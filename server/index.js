@@ -1,0 +1,47 @@
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import { db, seedIfEmpty } from './db.js';
+import { auth } from './middleware/auth.js';
+
+import sitesRouter from './routes/sites.js';
+import articlesRouter from './routes/articles.js';
+import planRouter from './routes/plan.js';
+import aiRouter from './routes/ai.js';
+import deployRouter from './routes/deploy.js';
+import logRouter from './routes/log.js';
+import metricsRouter from './routes/metrics.js';
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+app.use(cors());
+app.use(express.json({ limit: '2mb' }));
+
+// Seed демо-данные при первом запуске
+seedIfEmpty();
+
+// Health
+app.get('/api/health', (req, res) => {
+  const { n: sites } = db.prepare('SELECT COUNT(*) AS n FROM sites').get();
+  res.json({ ok: true, sites, ts: new Date().toISOString() });
+});
+
+// Все /api/* требуют auth (если AUTH_TOKEN задан)
+app.use('/api', auth);
+
+app.use('/api/sites', sitesRouter);
+app.use('/api', articlesRouter);      // маршруты внутри начинаются с /sites/:siteId/articles или /articles/:id
+app.use('/api', planRouter);           // аналогично
+app.use('/api/ai', aiRouter);
+app.use('/api/deploy', deployRouter);
+app.use('/api/deploys', deployRouter); // alias для /api/deploys
+app.use('/api/log', logRouter);
+app.use('/api/metrics', metricsRouter);
+
+// 404
+app.use('/api', (req, res) => res.status(404).json({ error: 'Not found', path: req.path }));
+
+app.listen(PORT, () => {
+  console.log(`🚀 SEO Command Center API → http://localhost:${PORT}`);
+});
