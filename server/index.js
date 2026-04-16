@@ -1,6 +1,9 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import path from 'node:path';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { db, seedIfEmpty } from './db.js';
 import { auth } from './middleware/auth.js';
 import { startCron } from './cron.js';
@@ -12,6 +15,10 @@ import aiRouter from './routes/ai.js';
 import deployRouter from './routes/deploy.js';
 import logRouter from './routes/log.js';
 import metricsRouter from './routes/metrics.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT      = path.resolve(__dirname, '..');
+const DIST_DIR  = path.join(ROOT, 'dist');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -53,8 +60,17 @@ app.use('/api/deploys', deployRouter); // alias для /api/deploys
 app.use('/api/log', logRouter);
 app.use('/api/metrics', metricsRouter);
 
-// 404
+// 404 для API
 app.use('/api', (req, res) => res.status(404).json({ error: 'Not found', path: req.path }));
+
+// ---- Static frontend (production) ----
+// В dev используется Vite dev server (5173) с прокси на :3001.
+// В production Express сам отдаёт собранный фронт + SPA-fallback.
+if (process.env.NODE_ENV === 'production' && fs.existsSync(DIST_DIR)) {
+  app.use(express.static(DIST_DIR, { maxAge: '30d', index: false }));
+  app.get('*', (req, res) => res.sendFile(path.join(DIST_DIR, 'index.html')));
+  console.log(`📦 Serving static frontend from ${DIST_DIR}`);
+}
 
 app.listen(PORT, () => {
   console.log(`🚀 SEO Command Center API → http://localhost:${PORT}`);

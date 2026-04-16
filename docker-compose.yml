@@ -1,0 +1,58 @@
+# SEO Command Center — для Dokploy + Traefik v3
+# Запуск:
+#   1. через Dokploy "Compose" — вставить этот файл, .env через UI
+#   2. напрямую: docker compose up -d (после создания .env рядом)
+#
+# Требует внешнюю сеть `web` (создаётся Dokploy при первом сервисе).
+# Сертификат выпускается Traefik через certResolver `letsencrypt` —
+# при необходимости поменяйте имя на используемое в вашей конфигурации.
+
+services:
+  scc:
+    container_name: scc
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+    volumes:
+      # SQLite база и бэкапы
+      - scc-data:/app/data
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+
+      # ---- HTTPS (websecure) ----
+      - "traefik.http.routers.scc.rule=Host(`cmd.bonaka.app`)"
+      - "traefik.http.routers.scc.entrypoints=websecure"
+      - "traefik.http.routers.scc.tls=true"
+      - "traefik.http.routers.scc.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.scc.service=scc"
+
+      # ---- HTTP → HTTPS редирект ----
+      - "traefik.http.routers.scc-http.rule=Host(`cmd.bonaka.app`)"
+      - "traefik.http.routers.scc-http.entrypoints=web"
+      - "traefik.http.routers.scc-http.middlewares=scc-redirect"
+      - "traefik.http.middlewares.scc-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.scc-redirect.redirectscheme.permanent=true"
+
+      # ---- Backend port ----
+      - "traefik.http.services.scc.loadbalancer.server.port=3001"
+
+volumes:
+  scc-data:
+    # Если нужен bind mount вместо named volume — заменить на:
+    # driver_opts:
+    #   type: none
+    #   o: bind
+    #   device: /etc/dokploy/scc-data
+
+networks:
+  web:
+    external: true

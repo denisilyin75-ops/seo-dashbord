@@ -44,13 +44,18 @@ npm run dev              # vite (5173) + express (3001) через concurrently
 
 ## Production deployment
 
-- **[`DEPLOY.md`](./DEPLOY.md)** — пошаговая инструкция для Timeweb VPS
-  (`5.129.245.98`), развёртывание рядом с существующим Next.js на bonaka.app,
-  поддомен `cmd.bonaka.app`, OpenRouter AI
-- **[`WARP-DEPLOY.md`](./WARP-DEPLOY.md)** — та же инструкция, но в формате
-  "для AI-агента" (warp.ai): с защитными проверками, checkpoint'ами,
-  STOP-условиями и rollback-планом — даёшь агенту этот файл, он не
-  сломает bonaka.app
+**Целевой сервер использует Dokploy + Traefik (не nginx) — основной путь:**
+
+- **[`DEPLOY-DOKPLOY.md`](./DEPLOY-DOKPLOY.md)** — деплой как Docker-сервис
+  через Dokploy UI / `docker compose`, с Traefik labels для SSL и роутинга
+- **[`WARP-DEPLOY-DOKPLOY.md`](./WARP-DEPLOY-DOKPLOY.md)** — та же инструкция,
+  но для AI-агента (warp.ai), с защитными проверками и STOP-условиями
+- `Dockerfile` + `docker-compose.yml` + `.dockerignore` — для сборки и запуска
+
+**Альтернативные пути (для серверов без Docker):**
+
+- [`DEPLOY.md`](./DEPLOY.md) — bare-metal через nginx + PM2
+- [`WARP-DEPLOY.md`](./WARP-DEPLOY.md) — то же, для AI-агента
 - [`deploy/setup.sh`](./deploy/setup.sh) — bootstrap **нового** чистого
   Ubuntu VPS (если нужно развернуть с нуля)
 - [`deploy/nginx.conf`](./deploy/nginx.conf) — nginx-конфиг
