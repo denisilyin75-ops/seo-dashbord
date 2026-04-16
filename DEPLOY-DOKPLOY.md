@@ -139,14 +139,49 @@ docker logs -f scc
 
 ## Обновление после push в git
 
-### В Dokploy UI:
-**Deploy** (повторно) — Dokploy сделает rebuild из последнего коммита.
+### Вариант 1 — GitHub Actions (рекомендуется)
 
-### Или через webhook:
-Dokploy → **Webhooks** — даёт URL, который GitHub может дёргать на каждый push в нужную ветку. Включить **GitHub Auto-Deploy**.
+В репо есть готовый workflow `.github/workflows/deploy.yml`, который на каждый
+push в `main`:
+1. Проверяет что код собирается (`npm ci && npm run build`)
+2. Триггерит Dokploy webhook (если build успешен)
+3. Ждёт 30 сек и пингует `/api/health` до 10 раз
+4. Пишет итог в Summary деплоя в GitHub UI
 
-### Через CLI (если Compose):
+**Настройка (один раз):**
+
+1. **В Dokploy UI:**
+   - Открыть твой сервис `seo-command-center`
+   - **Deployments** (или **Auto Deploy**) → скопировать **Webhook URL**
+     (что-то вроде `https://dokploy.../api/deploy/...`)
+   - **Отключить** автоматический GitHub integration в Dokploy (иначе deploy
+     будет срабатывать дважды — от Dokploy и от GHA)
+
+2. **В GitHub:**
+   - Репо → **Settings → Secrets and variables → Actions**
+   - Добавить секрет `DOKPLOY_WEBHOOK_URL` = вставленный URL
+   - (опционально) **Variables** → `PROD_URL` = `https://cmd.bonaka.app`
+     (дефолт уже захардкожен, но лучше переопределить через variable)
+
+3. **Проверка:** запушить любое изменение в `main`. Перейти в **Actions** →
+   смотреть прогресс workflow `Deploy to production`.
+
+**Ручной триггер:** в GitHub → Actions → `Deploy to production` → `Run workflow` →
+можно выбрать `skip_build_check` для аварийных случаев.
+
+### Вариант 2 — Dokploy native auto-deploy
+
+Если не хочется GHA — включить в Dokploy UI:
+- Сервис → **Git** или **Source** → **Auto Deploy: ON**
+- Dokploy сам поставит webhook в GitHub и будет деплоить на каждый push
+
+**Минус:** не проверяет build до деплоя — сломанный код попадёт в prod и
+контейнер не запустится.
+
+### Вариант 3 — вручную
+
 ```bash
+# В Dokploy UI нажать Deploy, или:
 cd /opt/scc && git pull && docker compose up -d --build
 ```
 
