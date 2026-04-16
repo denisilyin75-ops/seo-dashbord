@@ -1,0 +1,56 @@
+{
+  "name": "SCC: Deploy WordPress",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "deploy-wp",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-1",
+      "name": "Webhook (deploy)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "scc-deploy-wp"
+    },
+    {
+      "parameters": {
+        "command": "=DOMAIN={{ $json.domain }} \\\nDB_NAME={{ $json.db_name }} DB_USER={{ $json.db_user }} DB_PASS={{ $json.db_pass }} \\\nWP_TITLE=\"{{ $json.wp_title }}\" \\\nWP_DESCRIPTION=\"{{ $json.wp_description }}\" \\\nWP_ADMIN_USER={{ $json.wp_admin_user }} \\\nWP_ADMIN_PASS={{ $json.wp_admin_pass }} \\\nWP_ADMIN_EMAIL={{ $json.wp_admin_email }} \\\nTHEME={{ $json.theme || 'astra' }} \\\nCATEGORIES=\"{{ $json.categories }}\" \\\nbash /var/www/seo-command-center/server/scripts/deploy-wp.sh"
+      },
+      "id": "ssh-1",
+      "name": "SSH: deploy-wp.sh",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [520, 300],
+      "credentials": {
+        "sshPassword": {
+          "id": "REPLACE",
+          "name": "VPS root"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "id": "respond-1",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [800, 300]
+    }
+  ],
+  "connections": {
+    "Webhook (deploy)": {
+      "main": [[{ "node": "SSH: deploy-wp.sh", "type": "main", "index": 0 }]]
+    },
+    "SSH: deploy-wp.sh": {
+      "main": [[{ "node": "Respond", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": ["seo-command-center"]
+}

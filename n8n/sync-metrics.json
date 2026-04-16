@@ -1,0 +1,74 @@
+{
+  "name": "SCC: Sync GA4/GSC daily",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 3 * * *" }]
+        }
+      },
+      "id": "schedule-1",
+      "name": "Schedule (03:00 UTC)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://cmd.popolkam.ru/api/sites",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "http-1",
+      "name": "GET /api/sites",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE",
+          "name": "SCC Bearer"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "id": "split-1",
+      "name": "Split sites",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [800, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://cmd.popolkam.ru/api/sites/{{ $json.id }}/sync-metrics?days=1",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "id": "http-2",
+      "name": "POST /sync-metrics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1080, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE",
+          "name": "SCC Bearer"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule (03:00 UTC)": { "main": [[{ "node": "GET /api/sites", "type": "main", "index": 0 }]] },
+    "GET /api/sites":       { "main": [[{ "node": "Split sites", "type": "main", "index": 0 }]] },
+    "Split sites":          { "main": [[{ "node": "POST /sync-metrics", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": ["seo-command-center"]
+}

@@ -30,6 +30,19 @@ npm run dev              # vite (5173) + express (3001) через concurrently
 ## Статус фаз
 
 - [x] **Фаза 1**: Vite+React скелет, SQLite схема, Express CRUD, UI из прототипа
-- [ ] Фаза 2: AI команды через Claude SDK (ключ в `.env`), AI-бриф для плана, графики
-- [ ] Фаза 3: WP REST, GA4, GSC, cron-синхронизация
-- [ ] Фаза 4: Реальный deploy через WP-CLI, n8n, nginx, PM2, SSL
+- [x] **Фаза 2**: React Router (Dashboard / SiteDetail / Settings), toast-уведомления,
+      график трафика (recharts), AI Command Center через бэкенд-прокси,
+      Settings со статусом интеграций
+- [x] **Фаза 3**: WP REST client (sync статей), GA4 + GSC clients, объединённый
+      `metricsSync`, ежедневный cron в 03:00 UTC, кнопки "Sync WP" и "Pull GA4/GSC"
+      на SiteDetail
+- [x] **Фаза 4 (артефакты)**: `deploy/nginx.conf`, `deploy/pm2.ecosystem.cjs`,
+      `deploy/setup.sh` (Ubuntu bootstrap), `deploy/backup.sh`,
+      `server/scripts/deploy-wp.sh` (WP-CLI install), n8n workflow templates
+- [ ] **TODO**: реальный запуск deploy на VPS (нужны SSH-ключ + домен), реальные
+      ключи для Claude/GA4/GSC в `.env`, мобильная адаптация полировки
+
+## Production deployment
+
+См. инструкции в [`deploy/setup.sh`](./deploy/setup.sh) — пошаговый bootstrap
+Ubuntu VPS с nginx + PM2 + Let's Encrypt + MariaDB + WP-CLI.
