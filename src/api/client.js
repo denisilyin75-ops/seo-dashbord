@@ -27,6 +27,10 @@ export const api = {
   createSite:   (data) => request('POST',   '/api/sites', data),
   updateSite:   (id, data) => request('PUT',    `/api/sites/${id}`, data),
   deleteSite:   (id) => request('DELETE', `/api/sites/${id}`),
+  siteMetrics:  (id, params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request('GET', `/api/sites/${id}/metrics${qs ? `?${qs}` : ''}`);
+  },
 
   // articles
   listArticles: (siteId) => request('GET',    `/api/sites/${siteId}/articles`),

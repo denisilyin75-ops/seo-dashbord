@@ -101,15 +101,34 @@ router.delete('/:id', (req, res) => {
   res.json({ ok: true });
 });
 
-// GET /api/sites/:id/metrics?from=...&to=...
+// GET /api/sites/:id/metrics?from=YYYY-MM-DD&to=YYYY-MM-DD&fill=1
+// fill=1 — заполнить пропущенные дни нулями (для непрерывного графика)
 router.get('/:id/metrics', (req, res) => {
-  const { from, to } = req.query;
+  const { from, to, fill } = req.query;
   let sql = 'SELECT * FROM site_metrics WHERE site_id = ?';
   const params = [req.params.id];
   if (from) { sql += ' AND date >= ?'; params.push(from); }
   if (to)   { sql += ' AND date <= ?'; params.push(to); }
   sql += ' ORDER BY date ASC';
-  res.json(db.prepare(sql).all(...params));
+  let rows = db.prepare(sql).all(...params);
+
+  if (fill && from && to) {
+    const map = new Map(rows.map((r) => [r.date, r]));
+    const days = [];
+    const cursor = new Date(from + 'T00:00:00Z');
+    const end = new Date(to + 'T00:00:00Z');
+    while (cursor <= end) {
+      const d = cursor.toISOString().slice(0, 10);
+      days.push(map.get(d) || {
+        site_id: req.params.id, date: d,
+        sessions: 0, revenue: 0, affiliate_clicks: 0, sales: 0,
+        rpm: 0, epc: 0, ctr: 0, cr: 0,
+      });
+      cursor.setUTCDate(cursor.getUTCDate() + 1);
+    }
+    rows = days;
+  }
+  res.json(rows);
 });
 
 // POST /api/sites/:id/sync-metrics — stub, Фаза 3

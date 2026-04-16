@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../api/client.js';
 import { Badge, Btn, Metric, Modal, XLink } from '../components/ui.jsx';
 import { TI, PC } from '../utils/constants.js';
-import { d2s } from '../utils/format.js';
+import { fmt } from '../utils/format.js';
 import ArticleRow from '../components/ArticleRow.jsx';
 import AIPanel from '../components/AIPanel.jsx';
 import LogPanel from '../components/LogPanel.jsx';
@@ -10,6 +11,7 @@ import DeploysPanel from '../components/DeploysPanel.jsx';
 import AddForm from '../components/AddForm.jsx';
 import SiteForm from '../components/SiteForm.jsx';
 import DeployWizard from '../components/DeployWizard.jsx';
+import { useTryToast } from '../components/Toast.jsx';
 
 export default function Dashboard() {
   const [sites, setSites] = useState([]);
@@ -22,83 +24,71 @@ export default function Dashboard() {
   const [modal, setModal] = useState(null);
   const [showDeploy, setShowDeploy] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState(null);
+  const tryToast = useTryToast();
 
   const loadBase = useCallback(async () => {
-    try {
-      const [s, d, l] = await Promise.all([api.listSites(), api.listDeploys(), api.listLog({ limit: 50 })]);
-      setSites(s); setDeploys(d); setLog(l);
-      setSel((prev) => prev || s[0]?.id || null);
-      setLoading(false);
-    } catch (e) {
-      setErr(e.message); setLoading(false);
-    }
+    const [s, d, l] = await Promise.all([api.listSites(), api.listDeploys(), api.listLog({ limit: 50 })]);
+    setSites(s); setDeploys(d); setLog(l);
+    setSel((prev) => prev || s[0]?.id || null);
+    setLoading(false);
   }, []);
 
   const loadSiteData = useCallback(async (siteId) => {
     if (!siteId) { setArticles([]); setPlan([]); return; }
-    try {
-      const [a, p] = await Promise.all([api.listArticles(siteId), api.listPlan(siteId)]);
-      setArticles(a); setPlan(p);
-    } catch (e) {
-      setErr(e.message);
-    }
+    const [a, p] = await Promise.all([api.listArticles(siteId), api.listPlan(siteId)]);
+    setArticles(a); setPlan(p);
   }, []);
 
-  useEffect(() => { loadBase(); }, [loadBase]);
-  useEffect(() => { loadSiteData(sel); }, [sel, loadSiteData]);
+  useEffect(() => { tryToast(loadBase, { error: (e) => `Не удалось загрузить данные: ${e.message}` }); }, [loadBase, tryToast]);
+  useEffect(() => { if (sel) loadSiteData(sel).catch(() => {}); }, [sel, loadSiteData]);
 
   const refreshLog = async () => { try { setLog(await api.listLog({ limit: 50 })); } catch {} };
 
   // Article handlers
-  const updArt = async (u) => { await api.updateArticle(u.id, u); await loadSiteData(sel); refreshLog(); };
-  const delArt = async (id) => { await api.deleteArticle(id); await loadSiteData(sel); };
-  const addArt = async (a) => { await api.createArticle(sel, a); await loadSiteData(sel); };
-  // Plan handlers
-  const addPl = async (p) => { await api.createPlan(sel, p); await loadSiteData(sel); };
-  const delPl = async (id) => { await api.deletePlan(id); await loadSiteData(sel); };
-  // Site handlers
-  const addSite = async (s) => { const created = await api.createSite(s); await loadBase(); setSel(created.id); };
-  const updSite = async (s) => { await api.updateSite(s.id, s); await loadBase(); };
-  const onDeployed = async (newSite) => { await loadBase(); setSel(newSite.id); };
+  const updArt = (u)  => tryToast(async () => { await api.updateArticle(u.id, u); await loadSiteData(sel); refreshLog(); }, { success: 'Сохранено' });
+  const delArt = (id) => tryToast(async () => { await api.deleteArticle(id); await loadSiteData(sel); }, { success: 'Удалено' });
+  const addArt = (a)  => tryToast(async () => { await api.createArticle(sel, a); await loadSiteData(sel); }, { success: 'Создано' });
+  const addPl  = (p)  => tryToast(async () => { await api.createPlan(sel, p); await loadSiteData(sel); }, { success: 'В план' });
+  const delPl  = (id) => tryToast(async () => { await api.deletePlan(id); await loadSiteData(sel); }, { success: 'Удалено' });
+  const addSite = (s) => tryToast(async () => { const c = await api.createSite(s); await loadBase(); setSel(c.id); }, { success: 'Сайт добавлен' });
+  const updSite = (s) => tryToast(async () => { await api.updateSite(s.id, s); await loadBase(); }, { success: 'Сайт сохранён' });
 
   if (loading) {
     return <div style={{ padding: '40px', textAlign: 'center', color: '#475569', fontFamily: 'var(--mn)' }}>⏳ Загрузка...</div>;
   }
-  if (err) {
-    return <div style={{ padding: '40px', textAlign: 'center', color: '#ef4444' }}>⚠️ {err}</div>;
-  }
 
-  const sA = articles;
-  const sP = plan;
   const cur = sites.find((s) => s.id === sel);
 
   const tabs = [
-    { id: 'articles', l: 'Статьи',  ic: '📄', n: sA.length },
-    { id: 'plan',     l: 'План',    ic: '📋', n: sP.length },
+    { id: 'articles', l: 'Статьи',  ic: '📄', n: articles.length },
+    { id: 'plan',     l: 'План',    ic: '📋', n: plan.length },
     { id: 'ai',       l: 'AI',      ic: '🤖' },
     { id: 'deploys',  l: 'Деплои',  ic: '🚀', n: deploys.length },
     { id: 'log',      l: 'Лог',     ic: '📜', n: log.length },
   ];
 
+  // Сводная статистика портфеля
+  const totals = sites.reduce((acc, s) => {
+    const m = s.metrics || {};
+    acc.sessions += m.sessions || 0;
+    acc.revenue  += m.revenue  || 0;
+    acc.clicks   += m.affiliateClicks || 0;
+    acc.sales    += m.sales || 0;
+    return acc;
+  }, { sessions: 0, revenue: 0, clicks: 0, sales: 0 });
+
   return (
-    <div style={{ background: '#0a0e17', color: '#e2e8f0', minHeight: '100vh', padding: '14px' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', paddingBottom: '10px', borderBottom: '1px solid #1e293b' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
-          <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'linear-gradient(135deg,#3b82f6,#8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px' }}>☕</div>
-          <div>
-            <div style={{ fontSize: '15px', fontWeight: 800, letterSpacing: '-.3px' }}>SEO Command Center</div>
-            <div style={{ fontSize: '9px', color: '#475569', fontFamily: 'var(--mn)' }}>v0.1 · phase 1 · api</div>
-          </div>
+    <div>
+      {/* Toolbar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', fontSize: '11px', color: '#64748b' }}>
+          <span>Портфель: <b style={{ color: '#e2e8f0' }}>{sites.length}</b> сайтов</span>
+          <span>Sessions: <b style={{ color: '#60a5fa', fontFamily: 'var(--mn)' }}>{fmt(totals.sessions)}</b></span>
+          <span>Revenue: <b style={{ color: '#34d399', fontFamily: 'var(--mn)' }}>${fmt(totals.revenue)}</b></span>
+          <span>Aff Clicks: <b style={{ color: '#fbbf24', fontFamily: 'var(--mn)' }}>{fmt(totals.clicks)}</b></span>
+          <span>Sales: <b style={{ color: '#f97316', fontFamily: 'var(--mn)' }}>{totals.sales}</b></span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-          <Btn onClick={() => setShowDeploy(true)} v="success" sx={{ fontSize: '11px', padding: '5px 12px' }}>🚀 Deploy</Btn>
-          <div style={{ padding: '3px 8px', borderRadius: '4px', background: '#1e293b', fontSize: '10px', fontFamily: 'var(--mn)', color: '#64748b' }}>
-            {new Date().toLocaleDateString('ru-RU')}
-          </div>
-          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 6px #34d39944' }} />
-        </div>
+        <Btn onClick={() => setShowDeploy(true)} v="success" sx={{ fontSize: '11px', padding: '5px 12px' }}>🚀 Deploy new site</Btn>
       </div>
 
       {/* Site cards */}
@@ -110,15 +100,16 @@ export default function Dashboard() {
             <div
               key={site.id}
               onClick={() => setSel(site.id)}
-              style={{ background: isSel ? '#3b82f608' : '#0f172a', borderRadius: '7px', padding: '12px', border: isSel ? '2px solid #3b82f6' : '2px solid #1e293b', cursor: 'pointer', flex: 1, minWidth: '240px', transition: 'all .2s' }}
+              style={{ background: isSel ? '#3b82f608' : '#0f172a', borderRadius: '7px', padding: '12px', border: isSel ? '2px solid #3b82f6' : '2px solid #1e293b', cursor: 'pointer', flex: '1 1 240px', minWidth: '240px', transition: 'all .2s' }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '7px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 800, fontFamily: 'var(--mn)', color: '#e2e8f0' }}>{site.name}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', minWidth: 0 }}>
+                  <span style={{ fontSize: '13px', fontWeight: 800, fontFamily: 'var(--mn)', color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{site.name}</span>
                   <span style={{ fontSize: '9px', color: '#64748b', background: '#1e293b', padding: '1px 4px', borderRadius: '3px' }}>{site.market}</span>
                 </div>
                 <div style={{ display: 'flex', gap: '3px', alignItems: 'center' }}>
                   <Badge s={site.status} />
+                  <Link to={`/sites/${site.id}`} onClick={(e) => e.stopPropagation()} style={{ fontSize: '11px', color: '#60a5fa', textDecoration: 'none', padding: '1px 6px', background: '#1e293b', borderRadius: '3px' }}>↗</Link>
                   <Btn onClick={(e) => { e.stopPropagation(); setModal({ t: 'editSite', site }); }} v="ghost" sx={{ fontSize: '11px', padding: '1px 3px' }}>✏️</Btn>
                 </div>
               </div>
@@ -165,11 +156,11 @@ export default function Dashboard() {
         {tab === 'articles' && (
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <span style={{ fontSize: '11px', color: '#64748b' }}>{sA.length} · {cur?.name}</span>
+              <span style={{ fontSize: '11px', color: '#64748b' }}>{articles.length} · {cur?.name}</span>
               <Btn onClick={() => setModal('addArticle')} v="acc" sx={{ fontSize: '10px' }}>＋ Статья</Btn>
             </div>
-            {sA.map((a) => <ArticleRow key={a.id} article={a} onUpdate={updArt} onDelete={delArt} />)}
-            {!sA.length && <div style={{ padding: '30px', textAlign: 'center', color: '#475569', fontSize: '12px' }}>Нет статей</div>}
+            {articles.map((a) => <ArticleRow key={a.id} article={a} onUpdate={updArt} onDelete={delArt} />)}
+            {!articles.length && <div style={{ padding: '30px', textAlign: 'center', color: '#475569', fontSize: '12px' }}>Нет статей</div>}
           </div>
         )}
 
@@ -179,7 +170,7 @@ export default function Dashboard() {
               <span style={{ fontSize: '11px', color: '#64748b' }}>План · {cur?.name}</span>
               <Btn onClick={() => setModal('addPlan')} v="acc" sx={{ fontSize: '10px' }}>＋</Btn>
             </div>
-            {sP.map((p) => (
+            {plan.map((p) => (
               <div key={p.id} style={{ background: '#0f172a', borderRadius: '5px', padding: '8px 10px', border: '1px solid #1e293b', marginBottom: '3px', borderLeft: `3px solid ${PC[p.priority] || '#64748b'}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span>{TI[p.type] || '📄'}</span>
@@ -192,26 +183,13 @@ export default function Dashboard() {
                 </div>
               </div>
             ))}
-            {!sP.length && <div style={{ padding: '30px', textAlign: 'center', color: '#475569', fontSize: '12px' }}>Пусто</div>}
+            {!plan.length && <div style={{ padding: '30px', textAlign: 'center', color: '#475569', fontSize: '12px' }}>Пусто</div>}
           </div>
         )}
 
         {tab === 'ai' && <AIPanel siteId={sel} />}
         {tab === 'deploys' && <DeploysPanel deploys={deploys} />}
         {tab === 'log' && <LogPanel log={log} />}
-      </div>
-
-      {/* Stack status */}
-      <div style={{ marginTop: '16px', padding: '10px', background: '#0f172a', borderRadius: '6px', border: '1px solid #1e293b' }}>
-        <div style={{ fontSize: '9px', fontWeight: 700, color: '#475569', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '.8px' }}>Stack</div>
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-          {[{ n: 'Express', s: 1 }, { n: 'SQLite', s: 1 }, { n: 'Claude API', s: 0 }, { n: 'WP REST', s: 0 }, { n: 'GA4', s: 0 }, { n: 'GSC', s: 0 }, { n: 'n8n', s: 0 }].map((i) => (
-            <div key={i.n} style={{ padding: '4px 8px', background: '#1e293b', borderRadius: '3px', fontSize: '9px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: i.s ? '#34d399' : '#fbbf24' }} />
-              <span style={{ fontWeight: 700, color: '#cbd5e1' }}>{i.n}</span>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* Modals */}
@@ -239,7 +217,7 @@ export default function Dashboard() {
       {showDeploy && (
         <DeployWizard
           sites={sites}
-          onDeployed={async (newSite) => { await onDeployed(newSite); }}
+          onDeployed={async () => { await loadBase(); }}
           onClose={() => { setShowDeploy(false); loadBase(); }}
         />
       )}
