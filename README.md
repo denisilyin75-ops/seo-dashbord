@@ -47,6 +47,10 @@ npm run dev              # vite (5173) + express (3001) через concurrently
 - **[`DEPLOY.md`](./DEPLOY.md)** — пошаговая инструкция для Timeweb VPS
   (`5.129.245.98`), развёртывание рядом с существующим Next.js на bonaka.app,
   поддомен `cmd.bonaka.app`, OpenRouter AI
+- **[`WARP-DEPLOY.md`](./WARP-DEPLOY.md)** — та же инструкция, но в формате
+  "для AI-агента" (warp.ai): с защитными проверками, checkpoint'ами,
+  STOP-условиями и rollback-планом — даёшь агенту этот файл, он не
+  сломает bonaka.app
 - [`deploy/setup.sh`](./deploy/setup.sh) — bootstrap **нового** чистого
   Ubuntu VPS (если нужно развернуть с нуля)
 - [`deploy/nginx.conf`](./deploy/nginx.conf) — nginx-конфиг
