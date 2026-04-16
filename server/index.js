@@ -25,6 +25,7 @@ seedIfEmpty();
 // Health + integration status
 import { ga4Status } from './services/analytics.js';
 import { gscStatus } from './services/searchConsole.js';
+import { aiStatus }  from './services/claude.js';
 app.get('/api/health', (req, res) => {
   const { n: sites } = db.prepare('SELECT COUNT(*) AS n FROM sites').get();
   res.json({
@@ -32,10 +33,10 @@ app.get('/api/health', (req, res) => {
     sites,
     ts: new Date().toISOString(),
     integrations: {
-      claude: !!process.env.ANTHROPIC_API_KEY,
-      ga4:    ga4Status(),
-      gsc:    gscStatus(),
-      n8n:    !!process.env.N8N_WEBHOOK_BASE,
+      ai:  aiStatus(),
+      ga4: ga4Status(),
+      gsc: gscStatus(),
+      n8n: !!process.env.N8N_WEBHOOK_BASE,
     },
   });
 });

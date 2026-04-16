@@ -47,16 +47,14 @@ export default function Settings() {
       detail: health ? `online · sites: ${health.sites}` : healthErr || '...',
     },
     {
-      name: 'Claude AI',
-      ok: aiStatus && !aiStatus.error && !aiStatus.stub,
-      warn: aiStatus?.stub,
-      detail: aiStatus?.error
-        ? `error: ${aiStatus.error}`
-        : aiStatus?.stub
-          ? 'stub mode — ANTHROPIC_API_KEY не задан в .env'
-          : aiStatus
-            ? `online · model: ${aiStatus.model || '—'}`
-            : '...',
+      name: 'AI',
+      ok: health?.integrations?.ai?.configured,
+      warn: !health?.integrations?.ai?.configured,
+      detail: health?.integrations?.ai?.configured
+        ? `${health.integrations.ai.provider} · ${health.integrations.ai.model}`
+        : health?.integrations?.ai
+          ? `${health.integrations.ai.provider}: ключ не задан в .env`
+          : '...',
     },
     {
       name: 'WordPress REST',

@@ -44,5 +44,22 @@ npm run dev              # vite (5173) + express (3001) через concurrently
 
 ## Production deployment
 
-См. инструкции в [`deploy/setup.sh`](./deploy/setup.sh) — пошаговый bootstrap
-Ubuntu VPS с nginx + PM2 + Let's Encrypt + MariaDB + WP-CLI.
+- **[`DEPLOY.md`](./DEPLOY.md)** — пошаговая инструкция для Timeweb VPS
+  (`5.129.245.98`), развёртывание рядом с существующим Next.js на bonaka.app,
+  поддомен `cmd.bonaka.app`, OpenRouter AI
+- [`deploy/setup.sh`](./deploy/setup.sh) — bootstrap **нового** чистого
+  Ubuntu VPS (если нужно развернуть с нуля)
+- [`deploy/nginx.conf`](./deploy/nginx.conf) — nginx-конфиг
+- [`deploy/pm2.ecosystem.cjs`](./deploy/pm2.ecosystem.cjs) — PM2
+
+## AI провайдеры
+
+Поддерживаются два (выбор через `AI_PROVIDER` в `.env`):
+
+- **OpenRouter** (`openrouter`) — `OPENROUTER_API_KEY`, OpenAI-совместимый,
+  доступ к Claude/GPT/Gemini и др. Дефолтная модель: `anthropic/claude-sonnet-4`
+- **Anthropic напрямую** (`anthropic`) — `ANTHROPIC_API_KEY`, дефолтная
+  модель: `claude-sonnet-4-20250514`
+
+Если оба ключа заданы, OpenRouter имеет приоритет. Модель можно переопределить
+через `AI_MODEL`.
