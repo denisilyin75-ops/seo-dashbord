@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import { db, seedIfEmpty } from './db.js';
 import { auth } from './middleware/auth.js';
+import { startCron } from './cron.js';
 
 import sitesRouter from './routes/sites.js';
 import articlesRouter from './routes/articles.js';
@@ -21,10 +22,22 @@ app.use(express.json({ limit: '2mb' }));
 // Seed демо-данные при первом запуске
 seedIfEmpty();
 
-// Health
+// Health + integration status
+import { ga4Status } from './services/analytics.js';
+import { gscStatus } from './services/searchConsole.js';
 app.get('/api/health', (req, res) => {
   const { n: sites } = db.prepare('SELECT COUNT(*) AS n FROM sites').get();
-  res.json({ ok: true, sites, ts: new Date().toISOString() });
+  res.json({
+    ok: true,
+    sites,
+    ts: new Date().toISOString(),
+    integrations: {
+      claude: !!process.env.ANTHROPIC_API_KEY,
+      ga4:    ga4Status(),
+      gsc:    gscStatus(),
+      n8n:    !!process.env.N8N_WEBHOOK_BASE,
+    },
+  });
 });
 
 // Все /api/* требуют auth (если AUTH_TOKEN задан)
@@ -44,4 +57,5 @@ app.use('/api', (req, res) => res.status(404).json({ error: 'Not found', path: r
 
 app.listen(PORT, () => {
   console.log(`🚀 SEO Command Center API → http://localhost:${PORT}`);
+  startCron();
 });

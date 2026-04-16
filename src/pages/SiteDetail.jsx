@@ -94,6 +94,25 @@ export default function SiteDetail() {
           <XLink href={site.ga4}       label="GA4"      icon="📈" />
           <XLink href={site.gsc}       label="GSC"      icon="🔍" />
           <XLink href={site.affiliate} label="Affiliate" icon="💰" />
+          {site.wpHasCreds && (
+            <Btn
+              onClick={() => tryToast(
+                async () => { const r = await api.syncAllWp(id); await load(); return r; },
+                { success: (r) => `Синхронизировано из WP: ${r.synced} постов`, error: (e) => `WP sync: ${e.message}` },
+              )}
+              sx={{ fontSize: '11px' }}
+            >↻ Sync WP</Btn>
+          )}
+          <Btn
+            onClick={() => tryToast(
+              async () => { const r = await api.syncSiteMetrics(id, 7); await load(); return r; },
+              {
+                success: (r) => `GA4: ${r.ga4.rows} rows, GSC: ${r.gsc.rows} rows, upserted ${r.upserted} дней` + (r.skipped.length ? ` · skipped: ${r.skipped.length}` : ''),
+                error: (e) => `Sync metrics: ${e.message}`,
+              },
+            )}
+            sx={{ fontSize: '11px' }}
+          >📊 Pull GA4/GSC</Btn>
           <Btn onClick={() => setModal('editSite')} sx={{ fontSize: '11px' }}>✏️ Редактировать</Btn>
           <Btn onClick={delSite} v="danger" sx={{ fontSize: '11px' }}>🗑 Удалить</Btn>
         </div>

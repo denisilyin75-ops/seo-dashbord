@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { randomUUID } from 'node:crypto';
 import { db } from '../db.js';
+import { syncSiteMetrics } from '../services/metricsSync.js';
 
 const router = Router();
 
@@ -17,6 +18,9 @@ function hydrateSite(row) {
     status: row.status,
     wpAdmin: row.wp_admin_url,
     wpApi: row.wp_api_url,
+    wpUser: row.wp_user,
+    wpHasCreds: !!(row.wp_api_url && row.wp_user && row.wp_app_password),
+    // wp_app_password — секрет, никогда не возвращается клиенту
     ga4: row.ga4_property_id,
     gsc: row.gsc_site_url,
     affiliate: row.affiliate_url,
@@ -72,6 +76,10 @@ router.put('/:id', (req, res) => {
   const b = req.body || {};
   const existing = db.prepare('SELECT * FROM sites WHERE id = ?').get(req.params.id);
   if (!existing) return res.status(404).json({ error: 'Site not found' });
+  // Пустая строка в wpAppPassword трактуется как "не менять" (UX-friendly).
+  const newAppPwd = (b.wpAppPassword == null || b.wpAppPassword === '')
+    ? existing.wp_app_password
+    : b.wpAppPassword;
   db.prepare(`UPDATE sites SET
     name = ?, market = ?, niche = ?, status = ?,
     wp_admin_url = ?, wp_api_url = ?, wp_user = ?, wp_app_password = ?,
@@ -85,7 +93,7 @@ router.put('/:id', (req, res) => {
     b.wpAdmin ?? existing.wp_admin_url,
     b.wpApi ?? existing.wp_api_url,
     b.wpUser ?? existing.wp_user,
-    b.wpAppPassword ?? existing.wp_app_password,
+    newAppPwd,
     b.ga4 ?? existing.ga4_property_id,
     b.gsc ?? existing.gsc_site_url,
     b.affiliate ?? existing.affiliate_url,
@@ -131,9 +139,17 @@ router.get('/:id/metrics', (req, res) => {
   res.json(rows);
 });
 
-// POST /api/sites/:id/sync-metrics — stub, Фаза 3
-router.post('/:id/sync-metrics', (req, res) => {
-  res.status(501).json({ error: 'Not implemented yet', phase: 3 });
+// POST /api/sites/:id/sync-metrics?days=7 — pull GA4/GSC за последние N дней
+router.post('/:id/sync-metrics', async (req, res) => {
+  const days = Math.max(1, Math.min(90, Number(req.query.days) || 7));
+  const site = db.prepare('SELECT * FROM sites WHERE id = ?').get(req.params.id);
+  if (!site) return res.status(404).json({ error: 'Site not found' });
+  try {
+    const result = await syncSiteMetrics(site, days);
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message, code: e.code });
+  }
 });
 
 export default router;

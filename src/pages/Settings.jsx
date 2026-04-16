@@ -38,6 +38,7 @@ export default function Settings() {
     checkHealth();
   };
 
+  const sitesWithWp = sites.filter((s) => s.wpHasCreds).length;
   const integrations = [
     {
       name: 'Express API',
@@ -56,10 +57,34 @@ export default function Settings() {
             ? `online · model: ${aiStatus.model || '—'}`
             : '...',
     },
-    { name: 'WordPress REST', ok: false, warn: true, detail: 'настраивается per-site (WP Application Password)' },
-    { name: 'GA4 Data API',   ok: false, warn: true, detail: 'требует GOOGLE_APPLICATION_CREDENTIALS (service account)' },
-    { name: 'Search Console', ok: false, warn: true, detail: 'требует GOOGLE_APPLICATION_CREDENTIALS (service account)' },
-    { name: 'n8n webhooks',   ok: false, warn: true, detail: 'требует N8N_WEBHOOK_BASE в .env' },
+    {
+      name: 'WordPress REST',
+      ok: sitesWithWp > 0,
+      warn: sitesWithWp === 0,
+      detail: sitesWithWp > 0 ? `${sitesWithWp} of ${sites.length} sites configured` : 'настраивается per-site (WP Application Password)',
+    },
+    {
+      name: 'GA4 Data API',
+      ok: !!health?.integrations?.ga4?.configured,
+      warn: !health?.integrations?.ga4?.configured,
+      detail: health?.integrations?.ga4?.configured
+        ? `online · source: ${health.integrations.ga4.source}`
+        : 'требует GOOGLE_APPLICATION_CREDENTIALS (service account)',
+    },
+    {
+      name: 'Search Console',
+      ok: !!health?.integrations?.gsc?.configured,
+      warn: !health?.integrations?.gsc?.configured,
+      detail: health?.integrations?.gsc?.configured
+        ? `online · source: ${health.integrations.gsc.source}`
+        : 'требует GOOGLE_APPLICATION_CREDENTIALS (service account)',
+    },
+    {
+      name: 'n8n webhooks',
+      ok: !!health?.integrations?.n8n,
+      warn: !health?.integrations?.n8n,
+      detail: health?.integrations?.n8n ? 'configured (N8N_WEBHOOK_BASE set)' : 'требует N8N_WEBHOOK_BASE в .env',
+    },
   ];
 
   return (

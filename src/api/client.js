@@ -31,12 +31,15 @@ export const api = {
     const qs = new URLSearchParams(params).toString();
     return request('GET', `/api/sites/${id}/metrics${qs ? `?${qs}` : ''}`);
   },
+  syncSiteMetrics: (id, days = 7) => request('POST', `/api/sites/${id}/sync-metrics?days=${days}`),
 
   // articles
   listArticles: (siteId) => request('GET',    `/api/sites/${siteId}/articles`),
   createArticle:(siteId, data) => request('POST',   `/api/sites/${siteId}/articles`, data),
   updateArticle:(id, data) => request('PUT',    `/api/articles/${id}`, data),
   deleteArticle:(id) => request('DELETE', `/api/articles/${id}`),
+  syncArticleWp: (id, direction = 'pull') => request('POST', `/api/articles/${id}/sync-wp?direction=${direction}`),
+  syncAllWp:    (siteId) => request('POST', `/api/sites/${siteId}/articles/sync-all`),
 
   // plan
   listPlan:     (siteId) => request('GET',    `/api/sites/${siteId}/plan`),
