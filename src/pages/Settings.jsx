@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../api/client.js';
 import { Btn, Inp, Badge } from '../components/ui.jsx';
 import { useToast } from '../components/Toast.jsx';
+import { Skeleton } from '../components/Skeleton.jsx';
 
 const TOKEN_KEY = 'scc:auth-token';
 
@@ -104,7 +105,20 @@ export default function Settings() {
 
       <Card title="Состояние интеграций">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {integrations.map((i) => (
+          {!health && !healthErr && (
+            <>
+              {[0,1,2,3,4,5].map((i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', background: '#0f172a', borderRadius: '5px', border: '1px solid #1e293b' }}>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <Skeleton w={8} h={8} sx={{ borderRadius: '50%' }} />
+                    <Skeleton w={120} h={12} />
+                  </div>
+                  <Skeleton w={180} h={10} />
+                </div>
+              ))}
+            </>
+          )}
+          {(health || healthErr) && integrations.map((i) => (
             <div key={i.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', background: '#0f172a', borderRadius: '5px', border: '1px solid #1e293b' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: i.ok ? '#34d399' : i.warn ? '#fbbf24' : '#ef4444' }} />

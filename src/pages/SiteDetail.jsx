@@ -9,13 +9,17 @@ import LogPanel from '../components/LogPanel.jsx';
 import AddForm from '../components/AddForm.jsx';
 import SiteForm from '../components/SiteForm.jsx';
 import MetricsChart from '../components/MetricsChart.jsx';
-import { useToast, useTryToast } from '../components/Toast.jsx';
+import EmptyState from '../components/EmptyState.jsx';
+import { Skeleton, RowSkeleton, ChartSkeleton } from '../components/Skeleton.jsx';
+import { useTryToast } from '../components/Toast.jsx';
+import { useConfirm } from '../components/ConfirmDialog.jsx';
+import useHotkeys from '../hooks/useHotkeys.js';
 
 export default function SiteDetail() {
   const { id } = useParams();
   const nav = useNavigate();
-  const toast = useToast();
   const tryToast = useTryToast();
+  const confirm = useConfirm();
 
   const [site, setSite] = useState(null);
   const [articles, setArticles] = useState([]);
@@ -51,8 +55,43 @@ export default function SiteDetail() {
 
   useEffect(() => { load(); }, [load]);
 
-  if (loading) return <div style={{ padding: '40px', textAlign: 'center', color: '#475569' }}>⏳ Загрузка...</div>;
-  if (err)     return (
+  // Hotkeys
+  useHotkeys('n a', () => setModal('addArticle'));
+  useHotkeys('n p', () => setModal('addPlan'));
+  useHotkeys('/', () => {
+    if (tab !== 'ai') setTab('ai');
+    setTimeout(() => document.dispatchEvent(new Event('scc:focus-ai')), 50);
+  });
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Skeleton w={280} h={28} />
+          <div style={{ display: 'flex', gap: 6 }}>
+            <Skeleton w={80}  h={26} />
+            <Skeleton w={100} h={26} />
+            <Skeleton w={100} h={26} />
+          </div>
+        </div>
+        <section style={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', padding: '14px' }}>
+          <Skeleton w={200} h={14} sx={{ marginBottom: '14px' }} />
+          <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginBottom: '12px' }}>
+            {[0,1,2,3,4,5,6,7].map((i) => (
+              <div key={i} style={{ flex: 1, minWidth: '70px' }}>
+                <Skeleton w={50} h={9}  sx={{ marginBottom: 4 }} />
+                <Skeleton w="70%" h={18} />
+              </div>
+            ))}
+          </div>
+          <ChartSkeleton h={240} />
+        </section>
+        <RowSkeleton /><RowSkeleton /><RowSkeleton />
+      </div>
+    );
+  }
+
+  if (err) return (
     <div style={{ padding: '40px', textAlign: 'center', color: '#ef4444' }}>
       ⚠️ {err}<br/>
       <Link to="/" style={{ color: '#60a5fa', fontSize: '12px' }}>← На Dashboard</Link>
@@ -60,14 +99,30 @@ export default function SiteDetail() {
   );
 
   const updArt = (u) => tryToast(async () => { await api.updateArticle(u.id, u); await load(); }, { success: 'Статья обновлена' });
-  const delArt = (id) => tryToast(async () => { await api.deleteArticle(id); await load(); }, { success: 'Статья удалена' });
+  const delArt = async (aid) => {
+    const ok = await confirm({
+      title: 'Удалить статью',
+      message: `Удалить "${articles.find(a => a.id === aid)?.title}"? Действие нельзя отменить.`,
+      okLabel: 'Удалить',
+      danger: true,
+    });
+    if (ok) tryToast(async () => { await api.deleteArticle(aid); await load(); }, { success: 'Статья удалена' });
+  };
   const addArt = (a) => tryToast(async () => { await api.createArticle(id, a); await load(); }, { success: 'Статья создана' });
   const addPl  = (p) => tryToast(async () => { await api.createPlan(id, p); await load(); }, { success: 'Добавлено в план' });
-  const delPl  = (pid) => tryToast(async () => { await api.deletePlan(pid); await load(); }, { success: 'Удалено из плана' });
+  const delPl  = async (pid) => {
+    const ok = await confirm({ message: 'Удалить пункт плана?', okLabel: 'Удалить', danger: true });
+    if (ok) tryToast(async () => { await api.deletePlan(pid); await load(); }, { success: 'Удалено' });
+  };
   const updSite = (s) => tryToast(async () => { await api.updateSite(s.id, s); await load(); }, { success: 'Сайт сохранён' });
-  const delSite = () => {
-    if (!confirm(`Удалить сайт "${site.name}" со всеми статьями и планом?`)) return;
-    tryToast(async () => { await api.deleteSite(id); nav('/'); }, { success: 'Сайт удалён' });
+  const delSite = async () => {
+    const ok = await confirm({
+      title: 'Удалить сайт',
+      message: `Удалить "${site.name}"?\n\nВсе статьи (${articles.length}) и план (${plan.length}) будут удалены без возможности восстановления.`,
+      okLabel: 'Удалить навсегда',
+      danger: true,
+    });
+    if (ok) tryToast(async () => { await api.deleteSite(id); nav('/'); }, { success: 'Сайт удалён' });
   };
 
   const m = site.metrics;
@@ -83,7 +138,7 @@ export default function SiteDetail() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
         <div>
           <Link to="/" style={{ fontSize: '11px', color: '#64748b', textDecoration: 'none' }}>← Dashboard</Link>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '4px', flexWrap: 'wrap' }}>
             <h1 style={{ fontSize: '22px', fontWeight: 800, margin: 0, fontFamily: 'var(--mn)' }}>{site.name}</h1>
             <Badge s={site.status} />
             <span style={{ fontSize: '11px', color: '#64748b' }}>{site.market} · {site.niche}</span>
@@ -137,7 +192,6 @@ export default function SiteDetail() {
         <MetricsChart data={metrics} lines={['sessions', 'affiliate_clicks']} />
       </section>
 
-      {/* Tabs */}
       <div style={{ display: 'flex', gap: '2px', borderBottom: '1px solid #1e293b', overflowX: 'auto' }}>
         {tabs.map((t) => (
           <button
@@ -158,10 +212,23 @@ export default function SiteDetail() {
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
               <span style={{ fontSize: '11px', color: '#64748b' }}>{articles.length} статей</span>
-              <Btn onClick={() => setModal('addArticle')} v="acc" sx={{ fontSize: '10px' }}>＋ Статья</Btn>
+              <Btn onClick={() => setModal('addArticle')} v="acc" sx={{ fontSize: '10px' }}>＋ Статья <kbd style={{ marginLeft: 4 }}>N A</kbd></Btn>
             </div>
-            {articles.map((a) => <ArticleRow key={a.id} article={a} onUpdate={updArt} onDelete={delArt} />)}
-            {!articles.length && <div style={{ padding: '30px', textAlign: 'center', color: '#475569', fontSize: '12px' }}>Нет статей</div>}
+            {articles.length ? (
+              articles.map((a) => <ArticleRow key={a.id} article={a} onUpdate={updArt} onDelete={delArt} />)
+            ) : (
+              <EmptyState
+                icon="📄"
+                title="Нет статей"
+                description="Добавьте вручную или импортируйте из WordPress (если настроены креды)."
+                actions={
+                  <>
+                    <Btn v="acc" onClick={() => setModal('addArticle')}>＋ Первая статья</Btn>
+                    {site.wpHasCreds && <Btn onClick={() => tryToast(async () => { const r = await api.syncAllWp(id); await load(); return r; }, { success: (r) => `Импортировано: ${r.synced}` })}>↻ Import from WP</Btn>}
+                  </>
+                }
+              />
+            )}
           </div>
         )}
 
@@ -169,9 +236,9 @@ export default function SiteDetail() {
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
               <span style={{ fontSize: '11px', color: '#64748b' }}>План</span>
-              <Btn onClick={() => setModal('addPlan')} v="acc" sx={{ fontSize: '10px' }}>＋</Btn>
+              <Btn onClick={() => setModal('addPlan')} v="acc" sx={{ fontSize: '10px' }}>＋ <kbd style={{ marginLeft: 4 }}>N P</kbd></Btn>
             </div>
-            {plan.map((p) => (
+            {plan.length ? plan.map((p) => (
               <div key={p.id} style={{ background: '#0f172a', borderRadius: '5px', padding: '8px 10px', border: '1px solid #1e293b', marginBottom: '3px', borderLeft: `3px solid ${PC[p.priority] || '#64748b'}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span>{TI[p.type] || '📄'}</span>
@@ -183,28 +250,35 @@ export default function SiteDetail() {
                   <Btn onClick={() => delPl(p.id)} v="ghost" sx={{ fontSize: '10px', color: '#ef4444' }}>✕</Btn>
                 </div>
               </div>
-            ))}
-            {!plan.length && <div style={{ padding: '30px', textAlign: 'center', color: '#475569', fontSize: '12px' }}>Пусто</div>}
+            )) : (
+              <EmptyState
+                icon="📋"
+                title="План пуст"
+                description="Запланируйте статьи с приоритетом и дедлайнами."
+                actions={<Btn v="acc" onClick={() => setModal('addPlan')}>＋ В план</Btn>}
+              />
+            )}
           </div>
         )}
 
         {tab === 'ai' && <AIPanel siteId={id} />}
-        {tab === 'log' && <LogPanel log={log} />}
+        {tab === 'log' && (log.length ? <LogPanel log={log} /> : (
+          <EmptyState icon="📜" title="Лог пуст" description="AI-команды по этому сайту будут здесь." />
+        ))}
       </div>
 
-      {/* Modals */}
       {modal === 'addArticle' && (
-        <Modal title="➕ Статья" onClose={() => setModal(null)}>
+        <Modal title="➕ Новая статья" onClose={() => setModal(null)}>
           <AddForm type="article" onAdd={async (a) => { await addArt(a); setModal(null); }} />
         </Modal>
       )}
       {modal === 'addPlan' && (
-        <Modal title="📋 План" onClose={() => setModal(null)}>
+        <Modal title="📋 Новый пункт плана" onClose={() => setModal(null)}>
           <AddForm type="plan" onAdd={async (p) => { await addPl(p); setModal(null); }} />
         </Modal>
       )}
       {modal === 'editSite' && (
-        <Modal title="✏️ Сайт" onClose={() => setModal(null)}>
+        <Modal title={`✏️ ${site.name}`} onClose={() => setModal(null)}>
           <SiteForm site={site} onSave={async (s) => { await updSite(s); setModal(null); }} />
         </Modal>
       )}

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Badge, Btn, Inp, Sel } from './ui.jsx';
+import Markdown from './Markdown.jsx';
 import { TI } from '../utils/constants.js';
 import { fmt } from '../utils/format.js';
 import { api } from '../api/client.js';
@@ -48,8 +49,14 @@ export default function ArticleRow({ article, onUpdate, onDelete }) {
             <Btn onClick={runAI} disabled={ld} v="acc">{ld ? '⏳' : '▶ AI'}</Btn>
           </div>
           {res && (
-            <div style={{ marginTop: '6px', padding: '10px', background: '#1e293b', borderRadius: '5px', fontSize: '12px', color: '#cbd5e1', lineHeight: 1.6, borderLeft: '3px solid #3b82f6', whiteSpace: 'pre-wrap' }}>
-              {res}
+            <div style={{ marginTop: '6px', padding: '10px 12px', background: '#1e293b', borderRadius: '5px', borderLeft: '3px solid #3b82f6', position: 'relative' }}>
+              <Markdown>{res}</Markdown>
+              <button
+                type="button"
+                onClick={() => { try { navigator.clipboard.writeText(res); } catch {} }}
+                title="Скопировать"
+                style={{ position: 'absolute', top: '6px', right: '6px', background: '#0f172a', border: '1px solid #334155', color: '#94a3b8', fontSize: '10px', padding: '2px 6px', borderRadius: '3px', cursor: 'pointer' }}
+              >📋</button>
             </div>
           )}
         </>

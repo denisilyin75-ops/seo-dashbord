@@ -1,4 +1,7 @@
-import { Link, useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import useHotkeys from '../hooks/useHotkeys.js';
+import HotkeysHelp from './HotkeysHelp.jsx';
 
 const navLinks = [
   { to: '/',         label: 'Dashboard', icon: '📊' },
@@ -7,6 +10,14 @@ const navLinks = [
 
 export default function Layout({ children, headerExtra }) {
   const loc = useLocation();
+  const nav = useNavigate();
+  const [showHelp, setShowHelp] = useState(false);
+
+  // Глобальные навигационные хоткеи
+  useHotkeys('?',    () => setShowHelp(true));
+  useHotkeys('g d',  () => nav('/'));
+  useHotkeys('g s',  () => nav('/settings'));
+
   return (
     <div style={{ background: '#0a0e17', color: '#e2e8f0', minHeight: '100vh' }}>
       <header style={{ padding: '14px 14px 10px', borderBottom: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
@@ -15,7 +26,7 @@ export default function Layout({ children, headerExtra }) {
             <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'linear-gradient(135deg,#3b82f6,#8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px' }}>☕</div>
             <div>
               <div style={{ fontSize: '15px', fontWeight: 800, letterSpacing: '-.3px' }}>SEO Command Center</div>
-              <div style={{ fontSize: '9px', color: '#475569', fontFamily: 'var(--mn)' }}>v0.2 · phase 2</div>
+              <div style={{ fontSize: '9px', color: '#475569', fontFamily: 'var(--mn)' }}>v0.3 · phase 2</div>
             </div>
           </Link>
           <nav style={{ display: 'flex', gap: '4px' }}>
@@ -35,6 +46,12 @@ export default function Layout({ children, headerExtra }) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
           {headerExtra}
+          <button
+            type="button"
+            onClick={() => setShowHelp(true)}
+            title="Клавиатурные шорткаты"
+            style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '4px', padding: '2px 6px', color: '#94a3b8', cursor: 'pointer', fontSize: '12px', fontWeight: 700 }}
+          >?</button>
           <div style={{ padding: '3px 8px', borderRadius: '4px', background: '#1e293b', fontSize: '10px', fontFamily: 'var(--mn)', color: '#64748b' }}>
             {new Date().toLocaleDateString('ru-RU')}
           </div>
@@ -42,6 +59,7 @@ export default function Layout({ children, headerExtra }) {
         </div>
       </header>
       <main style={{ padding: '14px' }}>{children}</main>
+      {showHelp && <HotkeysHelp onClose={() => setShowHelp(false)} />}
     </div>
   );
 }
