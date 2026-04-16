@@ -61,7 +61,8 @@ export function useToast() {
   return ctx;
 }
 
-/** Универсальный wrapper для async действий с автоматическим toast'ом. */
+/** Универсальный wrapper для async действий с автоматическим toast'ом.
+ *  Ошибки с флагом `unauthorized` пропускаются — их обрабатывает AuthGate. */
 export function useTryToast() {
   const toast = useToast();
   return useCallback(async (fn, { success, error } = {}) => {
@@ -70,6 +71,7 @@ export function useTryToast() {
       if (success) toast.success(typeof success === 'function' ? success(result) : success);
       return result;
     } catch (e) {
+      if (e?.unauthorized) throw e; // тихо пропускаем — AuthGate покажет модалку
       const msg = error ? (typeof error === 'function' ? error(e) : error) : `Ошибка: ${e.message}`;
       toast.error(msg);
       throw e;

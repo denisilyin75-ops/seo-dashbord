@@ -1,15 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api } from '../api/client.js';
+import { api, getToken, setToken as saveAuthToken } from '../api/client.js';
 import { Btn, Inp, Badge } from '../components/ui.jsx';
 import { useToast } from '../components/Toast.jsx';
 import { Skeleton } from '../components/Skeleton.jsx';
 
-const TOKEN_KEY = 'scc:auth-token';
-
 export default function Settings() {
   const toast = useToast();
-  const [token, setToken] = useState(localStorage.getItem(TOKEN_KEY) || '');
+  const [token, setTokenInput] = useState(getToken());
   const [health, setHealth] = useState(null);
   const [healthErr, setHealthErr] = useState(null);
   const [sites, setSites] = useState([]);
@@ -33,10 +31,10 @@ export default function Settings() {
   }, []);
 
   const saveToken = () => {
-    if (token) localStorage.setItem(TOKEN_KEY, token);
-    else localStorage.removeItem(TOKEN_KEY);
-    toast.success(token ? 'Токен сохранён в localStorage' : 'Токен удалён');
-    checkHealth();
+    saveAuthToken(token);
+    sessionStorage.removeItem('scc:auth-dismissed');
+    toast.success(token ? 'Токен сохранён. Перезагрузка...' : 'Токен удалён. Перезагрузка...');
+    setTimeout(() => window.location.reload(), 600);
   };
 
   const sitesWithWp = sites.filter((s) => s.wpHasCreds).length;
@@ -96,7 +94,7 @@ export default function Settings() {
           оставьте пустым (dev-режим). Хранится в <code style={{ color: '#60a5fa' }}>localStorage</code>.
         </p>
         <div style={{ display: 'flex', gap: '6px' }}>
-          <Inp value={token} onChange={setToken} placeholder="Bearer token" type="password" sx={{ flex: 1, fontFamily: 'var(--mn)' }} />
+          <Inp value={token} onChange={setTokenInput} placeholder="Bearer token" type="password" sx={{ flex: 1, fontFamily: 'var(--mn)' }} />
           <Btn v="acc" onClick={saveToken}>💾 Сохранить</Btn>
         </div>
       </Card>

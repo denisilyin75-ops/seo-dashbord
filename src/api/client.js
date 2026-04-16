@@ -1,8 +1,12 @@
 const TOKEN_KEY = 'scc:auth-token';
 
+export function getToken()      { return localStorage.getItem(TOKEN_KEY) || ''; }
+export function setToken(t)     { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); }
+export const AUTH_EVENT         = 'scc:unauthorized';
+
 function headers(body) {
   const h = { 'Content-Type': 'application/json' };
-  const t = localStorage.getItem(TOKEN_KEY);
+  const t = getToken();
   if (t) h.Authorization = `Bearer ${t}`;
   return h;
 }
@@ -13,9 +17,18 @@ async function request(method, path, body) {
     headers: headers(body),
     body: body != null ? JSON.stringify(body) : undefined,
   });
+  if (res.status === 401) {
+    document.dispatchEvent(new CustomEvent(AUTH_EVENT));
+    const err = new Error('Unauthorized');
+    err.unauthorized = true;
+    err.status = 401;
+    throw err;
+  }
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(err.error || `HTTP ${res.status}`);
+    const errBody = await res.json().catch(() => ({ error: res.statusText }));
+    const err = new Error(errBody.error || `HTTP ${res.status}`);
+    err.status = res.status;
+    throw err;
   }
   if (res.status === 204) return null;
   return res.json();

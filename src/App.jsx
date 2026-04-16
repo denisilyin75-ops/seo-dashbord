@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastProvider } from './components/Toast.jsx';
 import { ConfirmProvider } from './components/ConfirmDialog.jsx';
 import Layout from './components/Layout.jsx';
+import AuthGate from './components/AuthGate.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Settings from './pages/Settings.jsx';
 import SiteDetail from './pages/SiteDetail.jsx';
@@ -19,6 +20,7 @@ export default function App() {
               <Route path="*"             element={<Navigate to="/" replace />} />
             </Routes>
           </Layout>
+          <AuthGate />
         </ConfirmProvider>
       </ToastProvider>
     </BrowserRouter>
