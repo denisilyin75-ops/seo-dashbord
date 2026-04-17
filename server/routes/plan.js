@@ -16,6 +16,8 @@ function hydrate(row) {
     priority: row.priority,
     deadline: row.deadline,
     status: row.status,
+    phase: row.phase,
+    rubric: row.rubric,
     articleId: row.article_id,
     aiBrief: row.ai_brief,
   };
@@ -32,14 +34,16 @@ router.post('/sites/:siteId/plan', (req, res) => {
   const b = req.body || {};
   const id = b.id || `plan_${randomUUID().slice(0, 8)}`;
   db.prepare(`INSERT INTO content_plan
-    (id, site_id, title, type, priority, deadline, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?)`).run(
+    (id, site_id, title, type, priority, deadline, status, phase, rubric)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
     id, req.params.siteId,
     b.title || 'Без названия',
     b.type || 'review',
     b.priority || 'medium',
     b.deadline || null,
     b.status || 'idea',
+    b.phase ?? null,
+    b.rubric ?? null,
   );
   res.status(201).json(hydrate(db.prepare('SELECT * FROM content_plan WHERE id = ?').get(id)));
 });
@@ -50,13 +54,16 @@ router.put('/plan/:id', (req, res) => {
   const existing = db.prepare('SELECT * FROM content_plan WHERE id = ?').get(req.params.id);
   if (!existing) return res.status(404).json({ error: 'Plan item not found' });
   db.prepare(`UPDATE content_plan SET
-    title = ?, type = ?, priority = ?, deadline = ?, status = ?, article_id = ?, ai_brief = ?
+    title = ?, type = ?, priority = ?, deadline = ?, status = ?,
+    phase = ?, rubric = ?, article_id = ?, ai_brief = ?
     WHERE id = ?`).run(
     b.title ?? existing.title,
     b.type ?? existing.type,
     b.priority ?? existing.priority,
     b.deadline ?? existing.deadline,
     b.status ?? existing.status,
+    b.phase ?? existing.phase,
+    b.rubric ?? existing.rubric,
     b.articleId ?? existing.article_id,
     b.aiBrief ?? existing.ai_brief,
     req.params.id,
@@ -135,6 +142,72 @@ router.post('/plan/:id/generate-brief', async (req, res) => {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
+});
+
+// GET /api/sites/:siteId/progress
+// Сводка по рубрикам и фазам: сколько в плане, сколько опубликовано, drafts, ideas
+router.get('/sites/:siteId/progress', (req, res) => {
+  const siteId = req.params.siteId;
+
+  // Все пункты плана + join с articles для определения опубликованных
+  const rows = db.prepare(`
+    SELECT p.rubric, p.phase, p.status, p.article_id, a.status AS article_status
+    FROM content_plan p
+    LEFT JOIN articles a ON p.article_id = a.id
+    WHERE p.site_id = ?
+  `).all(siteId);
+
+  // Дополнительно — все опубликованные articles без plan-item (которые импортнулись из WP)
+  // группируем по категории/типу — пока без rubric, просто для общих метрик
+  const orphanArts = db.prepare(`
+    SELECT status, COUNT(*) as n FROM articles
+    WHERE site_id = ? AND id NOT IN (SELECT COALESCE(article_id,'') FROM content_plan WHERE site_id = ?)
+    GROUP BY status
+  `).all(siteId, siteId);
+
+  // Группируем plan по rubric → phase
+  const byRubric = new Map();
+  for (const r of rows) {
+    const rubric = r.rubric || '(без рубрики)';
+    const phase = r.phase || 0; // 0 = без фазы
+    if (!byRubric.has(rubric)) byRubric.set(rubric, new Map());
+    const phases = byRubric.get(rubric);
+    if (!phases.has(phase)) phases.set(phase, { total: 0, published: 0, drafts: 0, inProgress: 0, queued: 0, ideas: 0 });
+    const bucket = phases.get(phase);
+    bucket.total++;
+    // "Опубликовано" = есть связанная статья со статусом published
+    if (r.article_status === 'published') bucket.published++;
+    else if (r.article_status === 'draft') bucket.drafts++;
+    else if (r.status === 'in_progress') bucket.inProgress++;
+    else if (r.status === 'queued') bucket.queued++;
+    else bucket.ideas++;
+  }
+
+  // В JSON
+  const rubrics = [];
+  for (const [rubric, phases] of byRubric) {
+    const phasesArr = [];
+    for (const [phase, bucket] of phases) phasesArr.push({ phase, ...bucket });
+    phasesArr.sort((a, b) => a.phase - b.phase);
+    const total = phasesArr.reduce((s, p) => s + p.total, 0);
+    const published = phasesArr.reduce((s, p) => s + p.published, 0);
+    rubrics.push({ rubric, total, published, phases: phasesArr });
+  }
+  rubrics.sort((a, b) => b.total - a.total);
+
+  // Orphan articles summary
+  const orphan = orphanArts.reduce((o, r) => { o[r.status] = r.n; return o; }, {});
+
+  res.json({
+    siteId,
+    rubrics,
+    orphan: {
+      total: (orphan.published || 0) + (orphan.draft || 0) + (orphan.planned || 0),
+      published: orphan.published || 0,
+      draft: orphan.draft || 0,
+      planned: orphan.planned || 0,
+    },
+  });
 });
 
 export default router;

@@ -14,6 +14,7 @@ import DeployWizard from '../components/DeployWizard.jsx';
 import DailyBrief from '../components/DailyBrief.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import ScrollToTop from '../components/ScrollToTop.jsx';
+import ContentPlanProgress from '../components/ContentPlanProgress.jsx';
 import { SiteCardSkeleton, RowSkeleton } from '../components/Skeleton.jsx';
 import { useTryToast } from '../components/Toast.jsx';
 import { useConfirm } from '../components/ConfirmDialog.jsx';
@@ -344,6 +345,7 @@ export default function Dashboard() {
 
           {tab === 'plan' && (
             <div>
+              <ContentPlanProgress siteId={sel} />
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                 <span style={{ fontSize: '11px', color: '#64748b' }}>План · {cur?.name}</span>
                 <Btn onClick={() => setModal('addPlan')} v="acc" sx={{ fontSize: '10px' }}>＋ <kbd style={{ marginLeft: 4 }}>N P</kbd></Btn>
