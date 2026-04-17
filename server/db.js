@@ -97,10 +97,20 @@ CREATE TABLE IF NOT EXISTS deploys (
   created_at TEXT DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS daily_briefs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  site_id TEXT REFERENCES sites(id) ON DELETE CASCADE,
+  date TEXT NOT NULL,
+  cards_json TEXT NOT NULL,
+  created_at TEXT DEFAULT (datetime('now')),
+  UNIQUE(site_id, date)
+);
+
 CREATE INDEX IF NOT EXISTS idx_articles_site ON articles(site_id);
 CREATE INDEX IF NOT EXISTS idx_plan_site    ON content_plan(site_id);
 CREATE INDEX IF NOT EXISTS idx_metrics_site ON site_metrics(site_id, date);
 CREATE INDEX IF NOT EXISTS idx_log_site     ON ai_log(site_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_brief_site   ON daily_briefs(site_id, date);
 `;
 
 db.exec(SCHEMA);

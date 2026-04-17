@@ -11,6 +11,7 @@ import DeploysPanel from '../components/DeploysPanel.jsx';
 import AddForm from '../components/AddForm.jsx';
 import SiteForm from '../components/SiteForm.jsx';
 import DeployWizard from '../components/DeployWizard.jsx';
+import DailyBrief from '../components/DailyBrief.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import { SiteCardSkeleton, RowSkeleton } from '../components/Skeleton.jsx';
 import { useTryToast } from '../components/Toast.jsx';
@@ -112,6 +113,9 @@ export default function Dashboard() {
         </div>
         <Btn onClick={() => setShowDeploy(true)} v="success" sx={{ fontSize: '11px', padding: '5px 12px' }}>🚀 Deploy new site</Btn>
       </div>
+
+      {/* Daily Brief — "На сегодня" 4 карточки для оператора */}
+      {sel && <DailyBrief siteId={sel} />}
 
       {/* Site cards */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>

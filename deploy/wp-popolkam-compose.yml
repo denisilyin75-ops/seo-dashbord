@@ -1,0 +1,60 @@
+# WordPress — popolkam.ru (эталонный сайт SEO-портфеля)
+# Развёрнут на 5.129.245.98, Traefik v3 + Let's Encrypt
+services:
+  db:
+    image: mariadb:11
+    container_name: wp-popolkam-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: WpRoot2026!Pp
+      MYSQL_DATABASE: popolkam
+      MYSQL_USER: wp_popolkam
+      MYSQL_PASSWORD: WpDb2026!Popolkam
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - internal
+
+  wordpress:
+    image: wordpress:6.7-php8.3-apache
+    container_name: wp-popolkam
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_NAME: popolkam
+      WORDPRESS_DB_USER: wp_popolkam
+      WORDPRESS_DB_PASSWORD: WpDb2026!Popolkam
+      WORDPRESS_TABLE_PREFIX: wp_
+    volumes:
+      - wp-data:/var/www/html
+    networks:
+      - internal
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      # HTTPS
+      - "traefik.http.routers.wp-popolkam.rule=Host(`popolkam.ru`) || Host(`www.popolkam.ru`)"
+      - "traefik.http.routers.wp-popolkam.entrypoints=websecure"
+      - "traefik.http.routers.wp-popolkam.tls=true"
+      - "traefik.http.routers.wp-popolkam.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.wp-popolkam.service=wp-popolkam"
+      # HTTP -> HTTPS
+      - "traefik.http.routers.wp-popolkam-http.rule=Host(`popolkam.ru`) || Host(`www.popolkam.ru`)"
+      - "traefik.http.routers.wp-popolkam-http.entrypoints=web"
+      - "traefik.http.routers.wp-popolkam-http.middlewares=wp-popolkam-redirect"
+      - "traefik.http.middlewares.wp-popolkam-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.wp-popolkam-redirect.redirectscheme.permanent=true"
+      # Backend port
+      - "traefik.http.services.wp-popolkam.loadbalancer.server.port=80"
+
+volumes:
+  db-data:
+  wp-data:
+
+networks:
+  internal:
+  web:
+    external: true

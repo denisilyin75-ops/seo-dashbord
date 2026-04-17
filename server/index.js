@@ -15,6 +15,7 @@ import aiRouter from './routes/ai.js';
 import deployRouter from './routes/deploy.js';
 import logRouter from './routes/log.js';
 import metricsRouter from './routes/metrics.js';
+import dailyRouter from './routes/daily.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT      = path.resolve(__dirname, '..');
@@ -59,6 +60,7 @@ app.use('/api/deploy', deployRouter);
 app.use('/api/deploys', deployRouter); // alias для /api/deploys
 app.use('/api/log', logRouter);
 app.use('/api/metrics', metricsRouter);
+app.use('/api/daily-brief', dailyRouter);
 
 // 404 для API
 app.use('/api', (req, res) => res.status(404).json({ error: 'Not found', path: req.path }));

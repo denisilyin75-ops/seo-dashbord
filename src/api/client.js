@@ -75,4 +75,13 @@ export const api = {
   },
 
   health: () => request('GET', '/api/health'),
+
+  // daily brief (health/pulse/idea/quick-win карточки для оператора)
+  dailyBrief:       ({ siteId, refresh = false } = {}) => {
+    const qs = new URLSearchParams();
+    if (siteId) qs.set('siteId', siteId);
+    if (refresh) qs.set('refresh', '1');
+    const q = qs.toString();
+    return request('GET', `/api/daily-brief${q ? `?${q}` : ''}`);
+  },
 };
