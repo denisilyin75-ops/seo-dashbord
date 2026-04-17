@@ -108,11 +108,27 @@ CREATE TABLE IF NOT EXISTS daily_briefs (
   UNIQUE(site_id, date)
 );
 
+-- Журнал изменений статей. Фундамент для Content Freshness Agent.
+-- Каждое действие над article (manual edit, WP sync, AI refresh, price update и т.д.)
+-- оставляет здесь запись с типом, коротким summary и детальным JSON.
+CREATE TABLE IF NOT EXISTS article_revisions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  article_id TEXT,
+  site_id TEXT,
+  kind TEXT NOT NULL,       -- manual_edit | wp_sync_pull | wp_sync_push | ai_refresh | ai_price_update | ai_brief | auto_seo | import | offer_replaced | system_note
+  summary TEXT NOT NULL,    -- короткая человекочитаемая ремарка
+  detail TEXT,              -- JSON с полными данными изменения (опционально)
+  actor TEXT DEFAULT 'system',  -- user email / 'system' / 'ai'
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
 CREATE INDEX IF NOT EXISTS idx_articles_site ON articles(site_id);
 CREATE INDEX IF NOT EXISTS idx_plan_site    ON content_plan(site_id);
 CREATE INDEX IF NOT EXISTS idx_metrics_site ON site_metrics(site_id, date);
 CREATE INDEX IF NOT EXISTS idx_log_site     ON ai_log(site_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_brief_site   ON daily_briefs(site_id, date);
+CREATE INDEX IF NOT EXISTS idx_revs_article ON article_revisions(article_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_revs_site    ON article_revisions(site_id, created_at DESC);
 `;
 
 db.exec(SCHEMA);

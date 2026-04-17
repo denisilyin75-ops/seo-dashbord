@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { randomUUID } from 'node:crypto';
 import { db } from '../db.js';
 import { generateContentBrief } from '../services/claude.js';
+import { logRevision, REVISION_KINDS } from '../services/revisions.js';
 
 const router = Router();
 
@@ -116,6 +117,11 @@ router.post('/plan/:id/generate-brief', async (req, res) => {
       brief.slice(0, 4000),
       model, tokensUsed,
     );
+
+    // revision-логирование (brief на уровне плана — article_id пока null)
+    logRevision(null, siteRow.id, REVISION_KINDS.AI_BRIEF,
+      `AI-бриф для плана "${planItem.title.slice(0, 80)}" (${tokensUsed} токенов)`,
+      { planId: req.params.id, tokensUsed, model });
 
     res.json({
       ok: true,

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client.js';
 import { Badge, Btn, Metric, Modal, XLink } from '../components/ui.jsx';
@@ -13,6 +13,7 @@ import SiteForm from '../components/SiteForm.jsx';
 import DeployWizard from '../components/DeployWizard.jsx';
 import DailyBrief from '../components/DailyBrief.jsx';
 import EmptyState from '../components/EmptyState.jsx';
+import ScrollToTop from '../components/ScrollToTop.jsx';
 import { SiteCardSkeleton, RowSkeleton } from '../components/Skeleton.jsx';
 import { useTryToast } from '../components/Toast.jsx';
 import { useConfirm } from '../components/ConfirmDialog.jsx';
@@ -32,6 +33,14 @@ export default function Dashboard() {
   const [loadingSite, setLoadingSite] = useState(false);
   const tryToast = useTryToast();
   const confirm = useConfirm();
+
+  // Articles tab: поиск, фильтры, пагинация
+  const [search, setSearch] = useState('');
+  const [fStatus, setFStatus] = useState('all');      // all | published | draft | planned
+  const [fType, setFType] = useState('all');          // all | review | comparison | guide | quiz | tool | category
+  const [fFresh, setFFresh] = useState('all');        // all | green | yellow | orange | red
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 30;
 
   const loadBase = useCallback(async () => {
     const [s, d, l] = await Promise.all([api.listSites(), api.listDeploys(), api.listLog({ limit: 50 })]);
@@ -53,6 +62,38 @@ export default function Dashboard() {
 
   useEffect(() => { tryToast(loadBase, { error: (e) => `Не удалось загрузить данные: ${e.message}` }); }, [loadBase, tryToast]);
   useEffect(() => { if (sel) loadSiteData(sel).catch(() => {}); }, [sel, loadSiteData]);
+
+  // Сброс пагинации/поиска при смене сайта или фильтра
+  useEffect(() => { setPage(1); }, [sel, search, fStatus, fType, fFresh]);
+
+  // Helper для freshness уровня (зеркалит RevisionsModal.freshnessLevel)
+  const freshBucket = (iso) => {
+    if (!iso) return 'none';
+    const d = new Date(iso + (iso.endsWith('Z') ? '' : 'Z'));
+    const days = (Date.now() - d.getTime()) / 86400000;
+    if (days < 30)  return 'green';
+    if (days < 180) return 'yellow';
+    if (days < 365) return 'orange';
+    return 'red';
+  };
+
+  const filteredArticles = useMemo(() => {
+    let arr = articles;
+    if (search) {
+      const q = search.toLowerCase();
+      arr = arr.filter((a) =>
+        (a.title || '').toLowerCase().includes(q) ||
+        (a.url || '').toLowerCase().includes(q)
+      );
+    }
+    if (fStatus !== 'all') arr = arr.filter((a) => a.status === fStatus);
+    if (fType !== 'all')   arr = arr.filter((a) => a.type === fType);
+    if (fFresh !== 'all')  arr = arr.filter((a) => freshBucket(a.updated) === fFresh);
+    return arr;
+  }, [articles, search, fStatus, fType, fFresh]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredArticles.length / PAGE_SIZE));
+  const paginated = filteredArticles.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   // Hotkeys
   useHotkeys('n a', () => sel && setModal('addArticle'));
@@ -215,16 +256,81 @@ export default function Dashboard() {
         <div style={{ animation: 'fadeIn .3s ease' }}>
           {tab === 'articles' && (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <span style={{ fontSize: '11px', color: '#64748b' }}>{articles.length} · {cur?.name}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: 8 }}>
+                <span style={{ fontSize: '11px', color: '#64748b' }}>
+                  {filteredArticles.length === articles.length
+                    ? `${articles.length} статей · ${cur?.name}`
+                    : `${filteredArticles.length} / ${articles.length} · ${cur?.name}`}
+                </span>
                 <Btn onClick={() => setModal('addArticle')} v="acc" sx={{ fontSize: '10px' }}>＋ Статья <kbd style={{ marginLeft: 4 }}>N A</kbd></Btn>
               </div>
+
+              {/* Панель поиска и фильтров */}
+              {articles.length > 0 && (
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginBottom: 10, padding: 8, background: '#0f172a', border: '1px solid #1e293b', borderRadius: 6 }}>
+                  <input
+                    type="text"
+                    placeholder="Поиск по заголовку или URL..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    style={{ flex: '1 1 200px', minWidth: 180, background: '#0a0e17', border: '1px solid #1e293b', borderRadius: 4, padding: '6px 10px', color: '#e2e8f0', fontSize: 12, outline: 'none' }}
+                  />
+                  <select value={fStatus} onChange={(e) => setFStatus(e.target.value)} style={{ background: '#0a0e17', border: '1px solid #1e293b', borderRadius: 4, padding: '6px 8px', color: '#e2e8f0', fontSize: 11 }}>
+                    <option value="all">Статус: все</option>
+                    <option value="published">Published</option>
+                    <option value="draft">Draft</option>
+                    <option value="planned">Planned</option>
+                  </select>
+                  <select value={fType} onChange={(e) => setFType(e.target.value)} style={{ background: '#0a0e17', border: '1px solid #1e293b', borderRadius: 4, padding: '6px 8px', color: '#e2e8f0', fontSize: 11 }}>
+                    <option value="all">Тип: все</option>
+                    <option value="review">📋 Review</option>
+                    <option value="comparison">⚖️ Comparison</option>
+                    <option value="guide">📖 Guide</option>
+                    <option value="quiz">🎯 Quiz</option>
+                    <option value="tool">🔧 Tool</option>
+                    <option value="category">📁 Category</option>
+                  </select>
+                  <select value={fFresh} onChange={(e) => setFFresh(e.target.value)} style={{ background: '#0a0e17', border: '1px solid #1e293b', borderRadius: 4, padding: '6px 8px', color: '#e2e8f0', fontSize: 11 }}>
+                    <option value="all">Свежесть: все</option>
+                    <option value="green">🟢 &lt;30д</option>
+                    <option value="yellow">🟡 1-6мес</option>
+                    <option value="orange">🟠 6-12мес</option>
+                    <option value="red">🔴 &gt;12мес</option>
+                  </select>
+                  {(search || fStatus !== 'all' || fType !== 'all' || fFresh !== 'all') && (
+                    <Btn onClick={() => { setSearch(''); setFStatus('all'); setFType('all'); setFFresh('all'); }} v="ghost" sx={{ fontSize: 10 }}>сбросить</Btn>
+                  )}
+                </div>
+              )}
+
               {loadingSite ? (
                 <>
                   <RowSkeleton /><RowSkeleton /><RowSkeleton />
                 </>
-              ) : articles.length ? (
-                articles.map((a) => <ArticleRow key={a.id} article={a} onUpdate={updArt} onDelete={delArt} />)
+              ) : filteredArticles.length ? (
+                <>
+                  {paginated.map((a) => <ArticleRow key={a.id} article={a} onUpdate={updArt} onDelete={delArt} />)}
+
+                  {/* Пагинация */}
+                  {totalPages > 1 && (
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 4, marginTop: 12, padding: 8 }}>
+                      <Btn onClick={() => setPage(1)} disabled={page === 1} v="ghost" sx={{ fontSize: 11 }}>«</Btn>
+                      <Btn onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} v="ghost" sx={{ fontSize: 11 }}>‹</Btn>
+                      <span style={{ fontSize: 11, color: '#94a3b8', fontFamily: 'var(--mn)', padding: '0 10px' }}>
+                        стр. {page} / {totalPages}
+                      </span>
+                      <Btn onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages} v="ghost" sx={{ fontSize: 11 }}>›</Btn>
+                      <Btn onClick={() => setPage(totalPages)} disabled={page === totalPages} v="ghost" sx={{ fontSize: 11 }}>»</Btn>
+                    </div>
+                  )}
+                </>
+              ) : articles.length > 0 ? (
+                <EmptyState
+                  icon="🔍"
+                  title="Ничего не найдено"
+                  description="Попробуй изменить фильтры или поисковый запрос"
+                  actions={<Btn v="ghost" onClick={() => { setSearch(''); setFStatus('all'); setFType('all'); setFFresh('all'); }}>Сбросить фильтры</Btn>}
+                />
               ) : (
                 <EmptyState
                   icon="📄"
@@ -332,6 +438,8 @@ export default function Dashboard() {
           onClose={() => { setShowDeploy(false); loadBase(); }}
         />
       )}
+
+      <ScrollToTop />
     </div>
   );
 }

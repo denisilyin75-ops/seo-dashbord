@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { randomUUID } from 'node:crypto';
 import { db } from '../db.js';
 import { clientFromSiteRow, WordPressNotConfiguredError, WordPressApiError } from '../services/wordpress.js';
+import { logRevision, logBulkRevision, listRevisions, REVISION_KINDS } from '../services/revisions.js';
 
 const router = Router();
 
@@ -47,6 +48,9 @@ router.post('/sites/:siteId/articles', (req, res) => {
     b.cr || 0,
     b.notes || '',
   );
+  logRevision(id, req.params.siteId, REVISION_KINDS.MANUAL_EDIT,
+    `Создана статья "${(b.title || 'Без названия').slice(0, 80)}"`,
+    { type: b.type, status: b.status });
   res.status(201).json(hydrateArticle(db.prepare('SELECT * FROM articles WHERE id = ?').get(id)));
 });
 
@@ -55,6 +59,15 @@ router.put('/articles/:id', (req, res) => {
   const b = req.body || {};
   const existing = db.prepare('SELECT * FROM articles WHERE id = ?').get(req.params.id);
   if (!existing) return res.status(404).json({ error: 'Article not found' });
+
+  // Собираем список что реально поменялось (для человекочитаемого summary)
+  const changed = [];
+  if (b.title != null && b.title !== existing.title) changed.push('title');
+  if (b.url != null && b.url !== existing.url) changed.push('url');
+  if (b.type != null && b.type !== existing.type) changed.push(`type: ${existing.type}→${b.type}`);
+  if (b.status != null && b.status !== existing.status) changed.push(`status: ${existing.status}→${b.status}`);
+  if (b.notes != null && b.notes !== existing.notes) changed.push('notes');
+
   db.prepare(`UPDATE articles SET
     title = ?, url = ?, type = ?, status = ?,
     sessions = ?, clicks = ?, cr = ?, notes = ?,
@@ -70,6 +83,13 @@ router.put('/articles/:id', (req, res) => {
     b.notes ?? existing.notes,
     req.params.id,
   );
+
+  if (changed.length) {
+    logRevision(req.params.id, existing.site_id, REVISION_KINDS.MANUAL_EDIT,
+      `Правка: ${changed.join(', ')}`,
+      { changes: changed });
+  }
+
   res.json(hydrateArticle(db.prepare('SELECT * FROM articles WHERE id = ?').get(req.params.id)));
 });
 
@@ -106,9 +126,12 @@ router.post('/articles/:id/sync-wp', async (req, res) => {
         mapWpStatus(post.status),
         req.params.id,
       );
+      logRevision(req.params.id, article.site_id, REVISION_KINDS.WP_SYNC_PULL,
+        `Pull из WordPress (wp_id=${article.wp_post_id})`);
     } else {
       // push — создать или обновить пост в WP
       let wpId = article.wp_post_id;
+      const isCreate = !wpId;
       if (wpId) {
         await wp.updatePost(wpId, { title: article.title, status: mapLocalStatus(article.status) });
       } else {
@@ -116,6 +139,8 @@ router.post('/articles/:id/sync-wp', async (req, res) => {
         wpId = created.id;
       }
       db.prepare(`UPDATE articles SET wp_post_id = ?, wp_last_sync = datetime('now') WHERE id = ?`).run(wpId, req.params.id);
+      logRevision(req.params.id, article.site_id, REVISION_KINDS.WP_SYNC_PUSH,
+        isCreate ? `Создан пост в WordPress (wp_id=${wpId})` : `Push обновления в WordPress (wp_id=${wpId})`);
     }
     const fresh = db.prepare('SELECT * FROM articles WHERE id = ?').get(req.params.id);
     res.json(hydrateArticle(fresh));
@@ -162,11 +187,22 @@ router.post('/sites/:siteId/articles/sync-all', async (req, res) => {
       }
     });
     tx(allPosts);
+    logBulkRevision(req.params.siteId, REVISION_KINDS.WP_SYNC_PULL,
+      `Bulk sync: ${allPosts.length} постов из WordPress (${Math.ceil(allPosts.length / 100)} стр)`,
+      { count: allPosts.length });
     res.json({ synced: allPosts.length, pages: Math.ceil(allPosts.length / 100) });
   } catch (e) {
     if (e instanceof WordPressApiError) return res.status(502).json({ error: e.message, status: e.status });
     res.status(500).json({ error: e.message });
   }
+});
+
+// GET /api/articles/:id/revisions — история изменений статьи
+router.get('/articles/:id/revisions', (req, res) => {
+  const limit = Math.max(1, Math.min(200, Number(req.query.limit) || 50));
+  const article = db.prepare('SELECT id FROM articles WHERE id = ?').get(req.params.id);
+  if (!article) return res.status(404).json({ error: 'Article not found' });
+  res.json(listRevisions(req.params.id, { limit }));
 });
 
 function mapWpStatus(s) {

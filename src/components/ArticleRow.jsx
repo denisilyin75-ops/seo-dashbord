@@ -4,6 +4,7 @@ import Markdown from './Markdown.jsx';
 import { TI } from '../utils/constants.js';
 import { fmt } from '../utils/format.js';
 import { api } from '../api/client.js';
+import RevisionsModal, { freshnessLevel } from './RevisionsModal.jsx';
 
 export default function ArticleRow({ article, onUpdate, onDelete }) {
   const [cmd, setCmd] = useState('');
@@ -11,6 +12,8 @@ export default function ArticleRow({ article, onUpdate, onDelete }) {
   const [res, setRes] = useState(null);
   const [editing, setEditing] = useState(false);
   const [dr, setDr] = useState(article);
+  const [showHistory, setShowHistory] = useState(false);
+  const fresh = freshnessLevel(article.updated);
 
   const runAI = async () => {
     if (!cmd.trim()) return;
@@ -41,9 +44,23 @@ export default function ArticleRow({ article, onUpdate, onDelete }) {
               <span style={{ color: '#60a5fa' }}>🖱{fmt(article.clicks)}</span>
               <span style={{ color: article.cr > 3 ? '#34d399' : article.cr > 0 ? '#fbbf24' : '#475569' }}>⚡{article.cr}%</span>
             </div>
+            <button
+              type="button"
+              onClick={() => setShowHistory(true)}
+              title={`Клик — история изменений. Цвет = свежесть (зелёный <30д, жёлтый <6мес, оранжевый <12мес, красный >12мес)`}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 4,
+                background: 'transparent', border: `1px solid ${fresh.color}40`, color: fresh.color,
+                borderRadius: 4, padding: '3px 7px', fontSize: 10, fontFamily: 'var(--mn)', cursor: 'pointer',
+              }}
+            >
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: fresh.color, display: 'inline-block' }} />
+              {fresh.label}
+            </button>
             <Btn onClick={() => { setDr({ ...article }); setEditing(true); }} v="ghost" sx={{ fontSize: '12px' }}>✏️</Btn>
             <Btn onClick={() => onDelete(article.id)} v="ghost" sx={{ fontSize: '12px', color: '#ef4444' }}>🗑</Btn>
           </div>
+          {showHistory && <RevisionsModal article={article} onClose={() => setShowHistory(false)} />}
           <div style={{ display: 'flex', gap: '4px', marginTop: '6px' }}>
             <Inp value={cmd} onChange={setCmd} onKeyDown={(e) => e.key === 'Enter' && runAI()} placeholder="AI: обнови, добавь модель, перепиши..." sx={{ flex: 1 }} />
             <Btn onClick={runAI} disabled={ld} v="acc">{ld ? '⏳' : '▶ AI'}</Btn>
