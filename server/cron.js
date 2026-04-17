@@ -9,6 +9,7 @@ import { db } from './db.js';
 import { syncSiteMetrics } from './services/metricsSync.js';
 import { ga4Status } from './services/analytics.js';
 import { gscStatus } from './services/searchConsole.js';
+import { runDueAgents } from './services/agents/registry.js';
 
 const log = (...a) => console.log(`[cron ${new Date().toISOString()}]`, ...a);
 
@@ -41,6 +42,23 @@ function hourlyHealth() {
   }, { timezone: 'UTC' });
 }
 
+/** Agents ticker — проверяет registry агентов каждые 5 минут и запускает due */
+function agentsTicker() {
+  cron.schedule('*/5 * * * *', async () => {
+    try {
+      const results = await runDueAgents();
+      if (results.length) {
+        for (const r of results) {
+          log(`agent ${r.id}: ${r.status} — ${r.summary}`);
+        }
+      }
+    } catch (e) {
+      log(`agentsTicker error: ${e.message}`);
+    }
+  }, { timezone: 'UTC' });
+  log('registered agentsTicker (every 5 min)');
+}
+
 export function startCron() {
   if (process.env.DISABLE_CRON === '1') {
     log('cron disabled via DISABLE_CRON=1');
@@ -48,4 +66,5 @@ export function startCron() {
   }
   dailyMetricsSync();
   hourlyHealth();
+  agentsTicker();
 }

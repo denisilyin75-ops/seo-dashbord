@@ -108,6 +108,36 @@ CREATE TABLE IF NOT EXISTS daily_briefs (
   UNIQUE(site_id, date)
 );
 
+-- Registry агентов (cron-задачи, on-demand воркеры, AI-агенты).
+-- Каждый агент — строка здесь. Параметры конфигурируются через UI,
+-- расписание хранится в schedule (cron-expr или NULL для on_demand).
+CREATE TABLE IF NOT EXISTS agents (
+  id TEXT PRIMARY KEY,           -- стабильный идентификатор (metrics_sync, content_freshness, ...)
+  name TEXT NOT NULL,            -- человекочитаемое имя
+  description TEXT,
+  kind TEXT NOT NULL,            -- cron | on_demand | webhook
+  schedule TEXT,                 -- cron-expression для kind=cron
+  enabled INTEGER DEFAULT 1,
+  config_json TEXT,              -- JSON с параметрами (thresholds, filters, API-keys refs)
+  last_run_at TEXT,
+  last_run_status TEXT,          -- success | error | skipped
+  last_run_summary TEXT,
+  updated_at TEXT DEFAULT (datetime('now')),
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+-- История запусков агента (для анализа, дебага, отчётности)
+CREATE TABLE IF NOT EXISTS agent_runs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  agent_id TEXT NOT NULL,
+  started_at TEXT DEFAULT (datetime('now')),
+  finished_at TEXT,
+  status TEXT,                   -- success | error | skipped
+  summary TEXT,
+  detail TEXT,                   -- JSON c произвольными данными запуска
+  triggered_by TEXT DEFAULT 'schedule'  -- schedule | manual | webhook
+);
+
 -- Журнал изменений статей. Фундамент для Content Freshness Agent.
 -- Каждое действие над article (manual edit, WP sync, AI refresh, price update и т.д.)
 -- оставляет здесь запись с типом, коротким summary и детальным JSON.
@@ -129,6 +159,7 @@ CREATE INDEX IF NOT EXISTS idx_log_site     ON ai_log(site_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_brief_site   ON daily_briefs(site_id, date);
 CREATE INDEX IF NOT EXISTS idx_revs_article ON article_revisions(article_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_revs_site    ON article_revisions(site_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_agent_runs   ON agent_runs(agent_id, started_at DESC);
 `;
 
 db.exec(SCHEMA);

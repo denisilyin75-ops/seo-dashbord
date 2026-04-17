@@ -16,6 +16,8 @@ import deployRouter from './routes/deploy.js';
 import logRouter from './routes/log.js';
 import metricsRouter from './routes/metrics.js';
 import dailyRouter from './routes/daily.js';
+import agentsRouter from './routes/agents.js';
+import { syncAgentsToDb } from './services/agents/registry.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT      = path.resolve(__dirname, '..');
@@ -29,6 +31,9 @@ app.use(express.json({ limit: '2mb' }));
 
 // Seed демо-данные при первом запуске
 seedIfEmpty();
+
+// Синхронизируем registry агентов с БД (добавит новые, обновит описания)
+syncAgentsToDb();
 
 // Health + integration status
 import { ga4Status } from './services/analytics.js';
@@ -61,6 +66,7 @@ app.use('/api/deploys', deployRouter); // alias для /api/deploys
 app.use('/api/log', logRouter);
 app.use('/api/metrics', metricsRouter);
 app.use('/api/daily-brief', dailyRouter);
+app.use('/api/agents', agentsRouter);
 
 // 404 для API
 app.use('/api', (req, res) => res.status(404).json({ error: 'Not found', path: req.path }));

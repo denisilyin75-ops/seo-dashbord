@@ -6,6 +6,7 @@ import HotkeysHelp from './HotkeysHelp.jsx';
 
 const navLinks = [
   { to: '/',         label: 'Dashboard', icon: '📊' },
+  { to: '/agents',   label: 'Agents',    icon: '🤖' },
   { to: '/settings', label: 'Settings',  icon: '⚙️' },
 ];
 
@@ -17,6 +18,7 @@ export default function Layout({ children, headerExtra }) {
   // Глобальные навигационные хоткеи
   useHotkeys('?',    () => setShowHelp(true));
   useHotkeys('g d',  () => nav('/'));
+  useHotkeys('g a',  () => nav('/agents'));
   useHotkeys('g s',  () => nav('/settings'));
 
   return (

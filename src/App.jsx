@@ -9,6 +9,7 @@ import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Settings from './pages/Settings.jsx';
 import SiteDetail from './pages/SiteDetail.jsx';
+import Agents from './pages/Agents.jsx';
 
 export default function App() {
   const [authed, setAuthed] = useState(!!getToken());
@@ -29,6 +30,7 @@ export default function App() {
             <Routes>
               <Route path="/"             element={<Dashboard />} />
               <Route path="/sites/:id"    element={<SiteDetail />} />
+              <Route path="/agents"       element={<Agents />} />
               <Route path="/settings"     element={<Settings />} />
               <Route path="*"             element={<Navigate to="/" replace />} />
             </Routes>

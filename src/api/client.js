@@ -63,6 +63,13 @@ export const api = {
   generateBrief: (id) => request('POST', `/api/plan/${id}/generate-brief`),
   siteProgress: (siteId) => request('GET', `/api/sites/${siteId}/progress`),
 
+  // Agents
+  listAgents:   () => request('GET', '/api/agents'),
+  getAgent:     (id) => request('GET', `/api/agents/${id}`),
+  updateAgent:  (id, data) => request('PUT', `/api/agents/${id}`, data),
+  runAgent:     (id) => request('POST', `/api/agents/${id}/run`),
+  agentRuns:    (id, limit = 20) => request('GET', `/api/agents/${id}/runs?limit=${limit}`),
+
   // ai
   aiCommand:    (command, context = {}) => request('POST', '/api/ai/command', { command, context }),
   aiSitePlan:   (data) => request('POST', '/api/ai/site-plan', data),
