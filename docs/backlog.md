@@ -57,6 +57,16 @@
 **Что:** виджет на SiteDetail, группировка plan-items по phase, progress bar, счётчик
 **Данные:** `content_plan.phase` (поле уже добавлено в схему)
 
+#### [ ] 🤖 Content Freshness Agent — MVP (Phase 1)
+**Спец:** memory `project_content_freshness_agent.md`
+**Зачем:** supreme principle #2 (итеративность) — без агента оператор физически не может следить за 200-500 статьями
+**Фаза 1 (минимум):**
+- Таблица `content_health` в SQLite
+- Cron `offer-ping` (пинг партнёрских URL раз в час)
+- Новая страница `/content-health/:siteId` в SCC: read-only список с severity и action-кнопками
+- Эндпоинты: `GET/PATCH /api/content-health`
+**Фаза 2-4:** price-drift, SEO-drift, AI-refresh, автоматика (см. spec)
+
 #### [ ] Content Egg: подключение к API
 **Зачем:** автообновление цен в блоках «где купить» без ручной правки
 **Блокирует:** честные цены в обзорах (supreme principle)
@@ -186,3 +196,5 @@
 - **2026-04-17** — popolkam развёрнут + полирован + стратегия coffee/vacuum в файлах
 - **2026-04-17** — SCC: Daily Brief + AI-бриф endpoint реализованы
 - **2026-04-17** — favicon SCC + logo/favicon popolkam загружены
+- **2026-04-18** — Расширены supreme principles: итеративность + планка лидеров + монетизация как топливо + быстрый подбор
+- **2026-04-18** — Content Freshness Agent спроектирован (spec в памяти), добавлен в P1
