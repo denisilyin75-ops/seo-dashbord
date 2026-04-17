@@ -57,13 +57,13 @@ router.post('/', (req, res) => {
     b.market || 'RU',
     b.niche || null,
     b.status || 'setup',
-    b.wpAdmin || null,
-    b.wpApi || null,
-    b.wpUser || null,
-    b.wpAppPassword || null,
-    b.ga4 || null,
-    b.gsc || null,
-    b.affiliate || null,
+    b.wpAdmin || b.wp_admin_url || null,
+    b.wpApi || b.wp_api_url || null,
+    b.wpUser || b.wp_user || null,
+    b.wpAppPassword || b.wp_app_password || null,
+    b.ga4 || b.ga4_property_id || null,
+    b.gsc || b.gsc_site_url || null,
+    b.affiliate || b.affiliate_url || null,
   );
   // seed пустые метрики на сегодня чтобы карточка не падала
   const today = new Date().toISOString().slice(0, 10);
@@ -77,9 +77,11 @@ router.put('/:id', (req, res) => {
   const existing = db.prepare('SELECT * FROM sites WHERE id = ?').get(req.params.id);
   if (!existing) return res.status(404).json({ error: 'Site not found' });
   // Пустая строка в wpAppPassword трактуется как "не менять" (UX-friendly).
-  const newAppPwd = (b.wpAppPassword == null || b.wpAppPassword === '')
+  // Принимаем оба формата: camelCase (wpApi) и snake_case (wp_api_url)
+  const appPwd = b.wpAppPassword ?? b.wp_app_password;
+  const newAppPwd = (appPwd == null || appPwd === '')
     ? existing.wp_app_password
-    : b.wpAppPassword;
+    : appPwd;
   db.prepare(`UPDATE sites SET
     name = ?, market = ?, niche = ?, status = ?,
     wp_admin_url = ?, wp_api_url = ?, wp_user = ?, wp_app_password = ?,
@@ -90,13 +92,13 @@ router.put('/:id', (req, res) => {
     b.market ?? existing.market,
     b.niche ?? existing.niche,
     b.status ?? existing.status,
-    b.wpAdmin ?? existing.wp_admin_url,
-    b.wpApi ?? existing.wp_api_url,
-    b.wpUser ?? existing.wp_user,
+    (b.wpAdmin ?? b.wp_admin_url) ?? existing.wp_admin_url,
+    (b.wpApi ?? b.wp_api_url) ?? existing.wp_api_url,
+    (b.wpUser ?? b.wp_user) ?? existing.wp_user,
     newAppPwd,
-    b.ga4 ?? existing.ga4_property_id,
-    b.gsc ?? existing.gsc_site_url,
-    b.affiliate ?? existing.affiliate_url,
+    (b.ga4 ?? b.ga4_property_id) ?? existing.ga4_property_id,
+    (b.gsc ?? b.gsc_site_url) ?? existing.gsc_site_url,
+    (b.affiliate ?? b.affiliate_url) ?? existing.affiliate_url,
     req.params.id,
   );
   res.json(hydrateSite(db.prepare('SELECT * FROM sites WHERE id = ?').get(req.params.id)));
