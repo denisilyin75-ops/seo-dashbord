@@ -1,0 +1,411 @@
+/* Popolkam TCO Calculator — стили под светлый сайт popolkam.ru */
+
+.popolkam-calc-wrap {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 24px 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #0f172a;
+  font-size: 14px;
+  line-height: 1.5;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.popolkam-calc-header {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.popolkam-calc-title {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.popolkam-calc-icon {
+  font-size: 32px;
+}
+
+.popolkam-calc-h1 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.popolkam-calc-h2 {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.popolkam-calc-honest {
+  font-size: 12px;
+  color: #475569;
+  background: linear-gradient(135deg, #fff7ed, #fef2f2);
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-left: 3px solid #f97316;
+  line-height: 1.5;
+}
+
+.popolkam-calc-honest strong {
+  color: #ea580c;
+}
+
+.popolkam-calc-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 760px) {
+  .popolkam-calc-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.popolkam-calc-inputs {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-self: flex-start;
+}
+
+.popolkam-calc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.popolkam-calc-field label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.popolkam-calc-field label b {
+  color: #0f172a;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.popolkam-calc-field input[type="number"],
+.popolkam-calc-field select {
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 14px;
+  color: #0f172a;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.popolkam-calc-field input[type="number"]:focus,
+.popolkam-calc-field select:focus {
+  border-color: #f97316;
+}
+
+.popolkam-calc-field input[type="range"] {
+  width: 100%;
+  accent-color: #f97316;
+}
+
+.popolkam-calc-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.popolkam-calc-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.popolkam-calc-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: #cbd5e1;
+  border-radius: 24px;
+  transition: 0.2s;
+}
+
+.popolkam-calc-switch-slider::before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+.popolkam-calc-switch input:checked + .popolkam-calc-switch-slider {
+  background: #f97316;
+}
+
+.popolkam-calc-switch input:checked + .popolkam-calc-switch-slider::before {
+  transform: translateX(20px);
+}
+
+.popolkam-calc-toggle-advanced {
+  background: none;
+  border: 1px dashed #cbd5e1;
+  color: #64748b;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11px;
+  transition: all 0.15s;
+  text-align: left;
+}
+
+.popolkam-calc-toggle-advanced:hover {
+  border-color: #f97316;
+  color: #ea580c;
+}
+
+.popolkam-calc-advanced {
+  border-top: 1px dashed #e2e8f0;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.popolkam-calc-advanced-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.popolkam-calc-results {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.popolkam-calc-highlight {
+  background: linear-gradient(135deg, #fff7ed, #fef2f2);
+  border: 1px solid #fed7aa;
+  border-radius: 10px;
+  padding: 18px 20px;
+  text-align: center;
+}
+
+.popolkam-calc-hl-label {
+  font-size: 12px;
+  color: #9a3412;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.popolkam-calc-hl-value {
+  font-size: 44px;
+  font-weight: 900;
+  color: #ea580c;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.popolkam-calc-hl-sub {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.popolkam-calc-hl-sub b {
+  color: #0f172a;
+}
+
+.popolkam-calc-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+}
+
+.popolkam-calc-metric {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.popolkam-calc-metric-label {
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 3px;
+}
+
+.popolkam-calc-metric-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+}
+
+.popolkam-calc-breakdown {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+.popolkam-calc-breakdown-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.popolkam-calc-breakdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.popolkam-calc-bd-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.popolkam-calc-bd-bar-wrap {
+  background: #e2e8f0;
+  border-radius: 3px;
+  height: 6px;
+  overflow: hidden;
+}
+
+.popolkam-calc-bd-bar {
+  height: 100%;
+  transition: width 0.3s;
+}
+
+.popolkam-calc-bd-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #475569;
+}
+
+.popolkam-calc-bd-label b {
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+}
+
+.popolkam-calc-bd-label small {
+  color: #94a3b8;
+  font-size: 10px;
+}
+
+.popolkam-calc-tco {
+  background: #0f172a;
+  color: #e2e8f0;
+  border-radius: 8px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.popolkam-calc-tco-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 4px 0;
+}
+
+.popolkam-calc-tco-row b {
+  color: #fbbf24;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.popolkam-calc-tco-delta {
+  border-top: 1px solid #1e293b;
+  padding-top: 10px;
+  margin-top: 4px;
+}
+
+.popolkam-calc-tco-delta b {
+  color: #34d399;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.popolkam-calc-cta {
+  text-align: center;
+  background: linear-gradient(135deg, #f97316, #ef4444);
+  color: #fff;
+  border-radius: 10px;
+  padding: 14px 18px;
+}
+
+.popolkam-calc-cta-text {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  opacity: 0.95;
+}
+
+.popolkam-calc-cta-btn {
+  display: inline-block;
+  background: #fff;
+  color: #ea580c;
+  text-decoration: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 14px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.popolkam-calc-cta-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+  color: #ea580c;
+  text-decoration: none;
+}
+
+.popolkam-calc-disclaimer {
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.6;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border-left: 3px solid #cbd5e1;
+}
+
+.popolkam-calc-disclaimer em {
+  color: #64748b;
+  font-style: normal;
+  font-weight: 600;
+}
