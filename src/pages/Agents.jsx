@@ -31,6 +31,19 @@ const STATUS_COLOR = {
   running: '#60a5fa',
 };
 
+const READINESS = {
+  active:      { color: '#34d399', label: 'Active',      hint: 'Работает в проде полностью' },
+  beta:        { color: '#60a5fa', label: 'Beta',        hint: 'Работает, но ещё дорабатывается' },
+  mvp:         { color: '#fbbf24', label: 'MVP',         hint: 'Базовая функция, многое упрощено' },
+  placeholder: { color: '#64748b', label: 'Placeholder', hint: 'Заглушка — ждёт интеграции' },
+  planned:     { color: '#475569', label: 'Planned',     hint: 'Ещё не реализован' },
+};
+
+const SCOPE = {
+  portfolio: { icon: '🌐', label: 'Portfolio', hint: 'Обрабатывает все сайты за один запуск' },
+  site:      { icon: '🎯', label: 'Per-site',  hint: 'Анализирует конкретный сайт' },
+};
+
 export default function Agents() {
   const [agents, setAgents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -94,8 +107,25 @@ export default function Agents() {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
                 <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                     <span style={{ fontSize: 13, fontWeight: 700, color: '#e2e8f0' }}>{a.name}</span>
+                    {a.scope && (
+                      <span
+                        title={SCOPE[a.scope]?.hint}
+                        style={{ fontSize: 10, color: '#94a3b8', background: '#1e293b', padding: '1px 6px', borderRadius: 3 }}
+                      >
+                        {SCOPE[a.scope]?.icon} {SCOPE[a.scope]?.label}
+                      </span>
+                    )}
+                    {a.readiness && READINESS[a.readiness] && (
+                      <span
+                        title={READINESS[a.readiness].hint}
+                        style={{ fontSize: 9, color: READINESS[a.readiness].color, background: READINESS[a.readiness].color + '15', border: `1px solid ${READINESS[a.readiness].color}40`, padding: '1px 6px', borderRadius: 3, textTransform: 'uppercase', fontWeight: 700, letterSpacing: .3 }}
+                      >
+                        {READINESS[a.readiness].label}
+                        {a.todo?.length > 0 && ` · ${a.todo.length}`}
+                      </span>
+                    )}
                     <span style={{ fontSize: 9, color: '#64748b', fontFamily: 'var(--mn)', textTransform: 'uppercase' }}>
                       {a.kind === 'cron' ? (a.schedule || 'cron') : a.kind}
                     </span>
@@ -158,9 +188,33 @@ function AgentDetail({ agent, onReload, onClose }) {
         <Btn v="ghost" onClick={onClose} sx={{ fontSize: 12 }}>✕</Btn>
       </div>
 
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+        {agent.scope && (
+          <span style={{ fontSize: 10, color: '#94a3b8', background: '#1e293b', padding: '2px 8px', borderRadius: 3 }}>
+            {SCOPE[agent.scope]?.icon} {SCOPE[agent.scope]?.label}
+          </span>
+        )}
+        {agent.readiness && READINESS[agent.readiness] && (
+          <span style={{ fontSize: 10, color: READINESS[agent.readiness].color, background: READINESS[agent.readiness].color + '15', border: `1px solid ${READINESS[agent.readiness].color}40`, padding: '2px 8px', borderRadius: 3, fontWeight: 700, textTransform: 'uppercase', letterSpacing: .3 }}>
+            {READINESS[agent.readiness].label}
+          </span>
+        )}
+      </div>
+
       <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.5, marginBottom: 14 }}>
         {agent.description}
       </div>
+
+      {agent.todo && agent.todo.length > 0 && (
+        <div style={{ marginBottom: 14, padding: 10, background: '#1e293b', borderRadius: 6, border: '1px solid #334155' }}>
+          <div style={{ fontSize: 10, color: '#fbbf24', fontWeight: 700, marginBottom: 6, textTransform: 'uppercase', letterSpacing: .5 }}>
+            📋 Что ещё нужно ({agent.todo.length})
+          </div>
+          <ul style={{ margin: 0, paddingLeft: 18, fontSize: 11, color: '#cbd5e1', lineHeight: 1.5 }}>
+            {agent.todo.map((item, i) => <li key={i} style={{ marginBottom: 3 }}>{item}</li>)}
+          </ul>
+        </div>
+      )}
 
       {/* Расписание */}
       {agent.kind === 'cron' && (

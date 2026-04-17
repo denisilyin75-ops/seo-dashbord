@@ -130,12 +130,52 @@ CREATE TABLE IF NOT EXISTS agents (
 CREATE TABLE IF NOT EXISTS agent_runs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   agent_id TEXT NOT NULL,
+  site_id TEXT,                  -- для site-scope агентов
   started_at TEXT DEFAULT (datetime('now')),
   finished_at TEXT,
   status TEXT,                   -- success | error | skipped
   summary TEXT,
   detail TEXT,                   -- JSON c произвольными данными запуска
+  tokens_used INTEGER DEFAULT 0,
+  cost_usd REAL DEFAULT 0,
   triggered_by TEXT DEFAULT 'schedule'  -- schedule | manual | webhook
+);
+
+-- Расходы по сайтам (для Site Valuation + финансовой аналитики)
+-- auto-tracked costs AI-агентов + ручной ввод хостинга/лицензий
+CREATE TABLE IF NOT EXISTS site_expenses (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  site_id TEXT,                 -- NULL для portfolio-wide (shared costs)
+  date TEXT NOT NULL,
+  category TEXT NOT NULL,       -- hosting | domain | plugins | content | ai_agents | other
+  description TEXT,
+  amount_usd REAL NOT NULL,
+  is_recurring INTEGER DEFAULT 0,
+  recurring_period TEXT,        -- monthly | yearly
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+-- История оценок стоимости сайта (для трекинга роста капитализации)
+CREATE TABLE IF NOT EXISTS site_valuations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  site_id TEXT NOT NULL,
+  date TEXT NOT NULL,
+  revenue_last_12m REAL,
+  profit_last_12m REAL,
+  avg_monthly_revenue REAL,
+  avg_monthly_profit REAL,
+  base_multiple REAL,
+  final_multiple REAL,
+  adjustments TEXT,             -- JSON array of factors
+  valuation_low INTEGER,
+  valuation_expected INTEGER,
+  valuation_high INTEGER,
+  recommendations TEXT,         -- JSON array of growth recommendations
+  potential_valuation INTEGER,
+  potential_timeline_months INTEGER,
+  methodology TEXT,
+  confidence TEXT,              -- high | medium | low
+  created_at TEXT DEFAULT (datetime('now'))
 );
 
 -- Журнал изменений статей. Фундамент для Content Freshness Agent.

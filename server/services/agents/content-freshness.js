@@ -15,6 +15,15 @@ export const contentFreshnessAgent = {
   name: 'Content Freshness Monitor',
   description: 'Сканирует все статьи портфеля, помечает устаревшие (>N месяцев без обновлений) и падающие по позициям в GSC. В MVP только отчёт — без автодействий.',
   kind: 'cron',
+  scope: 'portfolio',
+  readiness: 'mvp',
+  todo: [
+    'Создание записей в content_health при обнаружении устаревших статей',
+    'Алерты на Dashboard для red-алертов',
+    'Интеграция GSC для отслеживания падения позиций (drop >5 pos / 2 недели)',
+    'Опция auto-queue для AI-refresh (автопостановка в очередь на обновление)',
+    'Per-site overrides (popolkam=60дн, 4beg=120дн)',
+  ],
   schedule: '@weekly',
 
   defaultConfig: {

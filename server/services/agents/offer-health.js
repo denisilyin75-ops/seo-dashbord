@@ -10,6 +10,15 @@ export const offerHealthAgent = {
   name: 'Offer Health Monitor',
   description: 'Проверяет партнёрские ссылки в обзорах (HTTP-пинг). Помечает 404/timeout/server-error. Критично для supreme principle — битые ссылки = ноль CR и потеря доверия читателя.',
   kind: 'cron',
+  scope: 'portfolio',
+  readiness: 'placeholder',
+  todo: [
+    'Интеграция Content Egg API (получение списка офферов из каждой статьи)',
+    'Создание таблицы offers (site_id, url, merchant, product_id, status)',
+    'Реальный HTTP-пинг с таймаутом и обработкой редиректов',
+    'Создание content_health алертов при 404/5xx',
+    'Автозамена битых ссылок если есть альтернатива',
+  ],
   schedule: '@hourly',
 
   defaultConfig: {

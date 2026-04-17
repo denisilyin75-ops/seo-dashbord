@@ -11,6 +11,12 @@ export const dailyBriefAgent = {
   name: 'Daily Brief (предгенерация)',
   description: 'Утром предгенерирует Daily Brief (Health, Pulse, Idea, Quick Win) для всех активных сайтов. Оператор при открытии панели видит готовые карточки без ожидания AI.',
   kind: 'cron',
+  scope: 'portfolio',
+  readiness: 'active',
+  todo: [
+    'Отдельная карточка "Idea of the Day" с историей (выделение в отдельный агент)',
+    'Кастомизация времени утренней генерации (сейчас @daily)',
+  ],
   schedule: '@daily',
 
   defaultConfig: {

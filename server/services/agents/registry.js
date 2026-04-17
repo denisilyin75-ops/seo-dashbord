@@ -21,6 +21,10 @@ import { metricsSyncAgent } from './metrics-sync.js';
 import { dailyBriefAgent } from './daily-brief.js';
 import { contentFreshnessAgent } from './content-freshness.js';
 import { offerHealthAgent } from './offer-health.js';
+import { analyticsReviewAgent } from './analytics-review.js';
+import { siteValuationAgent } from './site-valuation.js';
+import { expenseTrackerAgent } from './expense-tracker.js';
+import { ideaOfDayAgent } from './idea-of-day.js';
 
 const AGENTS = new Map();
 
@@ -181,3 +185,7 @@ register(metricsSyncAgent);
 register(dailyBriefAgent);
 register(contentFreshnessAgent);
 register(offerHealthAgent);
+register(analyticsReviewAgent);
+register(siteValuationAgent);
+register(expenseTrackerAgent);
+register(ideaOfDayAgent);

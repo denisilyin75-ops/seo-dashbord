@@ -11,6 +11,9 @@ export const metricsSyncAgent = {
   name: 'Metrics Sync',
   description: 'Ежедневный pull GA4 + Search Console для всех активных сайтов. Нужно для работы всех аналитических графиков и Daily Brief.',
   kind: 'cron',
+  scope: 'portfolio',
+  readiness: 'active',
+  todo: [],
   schedule: '@daily',
 
   defaultConfig: {
