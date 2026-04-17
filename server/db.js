@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS sites (
   ga4_property_id TEXT,
   gsc_site_url TEXT,
   affiliate_url TEXT,
+  domain_registered_at TEXT,
   created_at TEXT DEFAULT (datetime('now')),
   updated_at TEXT DEFAULT (datetime('now'))
 );
@@ -203,6 +204,22 @@ CREATE INDEX IF NOT EXISTS idx_agent_runs   ON agent_runs(agent_id, started_at D
 `;
 
 db.exec(SCHEMA);
+
+// ---- Lightweight ALTER-migrations ----
+// CREATE TABLE IF NOT EXISTS не добавляет колонки к существующим таблицам.
+// Каждая ALTER обёрнута в try-catch: если колонка уже есть — idle.
+function softAlter(sql) {
+  try { db.exec(sql); } catch (e) { /* column exists */ }
+}
+
+softAlter(`ALTER TABLE sites ADD COLUMN domain_registered_at TEXT`);
+softAlter(`ALTER TABLE content_plan ADD COLUMN phase INTEGER`);
+softAlter(`ALTER TABLE content_plan ADD COLUMN rubric TEXT`);
+softAlter(`ALTER TABLE site_valuations ADD COLUMN adjustments_json TEXT`);
+softAlter(`ALTER TABLE site_valuations ADD COLUMN mode TEXT DEFAULT 'asset_based'`);
+softAlter(`ALTER TABLE agent_runs ADD COLUMN site_id TEXT`);
+softAlter(`ALTER TABLE agent_runs ADD COLUMN tokens_used INTEGER DEFAULT 0`);
+softAlter(`ALTER TABLE agent_runs ADD COLUMN cost_usd REAL DEFAULT 0`);
 
 // ------- seed: минимальный демо-набор, только если БД пустая -------
 export function seedIfEmpty() {

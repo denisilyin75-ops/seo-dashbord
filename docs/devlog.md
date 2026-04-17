@@ -8,6 +8,18 @@
 
 ---
 
+## 2026-04-18 — часть 3 (ночь)
+
+### ✅ Added
+- **Site Valuation v2** — двухрежимная модель (asset-based ↔ hybrid ↔ revenue-based) с детальными adjustments. Каждый фактор имеет `impact_usd`, `actionable_hint`, `reason`.
+- **ValuationPanel** на SiteDetail (новая вкладка 💰 Капитализация) — текущая оценка с диапазоном + line chart динамики + список факторов с цветовыми маркерами (🟢/🟡/🔴) и конкретными действиями для роста
+- **Endpoint `/api/sites/:id/valuations`** — история для графика
+- **Soft ALTER migrations** — новые колонки добавляются автоматом при startup (domain_registered_at, adjustments_json, mode, phase, rubric, tokens_used, cost_usd)
+
+### 🧠 Decided
+- **Expected Value UX как product principle** — каждое действие показывает $-эффект («Refresh → +$150», «+1 обзор → +$60»). Зафиксировано в `memory/feedback_expected_value_ux.md`. Применяем везде где применимо.
+- **Site Valuation two-mode:** asset-based для новых сайтов (0-$50 profit), hybrid ($50-$500), revenue × multiple (от $500). Переключается автоматически по avg_monthly_profit.
+
 ## 2026-04-18 — часть 2 (вечер)
 
 ### ✅ Added

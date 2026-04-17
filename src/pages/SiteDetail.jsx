@@ -5,6 +5,7 @@ import { Badge, Btn, Metric, Modal, XLink } from '../components/ui.jsx';
 import { TI, PC } from '../utils/constants.js';
 import ArticleRow from '../components/ArticleRow.jsx';
 import AIPanel from '../components/AIPanel.jsx';
+import ValuationPanel from '../components/ValuationPanel.jsx';
 import LogPanel from '../components/LogPanel.jsx';
 import AddForm from '../components/AddForm.jsx';
 import SiteForm from '../components/SiteForm.jsx';
@@ -127,10 +128,11 @@ export default function SiteDetail() {
 
   const m = site.metrics;
   const tabs = [
-    { id: 'articles', l: 'Статьи',  ic: '📄', n: articles.length },
-    { id: 'plan',     l: 'План',    ic: '📋', n: plan.length },
-    { id: 'ai',       l: 'AI',      ic: '🤖' },
-    { id: 'log',      l: 'Лог',     ic: '📜', n: log.length },
+    { id: 'articles',   l: 'Статьи',       ic: '📄', n: articles.length },
+    { id: 'plan',       l: 'План',         ic: '📋', n: plan.length },
+    { id: 'valuation',  l: 'Капитализация', ic: '💰' },
+    { id: 'ai',         l: 'AI',           ic: '🤖' },
+    { id: 'log',        l: 'Лог',          ic: '📜', n: log.length },
   ];
 
   return (
@@ -261,6 +263,7 @@ export default function SiteDetail() {
           </div>
         )}
 
+        {tab === 'valuation' && <ValuationPanel siteId={id} />}
         {tab === 'ai' && <AIPanel siteId={id} />}
         {tab === 'log' && (log.length ? <LogPanel log={log} /> : (
           <EmptyState icon="📜" title="Лог пуст" description="AI-команды по этому сайту будут здесь." />

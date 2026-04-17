@@ -45,6 +45,7 @@ export const api = {
     return request('GET', `/api/sites/${id}/metrics${qs ? `?${qs}` : ''}`);
   },
   syncSiteMetrics: (id, days = 7) => request('POST', `/api/sites/${id}/sync-metrics?days=${days}`),
+  siteValuations: (id, limit = 180) => request('GET', `/api/sites/${id}/valuations?limit=${limit}`),
 
   // articles
   listArticles: (siteId) => request('GET',    `/api/sites/${siteId}/articles`),

@@ -141,6 +141,35 @@ router.get('/:id/metrics', (req, res) => {
   res.json(rows);
 });
 
+// GET /api/sites/:id/valuations — история оценок стоимости (для графика)
+router.get('/:id/valuations', (req, res) => {
+  const limit = Math.max(1, Math.min(500, Number(req.query.limit) || 180));
+  const rows = db.prepare(`
+    SELECT
+      id, date, mode, confidence,
+      avg_monthly_revenue, avg_monthly_profit,
+      valuation_low, valuation_expected, valuation_high,
+      adjustments_json, created_at
+    FROM site_valuations
+    WHERE site_id = ?
+    ORDER BY created_at DESC
+    LIMIT ?
+  `).all(req.params.id, limit);
+  res.json(rows.map((r) => ({
+    id: r.id,
+    date: r.date,
+    mode: r.mode,
+    confidence: r.confidence,
+    avgMonthlyRevenue: r.avg_monthly_revenue,
+    avgMonthlyProfit: r.avg_monthly_profit,
+    valuationLow: r.valuation_low,
+    valuationExpected: r.valuation_expected,
+    valuationHigh: r.valuation_high,
+    adjustments: r.adjustments_json ? (() => { try { return JSON.parse(r.adjustments_json); } catch { return []; } })() : [],
+    createdAt: r.created_at,
+  })));
+});
+
 // POST /api/sites/:id/sync-metrics?days=7 — pull GA4/GSC за последние N дней
 router.post('/:id/sync-metrics', async (req, res) => {
   const days = Math.max(1, Math.min(90, Number(req.query.days) || 7));
