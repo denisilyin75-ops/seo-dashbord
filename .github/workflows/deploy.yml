@@ -14,113 +14,88 @@ on:
         type: boolean
         default: false
 
-# Не отменяем текущий деплой если пришёл новый push — дожидаемся завершения
 concurrency:
   group: deploy-prod
   cancel-in-progress: false
 
 env:
   NODE_VERSION: '20'
+  DEPLOY_PATH: /opt/scc
 
 jobs:
   # ---------- 1. Проверка что код собирается ----------
   build-check:
-    name: 🔨 Build check
+    name: Build check
     runs-on: ubuntu-latest
     if: ${{ !inputs.skip_build_check }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+      - run: npm ci
+      - run: npm run build
+      - run: test -f dist/index.html && echo "Build OK"
 
-      - name: Install deps
-        run: npm ci
-
-      - name: Build frontend
-        run: npm run build
-
-      - name: Verify dist/
-        run: |
-          test -f dist/index.html || { echo "❌ dist/index.html missing"; exit 1; }
-          echo "✅ Frontend built successfully"
-          du -sh dist/
-
-      - name: Smoke-check server loads
-        run: |
-          node -e "import('./server/db.js').then(() => console.log('✅ Server module loads'))"
-
-  # ---------- 2. Trigger deploy в Dokploy ----------
+  # ---------- 2. Deploy через SSH ----------
   deploy:
-    name: 🚀 Deploy
+    name: Deploy via SSH
     needs: [build-check]
     if: ${{ always() && (needs.build-check.result == 'success' || inputs.skip_build_check) }}
     runs-on: ubuntu-latest
     environment:
       name: production
       url: https://cmd.bonaka.app
-
     steps:
-      - name: Validate secrets
-        run: |
-          if [ -z "${{ secrets.DOKPLOY_WEBHOOK_URL }}" ]; then
-            echo "❌ Secret DOKPLOY_WEBHOOK_URL не задан в repo Settings → Secrets"
-            echo "   В Dokploy UI: твой сервис → Deployments → Webhook URL → скопировать"
-            exit 1
-          fi
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 5.129.245.98
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script_stop: true
+          command_timeout: 5m
+          script: |
+            set -e
+            DEPLOY_PATH=/opt/scc
 
-      - name: Trigger Dokploy webhook
-        id: webhook
-        run: |
-          echo "Triggering deploy for ${{ github.sha }}..."
-          HTTP_CODE=$(curl -sS -o /tmp/resp.txt -w "%{http_code}" \
-            -X POST "${{ secrets.DOKPLOY_WEBHOOK_URL }}" \
-            -H "Content-Type: application/json" \
-            --max-time 30)
-          echo "HTTP $HTTP_CODE"
-          cat /tmp/resp.txt | head -c 500
-          if [ "$HTTP_CODE" -ge 400 ]; then
-            echo "❌ Dokploy вернул $HTTP_CODE"
-            exit 1
-          fi
-          echo "✅ Dokploy webhook triggered"
-
-      - name: Wait for deploy to start (30s)
-        run: sleep 30
-
-      - name: Health-check (retries × 10, 15s interval)
-        env:
-          PROD_URL: ${{ vars.PROD_URL || 'https://cmd.bonaka.app' }}
-        run: |
-          echo "Pinging $PROD_URL/api/health..."
-          for i in $(seq 1 10); do
-            BODY=$(curl -sS --max-time 10 "$PROD_URL/api/health" || echo "")
-            if echo "$BODY" | grep -q '"ok":true'; then
-              echo "✅ Health check passed on attempt $i"
-              echo "$BODY" | head -c 500
-              echo
-              echo "---"
-              exit 0
+            echo "=== Pull latest code ==="
+            if [ -d "$DEPLOY_PATH/.git" ]; then
+              cd $DEPLOY_PATH
+              git fetch origin main
+              git reset --hard origin/main
+            else
+              mkdir -p $DEPLOY_PATH
+              git clone --branch main https://github.com/denisilyin75-ops/seo-dashbord.git $DEPLOY_PATH
+              cd $DEPLOY_PATH
             fi
-            echo "Attempt $i/10 failed, retrying in 15s..."
-            sleep 15
-          done
-          echo "❌ Health check failed after 10 attempts (~2.5 min)"
-          echo "Проверь логи контейнера в Dokploy UI или: docker logs scc"
-          exit 1
+
+            echo "=== Rebuild container ==="
+            docker compose up -d --build --remove-orphans
+
+            echo "=== Wait for healthy ==="
+            for i in $(seq 1 20); do
+              STATUS=$(docker inspect scc --format '{{.State.Health.Status}}' 2>/dev/null || echo "missing")
+              echo "  attempt $i: $STATUS"
+              if [ "$STATUS" = "healthy" ]; then
+                echo "=== Health check ==="
+                docker exec scc node -e "fetch('http://127.0.0.1:3001/api/health').then(r=>r.text()).then(t=>{console.log(t);process.exit(0)}).catch(()=>process.exit(1))"
+                echo "=== Deploy OK ==="
+                exit 0
+              fi
+              sleep 5
+            done
+            echo "FAILED: container not healthy after 100s"
+            docker logs scc --tail 30
+            exit 1
 
       - name: Summary
         if: always()
         run: |
-          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Deploy Summary" >> $GITHUB_STEP_SUMMARY
           echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Commit | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Branch | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Actor | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
           echo "| URL | https://cmd.bonaka.app |" >> $GITHUB_STEP_SUMMARY
           echo "| Result | ${{ job.status }} |" >> $GITHUB_STEP_SUMMARY
