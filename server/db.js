@@ -71,6 +71,8 @@ CREATE TABLE IF NOT EXISTS content_plan (
   priority TEXT DEFAULT 'medium',
   deadline TEXT,
   status TEXT DEFAULT 'idea',
+  phase INTEGER,
+  rubric TEXT,
   article_id TEXT REFERENCES articles(id) ON DELETE SET NULL,
   ai_brief TEXT,
   created_at TEXT DEFAULT (datetime('now'))
