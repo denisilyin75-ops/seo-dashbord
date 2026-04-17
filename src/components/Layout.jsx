@@ -27,7 +27,7 @@ export default function Layout({ children, headerExtra }) {
             <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'linear-gradient(135deg,#3b82f6,#8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px' }}>☕</div>
             <div>
               <div style={{ fontSize: '15px', fontWeight: 800, letterSpacing: '-.3px' }}>SEO Command Center</div>
-              <div style={{ fontSize: '9px', color: '#475569', fontFamily: 'var(--mn)' }}>v0.3 · phase 2</div>
+              <div style={{ fontSize: '9px', color: '#475569', fontFamily: 'var(--mn)' }}>v0.3.1</div>
             </div>
           </Link>
           <nav style={{ display: 'flex', gap: '4px' }}>
