@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { setToken } from '../api/client.js';
 import useHotkeys from '../hooks/useHotkeys.js';
 import HotkeysHelp from './HotkeysHelp.jsx';
 
@@ -56,6 +57,12 @@ export default function Layout({ children, headerExtra }) {
             {new Date().toLocaleDateString('ru-RU')}
           </div>
           <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 6px #34d39944' }} title="API online" />
+          <button
+            type="button"
+            onClick={() => { setToken(''); window.location.href = '/'; }}
+            title="Выйти"
+            style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '4px', padding: '2px 8px', color: '#64748b', cursor: 'pointer', fontSize: '11px', fontWeight: 600 }}
+          >Выйти</button>
         </div>
       </header>
       <main style={{ padding: '14px' }}>{children}</main>
