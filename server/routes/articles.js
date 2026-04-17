@@ -134,7 +134,16 @@ router.post('/sites/:siteId/articles/sync-all', async (req, res) => {
   if (!wp) return res.status(400).json({ error: 'WordPress not configured for this site' });
 
   try {
-    const posts = await wp.getPosts({ per_page: 100, status: 'publish,draft' });
+    // Пагинация: забираем все страницы пока WP не вернёт меньше per_page
+    const allPosts = [];
+    const maxPages = 30; // safety cap: 30 × 100 = 3000 постов
+    for (let page = 1; page <= maxPages; page++) {
+      const posts = await wp.getPosts({ per_page: 100, status: 'publish,draft', page });
+      if (!posts.length) break;
+      allPosts.push(...posts);
+      if (posts.length < 100) break;
+    }
+
     const upsert = db.prepare(`INSERT INTO articles
       (id, site_id, wp_post_id, title, url, type, status, wp_last_sync, updated_at)
       VALUES (?, ?, ?, ?, ?, 'review', ?, datetime('now'), datetime('now'))
@@ -152,8 +161,8 @@ router.post('/sites/:siteId/articles/sync-all', async (req, res) => {
         );
       }
     });
-    tx(posts);
-    res.json({ synced: posts.length });
+    tx(allPosts);
+    res.json({ synced: allPosts.length, pages: Math.ceil(allPosts.length / 100) });
   } catch (e) {
     if (e instanceof WordPressApiError) return res.status(502).json({ error: e.message, status: e.status });
     res.status(500).json({ error: e.message });
