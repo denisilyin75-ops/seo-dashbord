@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="popFav" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#ef4444"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#popFav)"/>
+  <rect x="14" y="16" width="36" height="4" rx="2" fill="#fff"/>
+  <rect x="18" y="28" width="28" height="4" rx="2" fill="#fff" fill-opacity="0.85"/>
+  <rect x="22" y="40" width="20" height="4" rx="2" fill="#fff" fill-opacity="0.65"/>
+</svg>
