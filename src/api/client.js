@@ -59,6 +59,7 @@ export const api = {
   createPlan:   (siteId, data) => request('POST',   `/api/sites/${siteId}/plan`, data),
   updatePlan:   (id, data) => request('PUT',    `/api/plan/${id}`, data),
   deletePlan:   (id) => request('DELETE', `/api/plan/${id}`),
+  generateBrief: (id) => request('POST', `/api/plan/${id}/generate-brief`),
 
   // ai
   aiCommand:    (command, context = {}) => request('POST', '/api/ai/command', { command, context }),

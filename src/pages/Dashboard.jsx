@@ -250,10 +250,24 @@ export default function Dashboard() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span>{TI[p.type] || '📄'}</span>
                       <span style={{ fontSize: '12px', fontWeight: 600, color: '#e2e8f0' }}>{p.title}</span>
+                      {p.aiBrief && <span title="AI-бриф готов" style={{ fontSize: '10px' }}>✨</span>}
                     </div>
                     <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                       <Badge s={p.status} />
                       <span style={{ fontSize: '9px', color: '#475569', fontFamily: 'var(--mn)' }}>{p.deadline}</span>
+                      <Btn
+                        onClick={() => tryToast(async () => {
+                          const r = await api.generateBrief(p.id);
+                          await loadSiteData(sel);
+                          refreshLog();
+                          if (r.stub) throw new Error('AI не настроен — см. .env сервера');
+                        }, { success: p.aiBrief ? 'Бриф пересгенерирован' : 'Бриф готов ✨' })}
+                        v="ghost"
+                        sx={{ fontSize: '10px', color: p.aiBrief ? '#94a3b8' : '#60a5fa' }}
+                        title={p.aiBrief ? 'Пересгенерировать бриф' : 'Сгенерировать AI-бриф'}
+                      >
+                        {p.aiBrief ? '↻' : 'AI'}
+                      </Btn>
                       <Btn onClick={() => delPl(p.id)} v="ghost" sx={{ fontSize: '10px', color: '#ef4444' }}>✕</Btn>
                     </div>
                   </div>

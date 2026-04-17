@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { randomUUID } from 'node:crypto';
 import { db } from '../db.js';
+import { generateContentBrief } from '../services/claude.js';
 
 const router = Router();
 
@@ -69,9 +70,65 @@ router.delete('/plan/:id', (req, res) => {
   res.json({ ok: true });
 });
 
-// POST /api/plan/:id/generate-brief — stub, Фаза 2
-router.post('/plan/:id/generate-brief', (req, res) => {
-  res.status(501).json({ error: 'Not implemented yet', phase: 2 });
+// POST /api/plan/:id/generate-brief
+// Генерит AI-бриф для плана, сохраняет в ai_brief, логирует в ai_log
+router.post('/plan/:id/generate-brief', async (req, res) => {
+  const planRow = db.prepare('SELECT * FROM content_plan WHERE id = ?').get(req.params.id);
+  if (!planRow) return res.status(404).json({ error: 'Plan item not found' });
+
+  const siteRow = db.prepare('SELECT * FROM sites WHERE id = ?').get(planRow.site_id);
+  if (!siteRow) return res.status(404).json({ error: 'Site not found' });
+
+  // Для контекста — существующие статьи сайта (для внутренних ссылок)
+  const existingArticles = db.prepare(
+    `SELECT title, type, url FROM articles
+     WHERE site_id = ? AND status IN ('published','draft')
+     ORDER BY updated_at DESC LIMIT 20`
+  ).all(planRow.site_id);
+
+  const planItem = {
+    title: planRow.title,
+    type: planRow.type,
+    priority: planRow.priority,
+    deadline: planRow.deadline,
+  };
+
+  const site = {
+    id: siteRow.id,
+    name: siteRow.name,
+    niche: siteRow.niche,
+    market: siteRow.market,
+  };
+
+  try {
+    const { brief, tokensUsed, model, provider, stub } = await generateContentBrief({
+      planItem, site, existingArticles,
+    });
+
+    // Сохраняем бриф в content_plan
+    db.prepare('UPDATE content_plan SET ai_brief = ? WHERE id = ?').run(brief, req.params.id);
+
+    // Логируем в ai_log для аудита (+ мониторинг расхода токенов)
+    db.prepare(`INSERT INTO ai_log (site_id, article_id, command, result, model, tokens_used)
+                VALUES (?, ?, ?, ?, ?, ?)`).run(
+      siteRow.id, null,
+      `generate-brief:${planItem.type}:${planItem.title.slice(0, 80)}`,
+      brief.slice(0, 4000),
+      model, tokensUsed,
+    );
+
+    res.json({
+      ok: true,
+      planId: req.params.id,
+      brief,
+      tokensUsed,
+      model,
+      provider,
+      stub: !!stub,
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 export default router;
