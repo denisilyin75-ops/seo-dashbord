@@ -3,27 +3,27 @@ import { Btn, Inp } from '../components/ui.jsx';
 import { setToken, api } from '../api/client.js';
 
 export default function Login({ onSuccess }) {
-  const [value, setValue] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
-    const trimmed = value.trim();
-    if (!trimmed) { setError('Введите токен'); return; }
+    const trimmed = password.trim();
+    if (!trimmed) { setError('Введите пароль'); return; }
 
     setLoading(true);
     setError('');
     setToken(trimmed);
 
     try {
-      const h = await api.listSites();
+      await api.listSites();
       onSuccess();
     } catch (e) {
       setToken('');
       if (e.status === 401) {
-        setError('Неверный токен');
+        setError('Неверный пароль');
       } else {
-        setError(`Ошибка: ${e.message}`);
+        setError(`Ошибка подключения: ${e.message}`);
       }
     }
     setLoading(false);
@@ -35,7 +35,7 @@ export default function Login({ onSuccess }) {
         <div style={{ textAlign: 'center', marginBottom: '30px' }}>
           <div style={{ width: '56px', height: '56px', borderRadius: '14px', background: 'linear-gradient(135deg,#3b82f6,#8b5cf6)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', marginBottom: '16px' }}>☕</div>
           <div style={{ fontSize: '20px', fontWeight: 800, color: '#e2e8f0', letterSpacing: '-.5px' }}>SEO Command Center</div>
-          <div style={{ fontSize: '12px', color: '#475569', marginTop: '4px' }}>Вход в панель управления</div>
+          <div style={{ fontSize: '12px', color: '#475569', marginTop: '4px' }}>Панель управления сайтами</div>
         </div>
 
         <form
@@ -44,17 +44,16 @@ export default function Login({ onSuccess }) {
         >
           <div>
             <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: '6px' }}>
-              API Token
+              Пароль
             </div>
             <Inp
-              value={value}
-              onChange={setValue}
-              onKeyDown={(e) => e.key === 'Enter' && submit()}
-              placeholder="Вставьте AUTH_TOKEN из .env"
+              value={password}
+              onChange={setPassword}
+              placeholder="Введите пароль"
               type="password"
               invalid={!!error}
               autoFocus
-              sx={{ padding: '10px 12px', fontSize: '13px', fontFamily: 'var(--mn)' }}
+              sx={{ padding: '12px 14px', fontSize: '14px' }}
             />
             {error && (
               <div style={{ fontSize: '11px', color: '#ef4444', marginTop: '6px', fontWeight: 600 }}>
@@ -63,18 +62,13 @@ export default function Login({ onSuccess }) {
             )}
           </div>
 
-          <Btn type="submit" v="acc" disabled={loading} sx={{ width: '100%', padding: '10px', fontSize: '13px' }}>
-            {loading ? '⏳ Проверка...' : '🔐 Войти'}
+          <Btn type="submit" v="acc" disabled={loading} sx={{ width: '100%', padding: '12px', fontSize: '14px' }}>
+            {loading ? 'Проверка...' : 'Войти'}
           </Btn>
-
-          <div style={{ fontSize: '10px', color: '#475569', textAlign: 'center', lineHeight: 1.5 }}>
-            Токен задаётся на сервере в <code style={{ color: '#60a5fa', background: '#0a0e17', padding: '1px 4px', borderRadius: '3px' }}>AUTH_TOKEN</code> переменной.
-            Если вы владелец — посмотрите его в Dokploy → Environment.
-          </div>
         </form>
 
         <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '9px', color: '#334155', fontFamily: 'var(--mn)' }}>
-          v0.3 · cmd.bonaka.app
+          cmd.bonaka.app
         </div>
       </div>
     </div>
