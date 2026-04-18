@@ -22,6 +22,7 @@ import portfolioRouter from './routes/portfolio.js';
 import blogRouter from './routes/blog.js';
 import contentHealthRouter from './routes/content-health.js';
 import importedRouter from './routes/imported.js';
+import actionsRouter from './routes/actions.js';
 import { syncAgentsToDb } from './services/agents/registry.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -78,6 +79,7 @@ app.use('/api/portfolio', portfolioRouter);
 app.use('/api/blog', blogRouter);
 app.use('/api', contentHealthRouter);   // /api/quality/* + /api/sites/:id/content-health + /api/content-health/:id
 app.use('/api', importedRouter);        // /api/imported + /api/imported/:id
+app.use('/api', actionsRouter);         // /api/actions + /api/actions/:id
 
 // 404 для API
 app.use('/api', (req, res) => res.status(404).json({ error: 'Not found', path: req.path }));

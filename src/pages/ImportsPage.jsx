@@ -311,12 +311,149 @@ function ImportDetail({ data, onBack, onArchive }) {
           </details>
         )}
 
-        {/* Actions placeholder (Phase 3) */}
-        <div style={{ marginTop: 14, padding: 10, background: '#1e293b40', border: '1px dashed #334155', borderRadius: 4, fontSize: 11, color: '#64748b' }}>
-          🚧 Actions (translate / rewrite / PDF / structural analysis / facts) — Phase 3.
-          MVP Phase 2 только import + view + archive.
-        </div>
+        {/* Actions — Phase 3 */}
+        <ActionsPanel importedId={a.id} language={a.language} />
       </div>
+    </div>
+  );
+}
+
+function ActionsPanel({ importedId, language }) {
+  const [runningAction, setRunningAction] = useState(null);  // action_type
+  const [result, setResult] = useState(null);
+  const [history, setHistory] = useState([]);
+  const [err, setErr] = useState(null);
+  const [paramLang, setParamLang] = useState(language === 'ru' ? 'en' : 'ru');
+
+  useEffect(() => {
+    setResult(null);
+    setHistory([]);
+    api.listActions('imported_article', importedId, 20)
+      .then(r => setHistory(r.items || []))
+      .catch(() => {});
+  }, [importedId]);
+
+  const run = async (action_type, params = {}) => {
+    setRunningAction(action_type);
+    setResult(null); setErr(null);
+    try {
+      const r = await api.runAction({
+        action_type,
+        source_type: 'imported_article',
+        source_ids: [importedId],
+        params,
+      });
+      setResult(r);
+      // refresh history
+      const h = await api.listActions('imported_article', importedId, 20);
+      setHistory(h.items || []);
+    } catch (e) {
+      setErr(e.message);
+    } finally {
+      setRunningAction(null);
+    }
+  };
+
+  const COST_NOTES = {
+    translate:           '~$0.01-0.06 (Sonnet)',
+    rewrite_preserve:    '~$0.02-0.06 (Sonnet)',
+    rewrite_voice:       '~$0.03-0.08 (Sonnet, с persona)',
+    structural_analysis: '~$0.01 (Haiku)',
+    fact_extraction:     '~$0.01 (Haiku)',
+  };
+
+  return (
+    <div style={{ marginTop: 14, padding: 12, background: '#0a0e17', border: '1px solid #1e293b', borderRadius: 5 }}>
+      <div style={{ fontSize: 12, fontWeight: 700, color: '#e2e8f0', marginBottom: 8 }}>
+        🛠 Actions
+      </div>
+
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <Btn
+            onClick={() => run('translate', { target_lang: paramLang })}
+            disabled={runningAction === 'translate'}
+            sx={{ fontSize: 10 }}
+          >
+            📝 Translate
+          </Btn>
+          <select value={paramLang} onChange={e => setParamLang(e.target.value)} style={{ padding: '3px 5px', fontSize: 10, background: '#0f172a', border: '1px solid #1e293b', color: '#e2e8f0', borderRadius: 3 }}>
+            <option value="ru">→ RU</option>
+            <option value="en">→ EN</option>
+            <option value="nl">→ NL</option>
+            <option value="de">→ DE</option>
+          </select>
+        </div>
+        <Btn onClick={() => run('rewrite_preserve', {})} disabled={runningAction === 'rewrite_preserve'} sx={{ fontSize: 10 }}>
+          ✏️ Rewrite (preserve)
+        </Btn>
+        <Btn onClick={() => run('rewrite_voice', { voice_persona: 'dmitri' })} disabled={runningAction === 'rewrite_voice'} sx={{ fontSize: 10 }}>
+          🎙 Voice rewrite (Дмитрий)
+        </Btn>
+        <Btn onClick={() => run('structural_analysis', {})} disabled={runningAction === 'structural_analysis'} sx={{ fontSize: 10 }}>
+          📑 Structural analysis
+        </Btn>
+        <Btn onClick={() => run('fact_extraction', {})} disabled={runningAction === 'fact_extraction'} sx={{ fontSize: 10 }}>
+          📊 Facts
+        </Btn>
+      </div>
+
+      {runningAction && (
+        <div style={{ padding: 8, background: '#1e293b40', borderRadius: 3, fontSize: 11, color: '#60a5fa' }}>
+          ⏳ {runningAction} — {COST_NOTES[runningAction]}… (5-30 сек)
+        </div>
+      )}
+      {err && (
+        <div style={{ padding: 8, background: '#7f1d1d30', border: '1px solid #ef4444', borderRadius: 4, fontSize: 11, color: '#fca5a5' }}>
+          Ошибка: {err}
+        </div>
+      )}
+
+      {result && (
+        <div style={{ marginTop: 10, padding: 10, background: '#0f172a', border: '1px solid #334155', borderRadius: 4 }}>
+          <div style={{ fontSize: 11, color: '#64748b', marginBottom: 6 }}>
+            {result.action_type} · {result.model} · {result.tokens_used} tokens · ${result.cost_usd?.toFixed(4)} · {(result.elapsed_ms / 1000).toFixed(1)}s
+          </div>
+          {result.output_type === 'analysis_json' ? (
+            <pre style={{ fontSize: 10, background: '#0a0e17', padding: 8, borderRadius: 3, overflow: 'auto', maxHeight: 400, color: '#cbd5e1' }}>
+              {result.output}
+            </pre>
+          ) : (
+            <details open>
+              <summary style={{ cursor: 'pointer', fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>Output HTML ({result.output.length} chars)</summary>
+              <div
+                style={{ marginTop: 6, padding: 10, background: '#0a0e17', borderRadius: 3, fontSize: 12, color: '#cbd5e1', lineHeight: 1.5, maxHeight: 400, overflow: 'auto' }}
+                dangerouslySetInnerHTML={{ __html: result.output }}
+              />
+            </details>
+          )}
+          <Btn
+            onClick={() => navigator.clipboard.writeText(result.output)}
+            v="ghost"
+            sx={{ fontSize: 10, marginTop: 6 }}
+          >📋 Copy output</Btn>
+        </div>
+      )}
+
+      {history.length > 0 && (
+        <details style={{ marginTop: 10 }}>
+          <summary style={{ cursor: 'pointer', fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>
+            История actions ({history.length})
+          </summary>
+          <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {history.map(h => (
+              <div key={h.id} style={{ padding: '4px 8px', background: '#0f172a', borderRadius: 3, fontSize: 10, display: 'flex', gap: 8, alignItems: 'center' }}>
+                <span style={{ color: h.status === 'completed' ? '#86efac' : h.status === 'failed' ? '#fca5a5' : '#fbbf24' }}>
+                  {h.status === 'completed' ? '✓' : h.status === 'failed' ? '✕' : '…'}
+                </span>
+                <strong style={{ color: '#cbd5e1' }}>{h.actionType}</strong>
+                <span style={{ color: '#475569', fontFamily: 'var(--mn)' }}>{h.createdAt.slice(11, 16)}</span>
+                {h.llmTokensOut > 0 && <span style={{ color: '#64748b', marginLeft: 'auto' }}>{h.llmTokensOut}t · ${(h.llmCostUsd || 0).toFixed(4)}</span>}
+              </div>
+            ))}
+          </div>
+        </details>
+      )}
     </div>
   );
 }

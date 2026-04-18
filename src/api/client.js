@@ -82,6 +82,12 @@ export const api = {
   getImported: (id) => request('GET', `/api/imported/${id}`),
   archiveImported: (id) => request('DELETE', `/api/imported/${id}`),
 
+  // Article Actions (Phase 3)
+  runAction: (body) => request('POST', '/api/actions', body),
+  getAction: (id) => request('GET', `/api/actions/${id}`),
+  listActions: (source_type, source_id, limit = 20) =>
+    request('GET', `/api/actions?source_type=${source_type}&source_id=${source_id}&limit=${limit}`),
+
   // Daily brief — история «идея дня» для аккумулированной ленты
   ideasHistory: (siteId, limit = 30) => {
     const qs = new URLSearchParams();
