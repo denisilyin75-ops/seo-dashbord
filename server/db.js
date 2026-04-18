@@ -487,6 +487,16 @@ CREATE TABLE IF NOT EXISTS code_review_runs (
 );
 CREATE INDEX IF NOT EXISTS idx_crr_trigger ON code_review_runs(trigger, started_at DESC);
 CREATE INDEX IF NOT EXISTS idx_crr_commit ON code_review_runs(commit_sha);
+
+-- Exit Readiness Scorecards — monthly snapshots для tracking progress к экзиту.
+-- 15 dimensions × score 0-100, aggregate /100.
+CREATE TABLE IF NOT EXISTS exit_readiness_scorecards (
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  month           TEXT NOT NULL UNIQUE,           -- '2026-04'
+  overall_score   INTEGER,
+  scores_json     TEXT,
+  created_at      TEXT DEFAULT (datetime('now'))
+);
 `);
 
 // Rebuild FTS по user_version pragma.

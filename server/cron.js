@@ -86,6 +86,25 @@ function codeReviewWeekly() {
   log('registered codeReviewWeekly (0 6 * * 1 UTC)');
 }
 
+/** Exit Readiness Scorecard — 1 числа каждого месяца 08:00 UTC */
+function exitScorecardMonthly() {
+  cron.schedule('0 8 1 * *', async () => {
+    try {
+      const { runExitScorecard } = await import('./services/code-review/exit-scorecard.js');
+      const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+      const r = runExitScorecard(repoRoot);
+      db.prepare(`INSERT INTO code_review_runs
+        (trigger, started_at, finished_at, status, output_files)
+        VALUES ('monthly', datetime('now'), datetime('now'), 'completed', ?)`)
+        .run(JSON.stringify([r.path]));
+      log(`exitScorecardMonthly: ${r.month} overall=${r.overall}/100 delta=${r.delta ?? 'N/A'}`);
+    } catch (e) {
+      log(`exitScorecardMonthly error: ${e.message}`);
+    }
+  }, { timezone: 'UTC' });
+  log('registered exitScorecardMonthly (0 8 1 * * UTC)');
+}
+
 /** Agents ticker — проверяет registry агентов каждые 5 минут и запускает due */
 function agentsTicker() {
   cron.schedule('*/5 * * * *', async () => {
@@ -112,5 +131,6 @@ export function startCron() {
   hourlyHealth();
   codeReviewNightly();
   codeReviewWeekly();
+  exitScorecardMonthly();
   agentsTicker();
 }
