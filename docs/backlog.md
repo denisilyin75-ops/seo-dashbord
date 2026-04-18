@@ -1,7 +1,7 @@
 # Backlog — единый список всех открытых задач
 
 > **Статус:** живой документ. Обновляется после каждой значимой встречи/сессии.
-> **Последнее обновление:** 2026-04-18
+> **Последнее обновление:** 2026-04-18 (вечер)
 >
 > **Priority levels:**
 > - P0 — срочно (горит или блокирует много чего)
@@ -11,41 +11,60 @@
 
 ---
 
-## ✅ Сделано в сессии 2026-04-18 (Stage C, день 1)
+## ✅ Сделано в сессии 2026-04-18 (Stage C, день 1 — big day)
 
-- **P0-01: Site Valuation калибровка** — `PER_ARTICLE_VALUE` снижены, age × $100 (cap $800) + bonus $200 за «возраст × наполненность», momentum cap $500. Penalty за нет-revenue **двухуровневая**: −40% для «зомби» (нет momentum), −20% для активных. Прод: portfolio $7,496 (popolkam $660, 4beg $6,836). [commits 72fd153, 26355bc]
-- **P0-03: OpenRouter credits в Settings UI** — endpoint `GET /api/ai/credits`, карточка с прогресс-баром (зелёный/жёлтый/красный) и текстовой рекомендацией. На проде показывает $4.93/$5.00. [commit e7472ac]
-- **P0-04: popolkam meta-fields в ArticleRow** — WP-плагин 1.1.0 регистрирует 6 полей с `show_in_rest=true`; backend PUT /api/articles/:id принимает `body.meta` и пушит в WP; UI — collapsible-секция «🛠 Калькулятор / партнёрка» с 5 inputs, lazy-loaded. End-to-end проверено. [commit f85d1bf]
-- **Побочно: popolkam синкнут с WP** — оказалось 0 статей в БД SCC, поэтому zombie-tier penalty сработал. После sync — 2 статьи (это реальное число опубликованных постов на popolkam).
+### Валюация + UI
+- **P0-01 Site Valuation калибровка** — PER_ARTICLE_VALUE снижены, age × $100 max $800, momentum cap $500. Двухуровневая penalty за нет-revenue (−40% zombie / −20% active). Methodology bumped `v2.1_calibrated_2026-04-18`. [72fd153, 26355bc, cf87209]
+- **P0-03 OpenRouter credits в Settings UI** — карточка с прогресс-баром, текстовыми рекомендациями. $4.93/$5.00 на проде. [e7472ac]
+- **P0-04 popolkam meta-fields в ArticleRow** — WP плагин 1.1.0 + backend PUT с meta + UI collapsible «🛠 Калькулятор / партнёрка». End-to-end. [f85d1bf]
+- **Methodology badge + timestamp в ValuationPanel** — видно какой формулой считалось. [d86c216]
+
+### Геймификация + Blog
+- **Gamification Phase A** — Live Portfolio Value widget в шапке, action impact toasts (+$N), user_prefs для toggle'ов, GET /api/portfolio/valuation с delta 24h/30d фильтром по methodology. [d5f02d6, 362901d, 3bba57f]
+- **Blog «что сделано»** в Dashboard — DB + CRUD + BlogPanel UI + 5 ретроспективных seed-записей за 2026-04-17/18. [25f2887]
+
+### Документация
+- `docs/legacy-spec/` — импорт 4 .md + GAMIFICATION.md + jsx прототип (архив старых спек)
+- `docs/devlog.md` часть 4 + `docs/gamification.md` user-guide [6f6263c, 707a303]
+- `docs/scaling-checklist.md` — живой чек-лист запуска нового сайта (Фаза 1 скриптами / Фаза 2 руки+лицензии / Фаза 3 контент) + таблица 9 «известных гвоздей» [7261705]
+
+### Новый сайт
+- **aykakchisto.ru провижен** — wp-aykakchisto контейнер, 12 рубрик, E-E-A-T, Let's Encrypt cert, зарегистрирован в SCC (site_a43088d3). Бесплатный эталонный стек установлен (elementor / greenshift / woocommerce / cyr2lat / rank-math + allow-svg mu-plugin). [b272bf8]
+- Портфель: **$9,120 / $50k (18.2%)**
 
 ---
 
-## 🔥 P0 — следующим
+## 🔥 P0 — следующая сессия, первым
 
-### [ ] Продлить домен 4beg.ru
-**Дедлайн:** до 2026-07-04 (осталось ~2.5 мес)
-**Риск:** потеряем 10-летний домен с трафиком
-**Действие:** продлить на год+ в Timeweb/любом registrar
+### [ ] **aykakchisto: докупить лицензии и поставить платные плагины**
+Блокирует переход сайта в active. Нужно:
+- **REHub theme + rehub-framework** — ~$59 на ThemeForest. После покупки: wp-admin → Appearance → Upload Theme → активировать → плагины REHub ставить по одному (bulk-TGMPA падает на WP 6.9+), активировать лицензию в Registration tab.
+- **Content Egg Pro** — ~$59 на CodeCanyon. Upload Plugin → активировать → настроить API keys (Admitad, Я.Маркет, Ozon — те же что на popolkam).
+- **WP All Import Pro + 3 addon** — ~$199 на wpallimport.com. Upload Plugin × 4, активировать.
+- **envato-market** (бесплатный, но только с envato.com) — для auto-updates купленного.
 
-### [ ] Собрать доступы к 4beg.ru
-**Блокирует:** миграцию, подключение к SCC
-**Нужно:**
-- Логин/пароль админки `4beg.ru/wp-admin/`
-- SSH/FTP к Timeweb (для экспорта БД + uploads)
-- Доступ к GA4 + Search Console (email, который там зарегистрирован)
-- Список активных партнёрских аккаунтов (если есть)
+**Когда сделано:** применить ReCompare preset как на popolkam, поменять status на active, прогнать site_valuation — ожидаем рост $180 → $500-700 (базовая инфра + тема + E-E-A-T насыщеннее).
 
-### [ ] **P0-02: Expected Value UX везде** — применить principle
-**Где:**
-- Daily Brief Quick Win — переформулировать в «сделай X → +$Y»
-- Plan items — показывать +$N к капитализации при создании обзора
-- Offer Health алерты — «Заменить битую → +$N/мес EPC»
-- Content Freshness алерты — «Refresh → возврат $N»
+### [ ] **Продлить домен 4beg.ru** до 2026-07-04
+Осталось ~2.5 мес. Потеря = 10-летний домен с трафиком.
 
-**Принцип:** `memory/feedback_expected_value_ux.md`
+### [ ] **Собрать доступы к 4beg.ru** для миграции
+- wp-admin логин/пароль
+- SSH/FTP Timeweb (БД дамп + uploads)
+- GA4 / Search Console email
+- Активные партнёрские аккаунты
 
-### [ ] **Доразобраться с popolkam недотягом до таргета**
-После калибровки popolkam = $660 (таргет был $800-1500). Сейчас 2 статьи в БД. Возможно после публикации Phase 1 (9 статей) попадём в таргет естественно. **Решить:** оставить, или дополнительно подкрутить формулу под текущие 2 статьи.
+### [ ] **P0-02: Expected Value UX везде**
+Применить принцип «сделай X → +$Y» в:
+- Daily Brief Quick Win
+- Plan items (показывать +$N при создании)
+- Offer Health алерты (+$N/мес EPC)
+- Content Freshness алерты (+$N возврат)
+
+Сейчас применён только в ValuationPanel + Gamification toast'ах. Принцип: `memory/feedback_expected_value_ux.md`.
+
+### [ ] **aykakchisto контент-стратегия** → `docs/strategies/cleaning.md`
+После покупки лицензий. Взять за основу бриф (`Downloads/ay-kak-chisto-brief.md` или импортировать в `docs/briefs/aykakchisto.md`). Адаптировать под наши шаблоны coffee-machines.md / vacuum-robots.md: персоны + модели по приоритету + pillar-cluster + фазы публикаций + монетизация + KPI.
 
 ---
 
@@ -323,10 +342,38 @@ Per-site widget: uptime, SSL expiry, GA4/GSC connected, last metric sync, broken
 ## 📚 Документы, на которые ссылаемся
 
 - **Supreme principle** (память) — всё для пользователя
-- `docs/strategies/coffee-machines.md` — полная стратегия кофемашин
-- `docs/strategies/vacuum-robots.md` — полная стратегия роботов-пылесосов
+- [`docs/scaling-checklist.md`](scaling-checklist.md) — чек-лист запуска нового сайта (Фаза 1-3)
+- [`docs/gamification.md`](gamification.md) — user guide к Live Portfolio Value виджету
+- [`docs/strategies/coffee-machines.md`](strategies/coffee-machines.md) — стратегия кофемашин
+- [`docs/strategies/vacuum-robots.md`](strategies/vacuum-robots.md) — стратегия пылесосов
+- `docs/strategies/cleaning.md` — **создать** для aykakchisto (P0)
 - `docs/strategies/running-shoes.md` — **создать после миграции 4beg**
-- `server/scripts/wp-provision/` — provisioning scripts для новых сайтов
+- [`server/scripts/wp-provision/`](../server/scripts/wp-provision/) — provisioning scripts
+- [`docs/legacy-spec/`](legacy-spec/) — архив старых спек (GAMIFICATION.md, AGENTS.md и др.)
+
+---
+
+## 🎯 Что делаем в ближайшую сессию
+
+**Очерёдность (рекомендация):**
+
+1. **Лицензии aykakchisto → платные плагины → ReCompare preset** (P0, главный unblock)
+2. **Контент-стратегия aykakchisto** → `docs/strategies/cleaning.md` (P0)
+3. **Docker DNS fix** (P2 infra — 30 сек работы + 1 мин простоя) — пока у нас хотфикс через extra_hosts
+4. **Expected Value UX везде** (P0-02) — Daily Brief / Plan / Offer Health
+5. **Продлить 4beg.ru домен** — deadline 2026-07-04
+
+**Параллельно (когда есть слоты):**
+- Stage C идеи из legacy spec: Circuit Breaker / Budget Control для агентов (P1)
+- AI model picker per-agent — экономия 50-80% на Haiku (P1)
+- Site Health summary card (P1 — моя идея)
+- Gamification Phase B — editable impact config (P2)
+- Prompt caching в claude.js (P1 — −50-80% AI costs)
+
+**Не срочное:**
+- IPv6 infra (P2, отдельная сессия с rescue console fallback)
+- Audit Log + Activity Feed (P1)
+- Schedule Builder UI, Per-site overrides, Cannibalization Detector, Sale Preparation Checklist (P2 — см. Stage C)
 
 ---
 
@@ -349,4 +396,5 @@ Per-site widget: uptime, SSL expiry, GA4/GSC connected, last metric sync, broken
 - **2026-04-17** — favicon SCC + logo/favicon popolkam загружены
 - **2026-04-18** — Расширены supreme principles: итеративность + планка лидеров + монетизация как топливо + быстрый подбор
 - **2026-04-18** — Content Freshness Agent спроектирован (spec в памяти), добавлен в P1
-- **2026-04-18 (Stage C, день 1)** — P0-01 / P0-03 / P0-04 закрыты. Изучена legacy spec из `Downloads/files (1)/` — отобраны 7 идей и добавлены в backlog как Stage C. Добавлены 5 собственных идей (Site Health card, Audit Log, AI commentary, Cross-site benchmark, Onboarding Wizard). Двухуровневая penalty в site-valuation. popolkam впервые синкнут в БД SCC (был 0 статей).
+- **2026-04-18 (Stage C, день 1)** — P0-01 / P0-03 / P0-04 закрыты. Изучена legacy spec из `Downloads/files (1)/` — отобраны 7 идей и добавлены в backlog как Stage C. Добавлены 5 собственных идей. Двухуровневая penalty в site-valuation. popolkam впервые синкнут в БД SCC.
+- **2026-04-18 (вечер)** — Gamification Phase A (Live Portfolio Value + toast'ы + Settings toggle). Blog «что сделано» как виджет в Dashboard. `docs/scaling-checklist.md` собран по итогам сессии. **Третий сайт aykakchisto.ru провижен** (WP + бесплатная часть стека + E-E-A-T + Let's Encrypt + SCC) — ждёт докупки REHub/Content Egg/WPAI Pro. Собраны 2 инфра-задачи в backlog P2: Docker daemon DNS, IPv6 на сервере.
