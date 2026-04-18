@@ -1,15 +1,21 @@
 /**
- * AI сервис с поддержкой двух провайдеров:
+ * AI сервис с поддержкой трёх провайдеров:
  *   - anthropic  — прямой SDK @anthropic-ai/sdk (требует ANTHROPIC_API_KEY)
- *   - openrouter — HTTP к https://openrouter.ai/api/v1 (OpenAI-совместимый;
- *                  требует OPENROUTER_API_KEY)
+ *   - openrouter — HTTP к https://openrouter.ai/api/v1 (OpenAI-совместимый)
+ *   - local      — HTTP к Ollama / vLLM / любому OpenAI-совместимому endpoint
+ *                  (requires LOCAL_LLM_URL, optionally LOCAL_LLM_MODEL)
  *
- * Выбор провайдера: env AI_PROVIDER (default: openrouter если есть
- * OPENROUTER_API_KEY, иначе anthropic).
+ * Выбор провайдера: env AI_PROVIDER. Default: local если доступен, иначе
+ * openrouter если есть OPENROUTER_API_KEY, иначе anthropic.
+ *
+ * Routing задач (внутренний, не exposed env):
+ *   bulk (enrichment/content-quality) → local-first, fallback → openrouter:haiku
+ *   realtime (publication quality)     → openrouter:sonnet primary
  *
  * Модель: env AI_MODEL. Дефолты:
  *   - anthropic:  claude-sonnet-4-20250514
  *   - openrouter: anthropic/claude-sonnet-4
+ *   - local:      qwen2.5:72b (или что угодно, LOCAL_LLM_MODEL override)
  */
 
 import Anthropic from '@anthropic-ai/sdk';
@@ -17,15 +23,20 @@ import Anthropic from '@anthropic-ai/sdk';
 const DEFAULT_MODELS = {
   anthropic:  'claude-sonnet-4-20250514',
   openrouter: 'anthropic/claude-sonnet-4',
+  local:      'qwen2.5:72b',
 };
 
 function getProvider() {
   const explicit = process.env.AI_PROVIDER?.toLowerCase();
-  if (explicit === 'anthropic' || explicit === 'openrouter') return explicit;
-  // Автовыбор: если есть OpenRouter key — используем его (чаще дешевле/гибче)
-  if (process.env.OPENROUTER_API_KEY) return 'openrouter';
-  if (process.env.ANTHROPIC_API_KEY) return 'anthropic';
-  return 'anthropic'; // не настроено — fallback
+  if (['anthropic', 'openrouter', 'local'].includes(explicit)) return explicit;
+  // Auto-selection priority:
+  //   1. local (если LOCAL_LLM_URL задан — приватность + бесплатно для bulk)
+  //   2. openrouter (дешевле и гибче чем прямой Anthropic)
+  //   3. anthropic
+  if (process.env.LOCAL_LLM_URL)       return 'local';
+  if (process.env.OPENROUTER_API_KEY)  return 'openrouter';
+  if (process.env.ANTHROPIC_API_KEY)   return 'anthropic';
+  return 'anthropic';
 }
 
 function getModel(provider) {
@@ -44,7 +55,27 @@ export function aiStatus() {
   if (provider === 'anthropic' && process.env.ANTHROPIC_API_KEY) {
     return { configured: true, provider, model, source: 'ANTHROPIC_API_KEY' };
   }
+  if (provider === 'local' && process.env.LOCAL_LLM_URL) {
+    return { configured: true, provider, model, source: 'LOCAL_LLM_URL', endpoint: process.env.LOCAL_LLM_URL };
+  }
   return { configured: false, provider, model };
+}
+
+// Проверка доступности local LLM (Ollama/vLLM/OpenAI-compat endpoint).
+// Используется перед routing — если local не отвечает, fallback на cloud.
+export async function localLlmAvailable() {
+  const url = process.env.LOCAL_LLM_URL;
+  if (!url) return false;
+  try {
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), 3000);
+    // Ollama has /api/tags; OpenAI-compat has /v1/models
+    const res = await fetch(`${url.replace(/\/$/, '')}/api/tags`, { signal: controller.signal }).catch(() =>
+      fetch(`${url.replace(/\/$/, '')}/v1/models`, { signal: controller.signal })
+    );
+    clearTimeout(t);
+    return res?.ok ?? false;
+  } catch { return false; }
 }
 
 /**
@@ -95,9 +126,88 @@ async function callAnthropic({ system, userMessage, maxTokens = 2000, model }) {
 }
 
 // ---------- OpenRouter (OpenAI-compatible) ----------
-// Exported для специализированных агентов (code-review), которые хотят
-// вызывать LLM с собственными system/model/maxTokens без общего buildSystemPrompt.
-export { callAnthropic, callOpenRouter };
+// Exported для специализированных агентов (code-review / content-quality / actions),
+// которые хотят вызывать LLM с собственными system/model/maxTokens.
+export { callAnthropic, callOpenRouter, callLocal, callWithFallback };
+
+// ---------- Local LLM (Ollama / vLLM / OpenAI-compatible) ----------
+// Поддерживает два формата endpoint'а:
+//   - Ollama /api/generate (default для LOCAL_LLM_URL=http://host:11434)
+//   - OpenAI-compatible /v1/chat/completions (vLLM, LM Studio, etc.)
+// Определяется по env LOCAL_LLM_API_TYPE: 'ollama' | 'openai' (default 'ollama').
+async function callLocal({ system, userMessage, maxTokens = 2000, model }) {
+  const url = process.env.LOCAL_LLM_URL;
+  if (!url) return null;
+  const apiType = (process.env.LOCAL_LLM_API_TYPE || 'ollama').toLowerCase();
+  const chosenModel = model || process.env.LOCAL_LLM_MODEL || DEFAULT_MODELS.local;
+
+  if (apiType === 'openai') {
+    const messages = [];
+    if (system) messages.push({ role: 'system', content: system });
+    messages.push({ role: 'user', content: userMessage });
+    const res = await fetch(`${url.replace(/\/$/, '')}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: chosenModel, messages, max_tokens: maxTokens }),
+    });
+    if (!res.ok) throw new Error(`Local LLM ${res.status}: ${await res.text()}`);
+    const data = await res.json();
+    return {
+      text: data.choices?.[0]?.message?.content || '',
+      tokensUsed: (data.usage?.prompt_tokens || 0) + (data.usage?.completion_tokens || 0),
+    };
+  }
+
+  // Ollama by default
+  const prompt = (system ? system + '\n\n' : '') + userMessage;
+  const res = await fetch(`${url.replace(/\/$/, '')}/api/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: chosenModel,
+      prompt,
+      stream: false,
+      options: { num_predict: maxTokens },
+    }),
+  });
+  if (!res.ok) throw new Error(`Ollama ${res.status}: ${await res.text()}`);
+  const data = await res.json();
+  return {
+    text: data.response || '',
+    tokensUsed: (data.prompt_eval_count || 0) + (data.eval_count || 0),
+  };
+}
+
+// callWithFallback — попробует local первым (если настроен), fallback на cloud.
+// Используется специализированными агентами для bulk задач (content-quality, enrichment),
+// где local Qwen приемлем по качеству и бесплатен.
+//
+// preferredChain: ['local', 'openrouter', 'anthropic'] по умолчанию.
+async function callWithFallback({ system, userMessage, maxTokens, model, preferredChain }) {
+  const chain = preferredChain || ['local', 'openrouter', 'anthropic'];
+  const errors = [];
+  for (const provider of chain) {
+    try {
+      if (provider === 'local') {
+        const available = await localLlmAvailable();
+        if (!available) { errors.push({ provider, reason: 'not_available' }); continue; }
+        const r = await callLocal({ system, userMessage, maxTokens, model });
+        if (r) return { ...r, provider };
+      } else if (provider === 'openrouter' && process.env.OPENROUTER_API_KEY) {
+        const r = await callOpenRouter({ system, userMessage, maxTokens, model: model || DEFAULT_MODELS.openrouter });
+        if (r) return { ...r, provider };
+      } else if (provider === 'anthropic' && process.env.ANTHROPIC_API_KEY) {
+        const r = await callAnthropic({ system, userMessage, maxTokens, model: model || DEFAULT_MODELS.anthropic });
+        if (r) return { ...r, provider };
+      } else {
+        errors.push({ provider, reason: 'not_configured' });
+      }
+    } catch (e) {
+      errors.push({ provider, reason: e.message });
+    }
+  }
+  throw new Error(`All providers failed: ${JSON.stringify(errors)}`);
+}
 
 async function callOpenRouter({ system, userMessage, maxTokens = 2000, model }) {
   const key = process.env.OPENROUTER_API_KEY;
@@ -152,10 +262,14 @@ export async function executeCommand(command, context = {}) {
   }
 
   const systemPrompt = buildSystemPrompt(context);
-  const call = status.provider === 'openrouter' ? callOpenRouter : callAnthropic;
+  let call;
+  if (status.provider === 'local')        call = callLocal;
+  else if (status.provider === 'openrouter') call = callOpenRouter;
+  else                                     call = callAnthropic;
+
   const r = await call({ system: systemPrompt, userMessage: command, model: status.model });
   if (!r) {
-    throw new Error(`AI provider "${status.provider}" returned null — проверьте ключ`);
+    throw new Error(`AI provider "${status.provider}" returned null — проверьте конфигурацию`);
   }
   return { result: r.text, tokensUsed: r.tokensUsed, model: status.model, provider: status.provider };
 }
