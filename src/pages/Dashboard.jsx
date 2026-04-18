@@ -15,6 +15,7 @@ import DailyBrief from '../components/DailyBrief.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import ScrollToTop from '../components/ScrollToTop.jsx';
 import ContentPlanProgress from '../components/ContentPlanProgress.jsx';
+import BlogPanel from '../components/BlogPanel.jsx';
 import { SiteCardSkeleton, RowSkeleton } from '../components/Skeleton.jsx';
 import { useTryToast } from '../components/Toast.jsx';
 import { useConfirm } from '../components/ConfirmDialog.jsx';
@@ -262,6 +263,25 @@ export default function Dashboard() {
           sx={{ marginBottom: '12px' }}
         />
       )}
+
+      {/* Блог «что сделано» — мотивационная лента */}
+      <details
+        style={{
+          background: '#0f172a', border: '1px solid #1e293b', borderRadius: 7,
+          padding: '10px 14px', marginBottom: 12,
+        }}
+        open
+      >
+        <summary style={{
+          cursor: 'pointer', userSelect: 'none', fontSize: 12, fontWeight: 700,
+          color: '#94a3b8', outline: 'none', padding: '2px 0',
+        }}>
+          📝 Журнал «что сделано» <span style={{ color: '#64748b', fontWeight: 500, fontSize: 11 }}>— портфельная лента для мотивации</span>
+        </summary>
+        <div style={{ maxHeight: 520, overflowY: 'auto', marginTop: 10, paddingRight: 4 }}>
+          <BlogPanel />
+        </div>
+      </details>
 
       {/* Tabs */}
       {sel && (

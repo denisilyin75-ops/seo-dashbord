@@ -4,7 +4,7 @@ import cors from 'cors';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { db, seedIfEmpty } from './db.js';
+import { db, seedIfEmpty, seedBlogIfEmpty } from './db.js';
 import { auth } from './middleware/auth.js';
 import { startCron } from './cron.js';
 
@@ -19,6 +19,7 @@ import dailyRouter from './routes/daily.js';
 import agentsRouter from './routes/agents.js';
 import prefsRouter from './routes/prefs.js';
 import portfolioRouter from './routes/portfolio.js';
+import blogRouter from './routes/blog.js';
 import { syncAgentsToDb } from './services/agents/registry.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -33,6 +34,7 @@ app.use(express.json({ limit: '2mb' }));
 
 // Seed демо-данные при первом запуске
 seedIfEmpty();
+seedBlogIfEmpty();
 
 // Синхронизируем registry агентов с БД (добавит новые, обновит описания)
 syncAgentsToDb();
@@ -71,6 +73,7 @@ app.use('/api/daily-brief', dailyRouter);
 app.use('/api/agents', agentsRouter);
 app.use('/api/prefs', prefsRouter);
 app.use('/api/portfolio', portfolioRouter);
+app.use('/api/blog', blogRouter);
 
 // 404 для API
 app.use('/api', (req, res) => res.status(404).json({ error: 'Not found', path: req.path }));

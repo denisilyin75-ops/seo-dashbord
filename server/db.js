@@ -201,6 +201,21 @@ CREATE TABLE IF NOT EXISTS user_prefs (
   updated_at TEXT DEFAULT (datetime('now'))
 );
 
+-- Блог: человеко-читаемая лента «что сделано» прямо в дашборде.
+-- Часть мотивационного слоя (см. docs/gamification.md) — напоминалка прогресса.
+-- Разница с devlog.md: блог частый (несколько раз в день при активной работе)
+-- и narrative-first, а devlog — milestone-сводка недели/спринта.
+CREATE TABLE IF NOT EXISTS blog_posts (
+  id         TEXT PRIMARY KEY,
+  title      TEXT NOT NULL,
+  body       TEXT,                                    -- markdown
+  tags       TEXT,                                    -- JSON array of strings
+  pinned     INTEGER DEFAULT 0,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_blog_created ON blog_posts(created_at DESC);
+
 CREATE INDEX IF NOT EXISTS idx_articles_site ON articles(site_id);
 CREATE INDEX IF NOT EXISTS idx_plan_site    ON content_plan(site_id);
 CREATE INDEX IF NOT EXISTS idx_metrics_site ON site_metrics(site_id, date);
@@ -230,6 +245,71 @@ softAlter(`ALTER TABLE agent_runs ADD COLUMN tokens_used INTEGER DEFAULT 0`);
 softAlter(`ALTER TABLE agent_runs ADD COLUMN cost_usd REAL DEFAULT 0`);
 
 // ------- seed: минимальный демо-набор, только если БД пустая -------
+// Seed блога — независимо от sites (может сработать позже, когда sites уже есть).
+// Создаёт базовый набор ретроспективных записей «что сделано за 2026-04-17 → 2026-04-18».
+// Если блог не пустой — no-op.
+export function seedBlogIfEmpty() {
+  const count = db.prepare('SELECT COUNT(*) AS n FROM blog_posts').get().n;
+  if (count > 0) return { seeded: false };
+
+  const entries = [
+    {
+      id: 'blog_2026-04-17_init',
+      title: 'День 1: запуск SCC + popolkam.ru',
+      body: `Заложили фундамент портфеля:\n\n- WordPress + REHub (ReCompare preset) развёрнут для popolkam.ru\n- 5 категорий + 5 подкатегорий под рубрику Кофемашины\n- E-E-A-T страницы (About / Contacts / How we test / Privacy)\n- SCC Daily Brief endpoint с 4 карточками\n- favicon SCC + логотип/favicon для popolkam\n- 4beg.ru подключен через WP REST API (366 постов синхронизированы)\n\nФормулировка supreme principle: «всё для пользователя, не для комиссии».`,
+      tags: ['infrastructure', 'popolkam', 'supreme-principle'],
+      created_at: '2026-04-17 10:00:00',
+    },
+    {
+      id: 'blog_2026-04-18_agents',
+      title: '8 агентов + Article Revisions + Content Plan Progress',
+      body: `Agents Panel расширен до 8 агентов (analytics_review, site_valuation, expense_tracker, idea_of_day + 4 предыдущих). Бейджи scope (portfolio/site) + readiness (active/mvp/placeholder).\n\nArticle Revisions MVP: таблица + timeline в модалке с цветовой свежестью (зелёный <30д, жёлтый <6мес, оранжевый <12мес, красный >12мес).\n\nDashboard: поиск + 3 фильтра + пагинация + scroll-to-top (важно для 4beg с 366 статьями).\n\nContent Plan Progress по фазам рубрик.\n\nTop-10 кофемашин — pillar-статья с 10 встроенными TCO-калькуляторами.`,
+      tags: ['scc', 'agents', 'popolkam'],
+      created_at: '2026-04-18 14:00:00',
+    },
+    {
+      id: 'blog_2026-04-18_strategy',
+      title: 'Документационная дисциплина + Managed Services',
+      body: `docs/business-model.md §11 — раздел Longevity & Adaptation: горизонты уверенности (5/10/20 лет), основные угрозы, pivot paths.\n\nдобавлены Managed Services как монетизационный слой E — done-for-you, coaching, portfolio acquisition.\n\ndocs/migration-plan.md — полный runbook миграции (<2ч downtime) + disaster recovery.\n\nПравило: каждая итерация → запись в devlog.md, стратегические решения в соответствующих docs/.`,
+      tags: ['docs', 'business-model', 'strategy'],
+      created_at: '2026-04-18 20:00:00',
+    },
+    {
+      id: 'blog_2026-04-18_valuation',
+      title: 'Site Valuation v2 + ValuationPanel UI',
+      body: `Двухрежимная модель оценки стоимости: asset-based (ранняя стадия) ↔ hybrid ↔ revenue × multiple (от $500 profit).\n\nКаждый фактор имеет impact_usd, actionable_hint, reason — видно ЧТО прокачать и НАСКОЛЬКО это поднимет стоимость.\n\nНовая вкладка 💰 Капитализация на SiteDetail: текущая оценка с low/expected/high + line chart динамики + список факторов.\n\nПервые оценки: popolkam=$3300, 4beg=$19360 — завышены, требуют калибровки (запланировано P0-01).`,
+      tags: ['scc', 'valuation', 'ui'],
+      created_at: '2026-04-18 22:00:00',
+    },
+    {
+      id: 'blog_2026-04-18_stage_c',
+      title: 'Stage C день 1: калибровка + OpenRouter credits + meta-fields + Gamification Phase A',
+      body: `Большая сессия — 8 коммитов:\n\n**P0-01: Site Valuation откалиброван.** PER_ARTICLE_VALUE сильно снижены (review 40→15). Domain age ×$300 max $3000 → ×$100 max $800. Моментум cap $500. Двухуровневая penalty за отсутствие revenue: −40% если сайт «зомби», −20% если активен. Methodology bumped → v2.1_calibrated_2026-04-18. Прод: popolkam $2,104 + 4beg $6,836 = **$8,940 портфель (17.9% к $50k цели)**.\n\n**P0-03: OpenRouter credits в Settings UI.** Карточка с прогресс-баром (зелёный/жёлтый/красный). $4.93 из $5.\n\n**P0-04: popolkam meta-fields в ArticleRow.** WP плагин popolkam-calculators 1.1.0 регистрирует 6 полей с show_in_rest. Теперь редактируем TCO-калькулятор из панели без wp-cli.\n\n**Gamification Phase A:** 💎 Portfolio Value виджет в шапке с дельтой/прогрессом + toast «+$N к капитализации» после публикации/правки. Toggle hide/show (backend всегда считает). Цифры реальные заниженные (review +$15, comparison +$25) — не «motivational».\n\n**Архив:** импортированы старые спецификации (legacy-spec) + GAMIFICATION.md в отдельный каталог.`,
+      tags: ['scc', 'gamification', 'valuation', 'milestone'],
+      created_at: '2026-04-18 23:45:00',
+      pinned: 1,
+    },
+  ];
+
+  const ins = db.prepare(`INSERT INTO blog_posts
+    (id, title, body, tags, pinned, created_at, updated_at)
+    VALUES (@id, @title, @body, @tags, @pinned, @created_at, @created_at)`);
+  const tx = db.transaction((items) => {
+    for (const e of items) {
+      ins.run({
+        id: e.id,
+        title: e.title,
+        body: e.body,
+        tags: JSON.stringify(e.tags || []),
+        pinned: e.pinned || 0,
+        created_at: e.created_at,
+      });
+    }
+  });
+  tx(entries);
+  return { seeded: true, count: entries.length };
+}
+
 export function seedIfEmpty() {
   const count = db.prepare('SELECT COUNT(*) AS n FROM sites').get().n;
   if (count > 0) return { seeded: false };

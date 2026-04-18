@@ -97,6 +97,19 @@ export const api = {
   setPref:  (key, value) => request('PUT', `/api/prefs/${encodeURIComponent(key)}`, { value }),
   delPref:  (key) => request('DELETE', `/api/prefs/${encodeURIComponent(key)}`),
 
+  // Blog (мотивационная лента «что сделано»)
+  listBlog:   ({ limit = 50, offset = 0, tag } = {}) => {
+    const qs = new URLSearchParams();
+    qs.set('limit', String(limit));
+    qs.set('offset', String(offset));
+    if (tag) qs.set('tag', tag);
+    return request('GET', `/api/blog?${qs.toString()}`);
+  },
+  getBlog:    (id) => request('GET',    `/api/blog/${id}`),
+  createBlog: (data) => request('POST',   '/api/blog', data),
+  updateBlog: (id, data) => request('PUT',    `/api/blog/${id}`, data),
+  deleteBlog: (id) => request('DELETE', `/api/blog/${id}`),
+
   // daily brief (health/pulse/idea/quick-win карточки для оператора)
   dailyBrief:       ({ siteId, refresh = false } = {}) => {
     const qs = new URLSearchParams();
