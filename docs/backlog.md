@@ -371,6 +371,13 @@ Per-site widget: uptime, SSL expiry, GA4/GSC connected, last metric sync, broken
 **Фаза 1a:** schema + Tier A fetching (Admitad feeds) + WP plugin basic integration
 **Фаза 1b:** Audit/Optimize mode + OpenRouter Flux + concept AI-gen для pillar
 
+#### [ ] 📥 Article Import & Actions — Phase 1 (P1, quick win)
+**Спец:** `docs/features/article-import-and-actions.md`
+**Зачем:** оператор тратит 30-60 мин на competitor research per статью → с модулем 5 мин. Плюс fixes cannibalization через AI-merge. Плюс search+filters — давно просится в большом списке.
+**Phase 1 (1-2 сессии, quick win):** FTS5 search + filters + bulk select/archive/tag в Articles page. Без import/actions пока — just search + bulk. Ценно сразу.
+**Phase 2-6:** Import MVP (Readability.js + Playwright) → Actions (translate/rewrite/PDF/structural) → Advanced (voice-rewrite + fact-extract + outline-to-brief) → Merge AI workflow → Re-fetch monitoring
+**AI cost:** $1-6/мес активного использования. Sonnet для merge/voice, Haiku для bulk.
+
 #### [ ] 📦 Catalog Module — Product Finder (Phase 1 core)
 **Спец:** `docs/catalog-module-architecture.md`
 **Зачем:** превращает портфель из «блог с обзорами» в independent product finder. Усиливает SUPREME, E-E-A-T, exit-мультипликатор 2-3×.
