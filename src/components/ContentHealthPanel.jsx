@@ -18,15 +18,15 @@ const SEVERITY_STYLE = {
 };
 
 const CATEGORY_LABEL = {
-  seo_hygiene:   'SEO',
-  link_health:   'Ссылки',
-  schema:        'Schema',
-  factual:       'Факты',
-  voice:         'Голос',
-  eeat:          'E-E-A-T',
-  readability:   'Читаемость',
-  freshness:     'Свежесть',
-  image_issue:   'Картинки',
+  seo_hygiene:   '🔍 SEO',
+  link_health:   '🔗 Ссылки',
+  schema:        '📋 Schema',
+  factual:       '✓ Факты',
+  voice:         '🎙 Голос',
+  eeat:          '👤 E-E-A-T',
+  readability:   '📖 Читаемость',
+  freshness:     '🕐 Свежесть',
+  image_issue:   '🖼 Картинки',
 };
 
 export default function ContentHealthPanel({ siteId }) {

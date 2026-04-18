@@ -65,6 +65,27 @@ function codeReviewNightly() {
   log('registered codeReviewNightly (0 4 * * * UTC)');
 }
 
+/** Code Review weekly — Mon 06:00 UTC, security audit + code smells */
+function codeReviewWeekly() {
+  cron.schedule('0 6 * * 1', async () => {
+    try {
+      const { runSecurityAudit } = await import('./services/code-review/security-audit.js');
+      const { runSmellScan } = await import('./services/code-review/smell-scan.js');
+      const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+      const sec = runSecurityAudit(repoRoot);
+      const smell = runSmellScan(repoRoot);
+      db.prepare(`INSERT INTO code_review_runs
+        (trigger, started_at, finished_at, status, output_files)
+        VALUES ('weekly', datetime('now'), datetime('now'), 'completed', ?)`)
+        .run(JSON.stringify([sec.path, smell.path]));
+      log(`codeReviewWeekly: security critical=${sec.counts.critical}/high=${sec.counts.high}, smells big_files=${smell.counts.big_files} orphans=${smell.counts.orphans}`);
+    } catch (e) {
+      log(`codeReviewWeekly error: ${e.message}`);
+    }
+  }, { timezone: 'UTC' });
+  log('registered codeReviewWeekly (0 6 * * 1 UTC)');
+}
+
 /** Agents ticker — проверяет registry агентов каждые 5 минут и запускает due */
 function agentsTicker() {
   cron.schedule('*/5 * * * *', async () => {
@@ -90,5 +111,6 @@ export function startCron() {
   dailyMetricsSync();
   hourlyHealth();
   codeReviewNightly();
+  codeReviewWeekly();
   agentsTicker();
 }
