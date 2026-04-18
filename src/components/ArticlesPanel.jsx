@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import ArticleRow from './ArticleRow.jsx';
 import EmptyState from './EmptyState.jsx';
-import ConfirmDialog from './ConfirmDialog.jsx';
+import { useConfirm } from './ConfirmDialog.jsx';
 import { Btn, Inp, Sel } from './ui.jsx';
 import { api } from '../api/client.js';
 
@@ -48,7 +48,7 @@ export default function ArticlesPanel({ siteId, articles: fallbackArticles, onAd
 
   // Selection state (id → true)
   const [selected, setSelected] = useState(() => new Set());
-  const [confirm, setConfirm] = useState(null); // {message, onOk}
+  const confirm = useConfirm();
 
   // Отслеживаем есть ли активные фильтры. Если нет и ничего не выбрано —
   // показываем fallback (non-paginated список). Это backward-compat + faster.
@@ -118,16 +118,16 @@ export default function ArticlesPanel({ siteId, articles: fallbackArticles, onAd
   });
   const clearSel = () => setSelected(new Set());
 
-  const bulkArchive = () => {
+  const bulkArchive = async () => {
     const ids = [...selected];
-    setConfirm({
+    const ok = await confirm({
       message: `Архивировать ${ids.length} статей? Можно восстановить (status→draft) позже.`,
-      onOk: async () => {
-        await api.bulkArticles(ids, 'archive');
-        clearSel();
-        reload();
-      },
+      okLabel: 'Архивировать',
     });
+    if (!ok) return;
+    await api.bulkArticles(ids, 'archive');
+    clearSel();
+    reload();
   };
   const bulkTagAdd = () => {
     const input = prompt('Теги через запятую (будут добавлены к выделенным):');
@@ -301,16 +301,6 @@ export default function ArticlesPanel({ siteId, articles: fallbackArticles, onAd
         />
       )}
 
-      {confirm && (
-        <ConfirmDialog
-          message={confirm.message}
-          onConfirm={async () => {
-            await confirm.onOk();
-            setConfirm(null);
-          }}
-          onCancel={() => setConfirm(null)}
-        />
-      )}
     </div>
   );
 }
