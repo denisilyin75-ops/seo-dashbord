@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { api, getToken } from '../api/client.js';
-import { Btn, Inp, Sel } from './ui.jsx';
-import Modal from './Modal.jsx';
+import { Btn, Inp, Sel, Modal } from './ui.jsx';
 
 // DeployWizardV2 — Phase 1 Real-provisioning.
 //
