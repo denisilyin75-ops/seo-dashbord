@@ -5,6 +5,8 @@
  */
 
 import cron from 'node-cron';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { db } from './db.js';
 import { syncSiteMetrics } from './services/metricsSync.js';
 import { ga4Status } from './services/analytics.js';
@@ -42,6 +44,27 @@ function hourlyHealth() {
   }, { timezone: 'UTC' });
 }
 
+/** Code Review nightly — 04:00 UTC, регенерация api-reference.md + architecture.md auto-sections */
+function codeReviewNightly() {
+  cron.schedule('0 4 * * *', async () => {
+    try {
+      const { writeApiReference } = await import('./services/code-review/api-doc-gen.js');
+      const { writeArchitectureDoc } = await import('./services/code-review/arch-snapshot.js');
+      const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+      const apiRes = writeApiReference(repoRoot);
+      const archRes = writeArchitectureDoc(repoRoot);
+      db.prepare(`INSERT INTO code_review_runs
+        (trigger, started_at, finished_at, status, output_files)
+        VALUES ('nightly', datetime('now'), datetime('now'), 'completed', ?)`)
+        .run(JSON.stringify([apiRes.path, archRes.path]));
+      log(`codeReviewNightly: api-ref=${apiRes.totalEndpoints} endpoints, arch=${archRes.tables} tables ${archRes.backendLoc}+${archRes.frontendLoc} LOC`);
+    } catch (e) {
+      log(`codeReviewNightly error: ${e.message}`);
+    }
+  }, { timezone: 'UTC' });
+  log('registered codeReviewNightly (0 4 * * * UTC)');
+}
+
 /** Agents ticker — проверяет registry агентов каждые 5 минут и запускает due */
 function agentsTicker() {
   cron.schedule('*/5 * * * *', async () => {
@@ -66,5 +89,6 @@ export function startCron() {
   }
   dailyMetricsSync();
   hourlyHealth();
+  codeReviewNightly();
   agentsTicker();
 }
