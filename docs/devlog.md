@@ -8,6 +8,49 @@
 
 ---
 
+## 2026-04-19 — Sprint finalization (30+ часовой непрерывный прогон, финальный commit)
+
+### ✅ Финальные штрихи
+- **Per-site LLM budget cap** — `sites.monthly_llm_budget_usd` + `checkSiteBudget()` в llm-tracker. Enforcement в article-actions + merge. Human-readable error когда spent > budget. Защита от runaway cost когда добавится 4-й/5-й сайт.
+- **Deploy Wizard V2** — real provisioning через queue + host-worker pattern. 5 templates (coffee/cleaning/shoes/electronics/custom). Stub заменён.
+- **Public blog infra** — 3 draft'а для Anthropic case study / Twitter / SEO community + sanitizer (strip IPs/tokens/emails).
+- **LLM cost tracking** — unified llm_calls table через trackLlmCall. Точный cost per request через ai-pricing.js. UI dashboard /agents с groupBy (source/model/operation/provider/day).
+- **Activity Feed compact form** — 22px/row grid, group by date, source filters, auto-refresh 30s.
+
+### 📊 Final sprint numbers
+- **40+ коммитов** за 30+ часов непрерывной работы
+- **~7000 LOC добавлено** (server/services/ + routes/ + components/ + scripts/)
+- **7 design docs** в docs/agents + docs/features + docs/catalog-module-architecture.md
+- **6 cron jobs** активны на VPS (metrics/content-quality/code-review nightly+weekly/exit-scorecard monthly/agents ticker)
+- **60 API endpoints** auto-documented в api-reference.md
+- **21 SQLite tables**, 13k LOC в architecture snapshot
+- **0 critical security findings**, **19 tests pass** (Node native runner)
+- **Exit readiness: 58/100** (first baseline, будет расти)
+
+### 🟢 Что работает автономно (пока user не у компьютера)
+Все cron-ы tickает по расписанию (UTC):
+- `02:30` — contentQualityNightly (SEO/links/schema per-site)
+- `03:00` — dailyMetricsSync (когда GA4/GSC подключены)
+- `04:00` — codeReviewNightly (api-reference + architecture regen)
+- `06:00 Mon` — codeReviewWeekly (security + smells)
+- `08:00 1st` — exitScorecardMonthly (15 dims → overall /100)
+- каждые `5 мин` — agentsTicker (registry due agents)
+
+### 🔴 Что требует user action
+См. `docs/manual-tasks.md` — все pending items с приоритетами. Ключевое:
+- **aykakchisto** REHub + Content Egg + WPAI Pro лицензии → активировать через `/wp-admin`
+- **popolkam** — перенос 4 обзоров + comparison + /o-avtore/ из markdown в WP (drafts готовы в content/popolkam/)
+- **4beg** — продлить домен до 2026-07-04, собрать SSH-доступы для миграции
+- **Google Service Account** — Cloud Console + дать access GA4+GSC для metrics sync
+- **OpenRouter top-up** (~$10 хватит на месяц) когда balance ниже $2
+
+### 🟡 Known limitations
+- Deploy Wizard V2 backend готов, но host-worker (`deploy-worker.sh`) ещё не запущен на VPS как systemd service — нужна 5-мин настройка: `export DEPLOY_WORKER_TOKEN=...` + copy service file + `systemctl enable`
+- Post-commit hook работает только на local commits, но VPS cron regenerates api-reference nightly — покрывает most cases
+- License file всё ещё отсутствует (LICENSE + package.json field) → scorecard license_clarity=0. User decision нужен.
+
+---
+
 ## 2026-04-18/19 — «24-hour sprint»: 20 deliverables за один прогон
 
 ### ✅ Added
