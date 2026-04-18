@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ArticleRow from './ArticleRow.jsx';
 import EmptyState from './EmptyState.jsx';
 import { useConfirm } from './ConfirmDialog.jsx';
@@ -49,6 +50,8 @@ export default function ArticlesPanel({ siteId, articles: fallbackArticles, onAd
   // Selection state (id → true)
   const [selected, setSelected] = useState(() => new Set());
   const confirm = useConfirm();
+  const nav = useNavigate();
+  const [merging, setMerging] = useState(false);
 
   // Отслеживаем есть ли активные фильтры. Если нет и ничего не выбрано —
   // показываем fallback (non-paginated список). Это backward-compat + faster.
@@ -139,6 +142,27 @@ export default function ArticlesPanel({ siteId, articles: fallbackArticles, onAd
     api.bulkArticles([...selected], 'status', { status: newStatus }).then(() => { clearSel(); reload(); });
   };
 
+  const bulkMerge = async () => {
+    const ids = [...selected];
+    if (ids.length < 2) return;
+    const ok = await confirm({
+      title: 'Merge с AI',
+      message: `Объединить ${ids.length} статей в одну через Sonnet?\n\nНа основе source'ов AI создаст consolidated draft. Source статьи перейдут в archived. Ожидаемая стоимость ~\$${(0.1 * ids.length).toFixed(2)}.`,
+      okLabel: 'Запустить AI merge',
+    });
+    if (!ok) return;
+    setMerging(true);
+    try {
+      const r = await api.planMerge({ site_id: siteId, article_ids: ids });
+      clearSel();
+      nav(`/merge/${r.id}`);
+    } catch (e) {
+      alert('Merge failed: ' + e.message);
+    } finally {
+      setMerging(false);
+    }
+  };
+
   const page = Math.floor(offset / limit) + 1;
   const totalPages = Math.max(1, Math.ceil(renderTotal / limit));
 
@@ -214,6 +238,11 @@ export default function ArticlesPanel({ siteId, articles: fallbackArticles, onAd
           <Btn onClick={() => bulkStatus('draft')} sx={{ fontSize: 10 }}>→ Draft</Btn>
           <Btn onClick={() => bulkStatus('published')} sx={{ fontSize: 10 }}>→ Published</Btn>
           <Btn onClick={bulkTagAdd} sx={{ fontSize: 10 }}>+ Теги</Btn>
+          {selected.size >= 2 && (
+            <Btn onClick={bulkMerge} disabled={merging} sx={{ fontSize: 10, color: '#60a5fa' }}>
+              {merging ? 'Merge…' : '🔀 Merge AI'}
+            </Btn>
+          )}
           <Btn onClick={bulkArchive} sx={{ fontSize: 10, color: '#f97316' }}>Архивировать</Btn>
           <Btn onClick={clearSel} v="ghost" sx={{ fontSize: 10, marginLeft: 'auto' }}>Отменить</Btn>
         </div>

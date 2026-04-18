@@ -88,6 +88,17 @@ export const api = {
   listActions: (source_type, source_id, limit = 20) =>
     request('GET', `/api/actions?source_type=${source_type}&source_id=${source_id}&limit=${limit}`),
 
+  // Merge workflow (Phase 4)
+  planMerge: (body) => request('POST', '/api/merge/preview', body),
+  getMergePreview: (id) => request('GET', `/api/merge/preview/${id}`),
+  listMergePreviews: (filters = {}) => {
+    const qs = new URLSearchParams();
+    for (const [k, v] of Object.entries(filters)) if (v != null && v !== '') qs.set(k, String(v));
+    return request('GET', `/api/merge/previews${qs.toString() ? '?' + qs : ''}`);
+  },
+  approveMerge: (id, adjustments) => request('POST', `/api/merge/preview/${id}/approve`, { adjustments }),
+  rejectMerge: (id, reason) => request('POST', `/api/merge/preview/${id}/reject`, { reason }),
+
   // Daily brief — история «идея дня» для аккумулированной ленты
   ideasHistory: (siteId, limit = 30) => {
     const qs = new URLSearchParams();

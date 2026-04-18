@@ -11,6 +11,7 @@ import Settings from './pages/Settings.jsx';
 import SiteDetail from './pages/SiteDetail.jsx';
 import Agents from './pages/Agents.jsx';
 import ImportsPage from './pages/ImportsPage.jsx';
+import MergePreviewPage from './pages/MergePreviewPage.jsx';
 
 export default function App() {
   const [authed, setAuthed] = useState(!!getToken());
@@ -33,6 +34,7 @@ export default function App() {
               <Route path="/sites/:id"    element={<SiteDetail />} />
               <Route path="/agents"       element={<Agents />} />
               <Route path="/imports"      element={<ImportsPage />} />
+              <Route path="/merge/:id"    element={<MergePreviewPage />} />
               <Route path="/settings"     element={<Settings />} />
               <Route path="*"             element={<Navigate to="/" replace />} />
             </Routes>

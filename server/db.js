@@ -439,6 +439,35 @@ CREATE TABLE IF NOT EXISTS article_actions (
 CREATE INDEX IF NOT EXISTS idx_actions_status ON article_actions(status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_actions_type ON article_actions(action_type);
 
+-- Article merge workflow (Phase 4 из features/article-import-and-actions.md).
+-- merge_previews: черновик объединения 2+ наших статей. LLM (Sonnet) анализирует
+-- и предлагает merged HTML + redirects plan + конфликты на решение оператору.
+-- После approve — создаётся новая articles row, source articles → status='archived'.
+CREATE TABLE IF NOT EXISTS merge_previews (
+  id                 TEXT PRIMARY KEY,
+  site_id            TEXT REFERENCES sites(id) ON DELETE CASCADE,
+  source_article_ids TEXT NOT NULL,         -- JSON array
+  proposed_title     TEXT,
+  proposed_url_slug  TEXT,
+  proposed_content   TEXT,                  -- HTML
+  proposed_excerpt   TEXT,
+  proposed_faqs      TEXT,                  -- JSON
+  redirects_plan     TEXT,                  -- JSON [{from_url, to_url, reason}]
+  conflicts          TEXT,                  -- JSON [{topic, a_claim, b_claim, recommendation, resolved_to}]
+  dedup_stats        TEXT,                  -- JSON
+  llm_provider       TEXT,
+  llm_model          TEXT,
+  llm_tokens_used    INTEGER,
+  llm_cost_usd       REAL,
+  created_at         TEXT DEFAULT (datetime('now')),
+  status             TEXT DEFAULT 'pending_review',   -- pending_review | approved | rejected | generating | failed
+  decided_at         TEXT,
+  decided_by         TEXT,
+  result_article_id  TEXT REFERENCES articles(id) ON DELETE SET NULL,
+  error              TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_mp_status ON merge_previews(status, created_at DESC);
+
 -- Code Review Agent Phase 1 — post-commit analysis.
 -- code_review_runs: каждый запуск (post-commit / nightly / manual).
 -- code_health: issues найденные автоматическими audits (security, smells и т.д. Phase 3+).
