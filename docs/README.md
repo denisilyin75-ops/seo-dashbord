@@ -13,6 +13,9 @@
 | [`migration-plan.md`](migration-plan.md) | Runbook миграции на новый сервер + disaster recovery | При переезде или ЧП |
 | [`scaling-checklist.md`](scaling-checklist.md) | Чек-лист запуска нового сайта портфеля (от 0 до боевого за 30-60 мин) | При добавлении нового сайта |
 | [`sources.md`](sources.md) | Каталог источников информации по рубрикам (производители, форумы, YouTube, SEO-ресёрч, партнёрки) | При подготовке обзоров и сравнений |
+| [`personas/`](personas/) | Редакторы-псевдонимы и mascot-ассистенты каждого сайта портфеля | При разработке UX интерактива, AI prompt'ов, страниц /o-avtore/ |
+| [`brand/aykakchisto/`](brand/aykakchisto/) | Brand system aykakchisto — SVG mark, favicon, lockup, React canvas | При использовании лого / работе с визуалом |
+| [`brand/popolkam/`](brand/popolkam/) | Brand system popolkam — legacy SVG + план апгрейда до полной системы | При использовании лого / планировании апгрейда |
 | [`gamification.md`](gamification.md) | User guide к Live Portfolio Value виджету + toast'ам (Phase A) | При вопросах «откуда эта цифра в шапке?» |
 | [`ai-routing.md`](ai-routing.md) | Гибридная стратегия AI: local LLM (Qwen-72B) + OpenRouter. Routing по task type. Hardware spec | При добавлении нового AI-вызова, при вопросе про costs |
 | [`agents/site-guardian.md`](agents/site-guardian.md) | Спека агента поиска и улучшения: 6 категорий checks, интеграция с local LLM | При реализации Site Guardian (Phase 2+) |
