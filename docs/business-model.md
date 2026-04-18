@@ -416,6 +416,89 @@ API key:  [optional — if endpoint requires one]
 
 При pivot'е мы меняем агентов — не ядро.
 
+### Product Vision 2.0 — Vertical Product Finder (закреплено 2026-04-18)
+
+**Эволюция модели:** от «affiliate-блог с 30 обзорами» → к **vertical product finder** с покрытием всего рынка + editorial depth для флагманов.
+
+**Проблема старого подхода:** 30 обзоров = 30 point-of-entry. Пользователь с нишевым запросом («белый чайник 2л быстрый нагрев») либо не находит нас, либо мы показываем ему нерелевантный обзор. Long-tail монетизация упущена.
+
+**Новое решение — 4-layer архитектура:**
+
+```
+┌─ Layer 4: Editorial ─────────────────────────────┐
+│  30-50 deep обзоров на рубрику (CPT machine)     │
+│  Наша экспертиза, мнение, «реальный опыт»       │
+│  SEO-target pages, глубокие comparison'ы        │
+└──────────────────┬───────────────────────────────┘
+                   │ связь через editorial_review_id
+┌─ Layer 3: Matching engine ───────────────────────┐
+│  L3.1 Scoring quiz (детерминированный MVP)      │
+│  L3.2 NL query parsing (Claude → criteria)       │
+│  L3.3 RAG semantic matching (Phase 3, >1k items) │
+└──────────────────┬───────────────────────────────┘
+                   │ читает products table
+┌─ Layer 2: Enrichment pipeline ───────────────────┐
+│  Regex/known-spec parsers (70% атрибутов)        │
+│  AI fallback на Claude Haiku / local LLM         │
+│  Batch enrichment: ~$0.10-0.30 на 100 offers     │
+└──────────────────┬───────────────────────────────┘
+                   │ пишет attributes_json
+┌─ Layer 1: Catalog (полный рыночный охват) ──────┐
+│  SCC products table (SQLite sep from WP)         │
+│  Admitad XML / Я.Маркет YML / Ozon feeds         │
+│  Cron feed_sync каждые 6 часов                   │
+│  5000+ offers на вертикаль                       │
+└──────────────────────────────────────────────────┘
+```
+
+**Вклад каждого слоя:**
+
+| Layer | Что даёт | Усилие | Срок |
+|---|---|---|---|
+| 1. Catalog | Полнота: 5000+ товаров, которых мы не писали | Один агент feed_sync + таблица | Phase 1 (Week 3-6) |
+| 2. Enrichment | Structured attributes для matching | AI батчи + regex | Phase 2 (Month 2-3) |
+| 3. Matching | Quiz/NL-поиск → конкретный товар | Scoring → AI → RAG | Phase 1-3 постепенно |
+| 4. Editorial | Depth и доверие для флагманов | Ручная работа, ~30-50 моделей | Уже делаем (Phase 0) |
+
+**Монетизация:**
+- Editorial (30 обзоров): high-trust, high-CTR, но узкое покрытие
+- Catalog matching (5000+): long-tail монетизация, тысячи niche-sales с меньшим чеком
+- Вместе: editorial = 20% revenue с 80% trust, catalog = 80% revenue через coverage
+
+**UX принцип:** editorial **всегда** имеет приоритет в ranking. Если у нас есть обзор — всплывает первым, даже если по metrics не топ. Если нет — честно показываем matched product из feed + warning «мы не тестировали лично, но по критериям подходит».
+
+**Unique value proposition:** Я.Маркет = агрегатор без интента (user должен сам знать что искать). Блоги = 30 обзоров без coverage. **Мы = intent-matching + editorial + coverage**. В RU никто реально этого не делает.
+
+**Exit implications:** старый shape = $50k exit (affiliate-блог портфель). Новый shape = **$100-200k+** потому что differentiation реальна, и движок (matching engine + feed pipeline) продаётся как SaaS-actifact отдельно.
+
+---
+
+### AI Routing — cloud + local гибрид (закреплено 2026-04-18)
+
+**Проблема:** Claude Sonnet на OpenRouter = $3/млн input tokens. Enrichment 5000 товаров × 500 tokens = 2.5M tokens = ~$10 за батч. Делаем раз в день → $300/мес только на enrichment. На scale (4 рубрики × 5000 offers) → $1200/мес. Не оправдано для bulk задач.
+
+**Решение — routing по типу задачи:**
+
+| Тип задачи | Провайдер | Модель | Обоснование |
+|---|---|---|---|
+| Публикация контента (user-facing) | OpenRouter | claude-sonnet-4 | Качество критично, один-в-одни статьи |
+| NL quiz parsing | OpenRouter | claude-haiku-4 | Скорость важна, простая задача |
+| AI-brief для обзоров | OpenRouter | claude-sonnet-4 | Структурная, качество важно |
+| Attribute enrichment (bulk feed) | **Local LLM** | mistral-7b / qwen2-7b | Скорость не критична, объём большой, privacy (наши данные) |
+| Site Guardian analysis (bulk) | **Local LLM** | qwen2-7b / llama3.2-8b | Аналитика наших же страниц, cost-sensitive |
+| Daily Brief AI comments | OpenRouter | claude-haiku-4 | Быстро, свежо |
+| Idea generation | OpenRouter | claude-sonnet-4 | Креатив требует хорошую модель |
+
+**Local LLM как первый провайдер для подходящих задач:**
+- Текущая инфра: Ollama / LM Studio на машине пользователя (или отдельный server)
+- Интеграция: SCC `claude.js` расширяется 3-м провайдером `local` с OpenAI-compatible endpoint
+- Fallback chain: local → OpenRouter Haiku → OpenRouter Sonnet (если local недоступен)
+- Cost savings: 80-95% на bulk задачах → экономия ~$300-1000/мес на scale
+
+**Детали стратегии:** см. `docs/ai-routing.md`.
+
+---
+
 ### Принцип «смежного плода» — как растим рубрики и портфель
 
 **Правило:** следующая рубрика на сайте должна отстоять от предыдущей не дальше чем «adjacent keyword» в семантическом дереве ниши. Запуск через семантическую пропасть = начать сайт заново, без накопленной authority.

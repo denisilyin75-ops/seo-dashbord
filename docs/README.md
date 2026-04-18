@@ -14,6 +14,8 @@
 | [`scaling-checklist.md`](scaling-checklist.md) | Чек-лист запуска нового сайта портфеля (от 0 до боевого за 30-60 мин) | При добавлении нового сайта |
 | [`sources.md`](sources.md) | Каталог источников информации по рубрикам (производители, форумы, YouTube, SEO-ресёрч, партнёрки) | При подготовке обзоров и сравнений |
 | [`gamification.md`](gamification.md) | User guide к Live Portfolio Value виджету + toast'ам (Phase A) | При вопросах «откуда эта цифра в шапке?» |
+| [`ai-routing.md`](ai-routing.md) | Гибридная стратегия AI: local LLM (Qwen-72B) + OpenRouter. Routing по task type. Hardware spec | При добавлении нового AI-вызова, при вопросе про costs |
+| [`agents/site-guardian.md`](agents/site-guardian.md) | Спека агента поиска и улучшения: 6 категорий checks, интеграция с local LLM | При реализации Site Guardian (Phase 2+) |
 
 ## Операционные стратегии (контент, SEO, монетизация)
 

@@ -11,6 +11,27 @@
 
 ---
 
+## 🚀 Product Vision 2.0 — phased rollout
+
+Закреплено 2026-04-18. Подробно: `docs/business-model.md §11 Product Vision 2.0`, `docs/ai-routing.md`, `docs/agents/site-guardian.md`.
+
+Эволюция: от «affiliate-блог с 30 обзорами» → **Vertical Product Finder** (editorial depth + full catalog coverage через partner feeds + intelligent matching).
+
+| Phase | Что | Блокеры | Таймлайн |
+|---|---|---|---|
+| **Phase 0 (идём сейчас)** | Editorial layer: CPT `machine` в WP + 10-30 обзоров на popolkam. Static scoring quiz. | Лицензии REHub/WPAI Pro для финального стека | Ближайшие 2-3 недели |
+| **Phase 1** | Catalog layer: products table в SCC + `feed_sync` агент (Admitad XML). Basic SQL matching в quiz. | LLM host online (user side, next week+). VPS upgrade 48GB → 120GB. | Week 3-6 |
+| **Phase 2** | Enrichment: `attribute_enricher` агент (local LLM). NL quiz parsing (Haiku). Вторая рубрика (чайники/химия). | Phase 1 стабильный | Month 2-3 |
+| **Phase 3** | RAG semantic matching. Cross-site products. Site Guardian full deployment. `price_drift` с history. | Phase 2 работает, >1000 products | Month 4-8 |
+| **Phase 4** | On-site chatbot, personalization, email alerts price-drop, SaaS exposure | Phase 3 | Month 9-18 |
+
+**Инфра стек** (закреплено):
+- **VPS (5.129.245.98)**: thin frontend — WP × 3 + MariaDB + SCC + Traefik. Upgrade нужен (текущий 48GB/3.8GB RAM → 120GB/8GB RAM).
+- **LLM host** (пользовательский сервер 2×RTX 3090 48GB VRAM / 96GB RAM / 4TB SSD / 18TB HDD): bulk compute — Qwen-72B flagship, embedding generation, feed processing, site_guardian heavy lifting. Online через Tailscale VPN.
+- **AI routing:** local LLM primary для bulk/privacy, OpenRouter Haiku для speed-sensitive UX, Sonnet только для публикационного контента. Экономия $200-500/мес.
+
+---
+
 ## ⚖️ Time allocation (ближайшие дни)
 
 Нарезка решения пользователя (2026-04-18):

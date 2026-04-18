@@ -70,18 +70,23 @@
 | `site_valuation` | Site Valuation | site | @weekly вс 06:00 | Сейчас | Оценка стоимости сайта (Profit × Multiple), тренд капитализации, рекомендации по росту |
 | `expense_tracker` | Expense Tracker | portfolio | @daily | Сейчас | Агрегация cost всех AI-агентов + reminders по подпискам |
 
-### Planned (Stage B — после Stage A)
+### Planned (Stage B — Vertical Product Finder rollout, после Stage A)
 
-| ID | Name | Scope | Schedule | Описание |
-|----|------|-------|----------|----------|
-| `listing_generator` | Listing Generator | site | on-demand | AI-генерация листинга для Empire Flippers/Flippa/Telderi |
-| `competitor_scout` | Competitor Scout | site | @weekly | SERP top-10 по нашим ключам, что пишут конкуренты |
-| `content_gap_finder` | Content Gap Finder | site | @monthly | Запросы где мы не ранжируемся, а у конкурентов есть |
-| `revenue_anomaly` | Revenue Anomaly Detector | portfolio | @daily | RPM/CR упал >30% → Telegram алерт |
-| `price_drift` | Price Drift Detector | portfolio | @daily | Расхождение цен в тексте vs Content Egg |
-| `seasonal_planner` | Seasonal Planner | site | @monthly | Готовит контент-план за 2 мес до сезонных пиков (ЧП, весна, подарки) |
-| `news_scout` | News Scout | portfolio | @weekly | Новые модели в брендах → идеи в контент-план |
-| `network_arbitrage` | Network Arbitrage Analyzer | site | @weekly | EPC Admitad vs Я.М vs Ozon на один товар → переключение на сильнейшую |
+⚠️ **Новое направление (закреплено 2026-04-18):** Vision 2.0 превращает каталожную часть портфеля в Vertical Product Finder (см. `docs/business-model.md §11 Product Vision 2.0`). Три новых агента — инфраструктурное ядро.
+
+| ID | Name | Scope | Schedule | AI | Описание |
+|----|------|-------|----------|-----|----------|
+| `feed_sync` | Partner Feed Sync | portfolio | every 6h | — | Импорт Admitad XML / Я.Маркет YML / Ozon feeds в products table. Upsert по source_feed+offer_id. Flag discontinued. Spec: `docs/agents/feed-sync.md` (TBD) |
+| `attribute_enricher` | Attribute Enricher | portfolio | on new products | **Local LLM** | После feed_sync — AI извлекает structured attributes из title+description. Batch 100 offers = 1 call. Writes to `products.attributes_json`. Fallback Claude Haiku. |
+| `site_guardian` | Site Guardian | site | @weekly + on-demand | **Local LLM** + selective Haiku | Агент поиска и улучшения. 6 категорий checks (health / quality / SEO / cannibalization / technical / competitive). Spec: `docs/agents/site-guardian.md` |
+| `listing_generator` | Listing Generator | site | on-demand | Sonnet | AI-генерация листинга для Empire Flippers/Flippa/Telderi |
+| `competitor_scout` | Competitor Scout | site | @weekly | Local | SERP top-10 по нашим ключам, что пишут конкуренты (→ feeds Site Guardian) |
+| `content_gap_finder` | Content Gap Finder | site | @monthly | Haiku | Запросы где мы не ранжируемся, а у конкурентов есть |
+| `revenue_anomaly` | Revenue Anomaly Detector | portfolio | @daily | — | RPM/CR упал >30% → Telegram алерт |
+| `price_drift` | Price Drift Detector | portfolio | @daily | — | Мониторинг `product_prices` — отслеживает аномалии цен в каталоге |
+| `seasonal_planner` | Seasonal Planner | site | @monthly | Haiku | Готовит контент-план за 2 мес до сезонных пиков (ЧП, весна, подарки) |
+| `news_scout` | News Scout | portfolio | @weekly | Haiku | Новые модели в брендах → идеи в контент-план |
+| `network_arbitrage` | Network Arbitrage Analyzer | site | @weekly | — | EPC Admitad vs Я.М vs Ozon на один товар → переключение на сильнейшую |
 
 ### Planned (Stage C — долгосрочно)
 
