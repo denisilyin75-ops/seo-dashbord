@@ -72,6 +72,16 @@ export const api = {
   articleRevisions: (id, limit = 50) => request('GET', `/api/articles/${id}/revisions?limit=${limit}`),
   articleMeta:  (id) => request('GET', `/api/articles/${id}/meta`),
 
+  // Article import (Phase 2)
+  importUrl: (body) => request('POST', '/api/imported', body),
+  listImported: (filters = {}) => {
+    const qs = new URLSearchParams();
+    for (const [k, v] of Object.entries(filters)) if (v != null && v !== '') qs.set(k, String(v));
+    return request('GET', `/api/imported${qs.toString() ? '?' + qs : ''}`);
+  },
+  getImported: (id) => request('GET', `/api/imported/${id}`),
+  archiveImported: (id) => request('DELETE', `/api/imported/${id}`),
+
   // Daily brief — история «идея дня» для аккумулированной ленты
   ideasHistory: (siteId, limit = 30) => {
     const qs = new URLSearchParams();

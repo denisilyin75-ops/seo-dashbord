@@ -9,6 +9,7 @@ import { versionString, buildInfoLines } from '../utils/version.js';
 const navLinks = [
   { to: '/',         label: 'Dashboard', icon: '📊' },
   { to: '/agents',   label: 'Agents',    icon: '🤖' },
+  { to: '/imports',  label: 'Imports',   icon: '📥' },
   { to: '/settings', label: 'Settings',  icon: '⚙️' },
 ];
 

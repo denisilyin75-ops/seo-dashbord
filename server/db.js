@@ -355,6 +355,90 @@ CREATE TABLE IF NOT EXISTS quality_runs (
 );
 CREATE INDEX IF NOT EXISTS idx_qruns_site ON quality_runs(site_id, started_at DESC);
 
+-- Article Import & Actions Phase 2 — imported external articles + actions.
+-- imported_articles: research material (competitor reviews, sources). Не наш контент.
+-- imported_images: тегированные со статьёй (Phase 2 download = pending).
+-- article_actions: history всех transformations (translate, rewrite, pdf, structural, etc.)
+CREATE TABLE IF NOT EXISTS imported_articles (
+  id                 TEXT PRIMARY KEY,
+  source_url         TEXT NOT NULL,
+  source_domain      TEXT NOT NULL,
+  canonical_url      TEXT,
+  title              TEXT NOT NULL,
+  author             TEXT,
+  published_at       TEXT,
+  language_detected  TEXT,
+  content_html       TEXT,
+  content_text       TEXT,
+  excerpt            TEXT,
+  word_count         INTEGER DEFAULT 0,
+  reading_time_min   INTEGER,
+  extraction_method  TEXT,
+  extraction_confidence REAL,
+  extraction_warnings TEXT,
+  meta_title         TEXT,
+  meta_description   TEXT,
+  og_image_url       TEXT,
+  schema_types       TEXT,
+  internal_links_count INTEGER DEFAULT 0,
+  external_links_count INTEGER DEFAULT 0,
+  links_json         TEXT,
+  auto_tags          TEXT,
+  user_tags          TEXT,
+  imported_at        TEXT DEFAULT (datetime('now')),
+  imported_by        TEXT,
+  purpose            TEXT,
+  status             TEXT DEFAULT 'active',
+  last_refetch_at    TEXT,
+  refetch_interval_days INTEGER,
+  content_hash       TEXT,
+  converted_to_article_id TEXT REFERENCES articles(id) ON DELETE SET NULL,
+  converted_at       TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_imported_domain ON imported_articles(source_domain);
+CREATE INDEX IF NOT EXISTS idx_imported_purpose ON imported_articles(purpose, status);
+CREATE INDEX IF NOT EXISTS idx_imported_imported_at ON imported_articles(imported_at DESC);
+
+CREATE TABLE IF NOT EXISTS imported_images (
+  id                 TEXT PRIMARY KEY,
+  imported_article_id TEXT NOT NULL REFERENCES imported_articles(id) ON DELETE CASCADE,
+  original_url       TEXT NOT NULL,
+  local_path         TEXT,
+  alt_text           TEXT,
+  caption            TEXT,
+  width              INTEGER,
+  height             INTEGER,
+  size_bytes         INTEGER,
+  download_status    TEXT DEFAULT 'pending',
+  download_error     TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_imported_images_article ON imported_images(imported_article_id);
+
+CREATE TABLE IF NOT EXISTS article_actions (
+  id                 TEXT PRIMARY KEY,
+  action_type        TEXT NOT NULL,
+  source_type        TEXT NOT NULL,
+  source_ids         TEXT NOT NULL,
+  params_json        TEXT,
+  status             TEXT DEFAULT 'pending',
+  output_type        TEXT,
+  output_data        TEXT,
+  output_file_path   TEXT,
+  output_article_id  TEXT REFERENCES articles(id) ON DELETE SET NULL,
+  llm_provider       TEXT,
+  llm_tokens_in      INTEGER,
+  llm_tokens_out     INTEGER,
+  llm_cost_usd       REAL,
+  elapsed_ms         INTEGER,
+  created_at         TEXT DEFAULT (datetime('now')),
+  started_at         TEXT,
+  finished_at        TEXT,
+  created_by         TEXT,
+  error              TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_actions_status ON article_actions(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_actions_type ON article_actions(action_type);
+
 -- Code Review Agent Phase 1 — post-commit analysis.
 -- code_review_runs: каждый запуск (post-commit / nightly / manual).
 -- code_health: issues найденные автоматическими audits (security, smells и т.д. Phase 3+).
