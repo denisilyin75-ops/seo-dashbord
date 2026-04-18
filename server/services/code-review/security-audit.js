@@ -10,11 +10,26 @@ import { execFileSync } from 'node:child_process';
 
 const IGNORE_DIRS = new Set(['node_modules', 'dist', '.git', 'coverage', '.claude']);
 
+// Имена переменных внутри ${...} которые означают "безопасная SQL-структура"
+// (conditions / placeholders / joins / sort keys — constructed by code, не user input).
+// Если внутри ${...} только эти имена — не считаем injection.
+const SAFE_SQL_VARS = /^(placeholders|conds|clauses|baseJoin|whereSql|sort|sortCol|orderBy|limitClause|fields|offset|limit|buildSort\([\w.]+\))$/;
+
+// True injection: template literal в SQL где ${X} содержит **user-controlled** value.
+// Эвристика: match только если ${...} НЕ одно из "safe" имён.
+function isLikelySqlInjection(snippet) {
+  // Extract interpolation: ${X}
+  const m = snippet.match(/\$\{([^}]+)\}/);
+  if (!m) return false;
+  const inner = m[1].trim();
+  return !SAFE_SQL_VARS.test(inner);
+}
+
 const PATTERNS = [
   // Critical
   { re: /(api[_-]?key|secret|password|token)['"\s:=]+['"][A-Za-z0-9_-]{20,}/gi, severity: 'critical', label: 'hardcoded secret-like string' },
-  { re: /`SELECT[\s\S]{0,100}\$\{/g, severity: 'critical', label: 'SQL injection risk (template literal)' },
-  { re: /execSync\s*\([^)]*\$\{/g, severity: 'critical', label: 'shell injection via template literal' },
+  { re: /`SELECT[\s\S]{0,100}\$\{([^}]+)\}/g, severity: 'critical', label: 'SQL injection risk (template literal)', filter: m => isLikelySqlInjection(m) },
+  { re: /execSync\s*\([^)]*\$\{([^}]+)\}/g, severity: 'critical', label: 'shell injection via template literal' },
   // High
   { re: /\beval\s*\(/g, severity: 'high', label: 'eval() usage' },
   { re: /\.innerHTML\s*=/g, severity: 'high', label: 'innerHTML assignment (XSS risk)' },
@@ -27,6 +42,12 @@ const PATTERNS = [
   { re: /TODO|FIXME|XXX|HACK/g, severity: 'info', label: 'TODO/FIXME marker' },
 ];
 
+// Files содержащие regex patterns сами себе (meta) — skip их от scan.
+const META_FILES = [
+  'server/services/code-review/security-audit.js',
+  'server/services/code-review/smell-scan.js',
+];
+
 // Files to skip by path pattern
 const SKIP_PATHS = [
   /\.md$/, /\.json$/, /\.lock$/, /package-lock/, /\.d\.ts$/,
@@ -35,6 +56,7 @@ const SKIP_PATHS = [
 
 function shouldSkip(relativePath) {
   if (SKIP_PATHS.some(re => re.test(relativePath))) return true;
+  if (META_FILES.includes(relativePath)) return true;
   return false;
 }
 
@@ -59,7 +81,9 @@ function scanFile(filePath, relPath) {
     rule.re.lastIndex = 0; // reset global regex state
     let m;
     while ((m = rule.re.exec(content)) !== null) {
-      // Вычислить line number
+      // Optional filter (например SAFE_SQL_VARS для SQL pattern)
+      if (rule.filter && !rule.filter(m[0])) continue;
+
       const pos = m.index;
       let lineNo = 1, running = 0;
       for (let i = 0; i < lines.length; i++) {
