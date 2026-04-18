@@ -55,9 +55,18 @@ async function fetchPageHtml(url) {
   }
 }
 
-// Главный entry.
-// opts: { site_id, post_id (optional), post_url (required — абсолютный URL), post_type }
-// Возвращает { score_overall, scores, issues, stats, run_id }.
+/**
+ * Main entry — анализирует один post по всем enabled dimensions.
+ *
+ * @param {object} opts
+ * @param {string} [opts.site_id]
+ * @param {number} [opts.post_id]
+ * @param {string} opts.post_url — абсолютный URL (обязательно)
+ * @param {string} [opts.post_type] — review | comparison | guide | ...
+ * @param {string} [opts.siteBaseUrl] — для persona detection (voice dim)
+ * @param {string} [opts.trigger='manual'] — 'manual' | 'post_publish' | 'cron_nightly' | ...
+ * @returns {Promise<{ score_overall: number|null, scores: object, issues: Array, stats: object, run_id: number }>}
+ */
 export async function analyzePost(opts) {
   const { site_id, post_id, post_url, post_type } = opts;
   if (!post_url) throw new Error('post_url required');
@@ -167,8 +176,15 @@ export async function analyzePost(opts) {
   };
 }
 
-// Batch: анализ всех published статей сайта с publicly-доступными URL.
-// limit — количество; filter по articles.status='published' + url начинается с /.
+/**
+ * Batch-анализ последних published статей сайта.
+ *
+ * @param {object} opts
+ * @param {string} opts.site_id
+ * @param {number} [opts.limit=10] — сколько статей обработать
+ * @param {string} [opts.trigger='manual']
+ * @returns {Promise<{ batch_run_id: number, posts_checked: number, results: Array }>}
+ */
 export async function analyzeBatch({ site_id, limit = 10, trigger = 'manual' } = {}) {
   if (!site_id) throw new Error('site_id required');
   const site = db.prepare('SELECT * FROM sites WHERE id = ?').get(site_id);
@@ -272,6 +288,14 @@ function finalizeRun(run_id, status, stats) {
 
 // --- Listing API (for UI) ---
 
+/**
+ * @param {string} site_id
+ * @param {object} [filters]
+ * @param {string} [filters.severity] — 'red' | 'yellow' | 'green'
+ * @param {string} [filters.category] — 'seo_hygiene' | 'link_health' | ...
+ * @param {number} [filters.limit=200]
+ * @returns {Array<object>}
+ */
 export function listHealth(site_id, { severity, category, limit = 200 } = {}) {
   const conds = ['site_id = ?', 'resolved_at IS NULL', 'ignored = 0'];
   const params = [site_id];

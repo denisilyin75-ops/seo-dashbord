@@ -151,8 +151,17 @@ function buildPrompt(action_type, params, content) {
   }
 }
 
-// Main entry — runs sync (MVP), возвращает результат.
-// Для тяжёлых actions можно перевести в background-job, но MVP sync ok (5-30 сек).
+/**
+ * Main entry — выполняет action на imported_article или our article. Sync (5-30 сек).
+ *
+ * @param {object} opts
+ * @param {('translate'|'rewrite_preserve'|'rewrite_voice'|'structural_analysis'|'fact_extraction')} opts.action_type
+ * @param {('imported_article'|'article')} opts.source_type
+ * @param {string[]} opts.source_ids — ID источника (MVP берёт первый)
+ * @param {object} [opts.params] — action-specific: target_lang, voice_persona, tone, etc.
+ * @param {string} [opts.created_by='operator']
+ * @returns {Promise<{ id: string, action_type: string, status: string, output_type: string, output: string, elapsed_ms: number, tokens_used: number, cost_usd: number, model: string, provider: string }>}
+ */
 export async function runAction({ action_type, source_type, source_ids, params = {}, created_by = 'operator' }) {
   if (!ACTION_TYPES.includes(action_type)) throw new Error(`action_type must be one of ${ACTION_TYPES.join(', ')}`);
   if (!Array.isArray(source_ids) || !source_ids.length) throw new Error('source_ids must be non-empty array');

@@ -138,9 +138,20 @@ function extractImages(contentHtml, sourceUrl) {
   }).filter(Boolean);
 }
 
-// Главный entry: impport URL.
-// opts: { url, purpose, user_tags: [], refetch_interval_days }
-// Returns: imported_article row + images[] (freshly created).
+/**
+ * Import URL через Readability.js + JSDOM. Сохраняет в imported_articles +
+ * imported_images (images download — Phase 2b, пока только URLs).
+ *
+ * Cache 24h: повторный import того же URL → return existing.
+ *
+ * @param {object} opts
+ * @param {string} opts.url — абсолютный HTTPS URL
+ * @param {string} [opts.purpose='research'] — 'research' | 'competitor_research' | 'source_material' | ...
+ * @param {string[]} [opts.user_tags]
+ * @param {number} [opts.refetch_interval_days] — для periodic re-fetch cron (Phase 2c)
+ * @param {string} [opts.imported_by='operator']
+ * @returns {Promise<{ article: object, images: Array, cached: boolean }>}
+ */
 export async function importUrl(opts) {
   const { url, purpose, user_tags, refetch_interval_days, imported_by } = opts;
   if (!url) throw new Error('url required');

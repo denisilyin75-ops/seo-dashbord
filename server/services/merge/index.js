@@ -116,7 +116,17 @@ async function getAi() {
 
 // PUBLIC API.
 
-// Создать merge-preview. Sync-run (5-30 сек). Phase 5 = background job если надо.
+/**
+ * Создаёт merge-preview через LLM (Sonnet) — консолидация 2-5 наших статей в одну.
+ * Sync-run (5-30 сек). Phase 5 = background job если надо.
+ *
+ * @param {object} opts
+ * @param {string} [opts.site_id] — если не задан, определяется из первой статьи
+ * @param {string[]} opts.article_ids — 2-5 ID статей одного сайта
+ * @param {object} [opts.params] — keep_title_from, model override
+ * @param {string} [opts.created_by='operator']
+ * @returns {Promise<object>} merge_preview row с proposed_content/conflicts/redirects_plan
+ */
 export async function planMerge({ site_id, article_ids, params = {}, created_by = 'operator' }) {
   if (!Array.isArray(article_ids) || article_ids.length < 2 || article_ids.length > MAX_SOURCES) {
     throw new Error(`article_ids: нужно 2-${MAX_SOURCES} ID`);
