@@ -8,6 +8,72 @@
 
 ---
 
+## 2026-04-18/19 — «24-hour sprint»: 20 deliverables за один прогон
+
+### ✅ Added
+
+**Article Import & Actions (4 фазы из features/article-import-and-actions.md):**
+- Phase 1: Articles FTS5 search + filters + bulk select/archive/tag (backward-compat); работает на 366 статьях 4beg
+- Phase 2: Import URL через Mozilla Readability → `imported_articles` + `imported_images` (pending download = Phase 2b); domain-hints auto-tagging; legal disclaimer в UI ("research material")
+- Phase 3: 5 AI actions (translate/rewrite-preserve/rewrite-voice/structural-analysis/fact-extraction); Sonnet для publication, Haiku для analysis; cost $0.01-0.08 per action
+- Phase 4: AI merge workflow — 2-5 статей → одна через Sonnet с conflict resolver; 301 redirects plan; soft-delete sources; ~\$0.10 per merge
+
+**Content Quality Agent (6 deterministic dimensions):**
+- SEO hygiene (H1/meta/alt/headings/links), Link health (HTTP ping + affiliate SubID check), Schema.org validation
+- Readability (Flesch adaptation RU + sentence/paragraph length + passive voice), E-E-A-T (author byline + dates + affiliate disclosure), Voice persona (Dmitri/Darya forbidden phrases с u flag для cyrillic)
+- Nightly cron per-site → `content_quality_scores` + `content_health` (dedup + resolve/ignore actions)
+
+**Code Review Agent (4 фазы, docs/agents/code-review-agent.md):**
+- Phase 1 MVP: post-commit git hook → Haiku/Sonnet review diff → `docs/review_log.md` (~\$0.002-0.01 per commit)
+- Phase 2 nightly: auto-generated `docs/api-reference.md` (60 endpoints, 15 групп) + `docs/architecture.md` auto-sections (21 tables, 13k LOC)
+- Phase 3 weekly: security audit (pattern-scan + npm audit) + code smells (big files, big functions, TODOs, orphans)
+- Phase 4 monthly: exit-readiness scorecard 15 dimensions /100 (tests, type_safety, secret_hygiene, dep_freshness, commit_quality, etc.)
+
+**Infrastructure:**
+- Local LLM provider support (Ollama/vLLM/OpenAI-compat) — switchable через `LOCAL_LLM_URL` env без кода
+- `callWithFallback([local, openrouter, anthropic])` — priority chain для bulk tasks
+- Dockerfile copies docs/ + .env.example for in-container code-review
+- 6 cron jobs registered: metrics (03:00), content-quality batch (02:30), code-review nightly (04:00), weekly (Mon 06:00), monthly (1st 08:00), agents ticker (5 min)
+
+**Testing + CI:**
+- Node native test runner (19 tests pass, zero external deps)
+- GitHub Actions workflow (test + syntax-check + code-quality informational)
+- Fix cyrillic regex `\b` via `u` flag (found during test writing)
+
+**Expected Value UX (P0-02):**
+- Daily Brief quickWin cards teraz содержат `impact` (например "+\$25 к капитализации" или "Держит momentum")
+- AddForm динамически показывает `+\$X` при смене типа
+- Values synced с `PER_ARTICLE_VALUE` из site-valuation agent
+
+**UI:**
+- `ArticlesPanel` с search/filter/bulk/pagination/merge button
+- `ContentHealthPanel` tab на SiteDetail (6 dims + filters + severity + resolve actions)
+- `ImportsPage` с detail + `ActionsPanel` (5 actions с inline cost estimates)
+- `MergePreviewPage` с conflict resolver + editable title/URL
+- `HealthWidget` на Dashboard (Exit readiness + Portfolio content quality single-glance)
+- `IdeasHistoryPanel` — accumulated daily-brief ideas
+
+### ✅ Decided
+- **Не разбивать `server/db.js`** на модули — риск регрессий, а many dependents импортируют; smell-scan допустимый LOC.
+- **Merge: всегда новый draft + archive sources** (не auto-delete) — supreme + rollback safety.
+- **PDF export — Phase 3b** (требует Chromium в Docker, 150+MB bloat — отложено).
+- **Imported articles — отдельная таблица** (не flag в `articles`); convert-to-draft explicit action.
+- **AI routing: Local для bulk (content-quality LLM dims, structural analysis), Cloud Sonnet для publication quality** (voice rewrite, merge).
+- **SAFE_SQL_BASE_VARS allowlist** в security-audit: considered safe если ${X} содержит code-constructed var (conds/placeholders/whereSql/...) — template literals building SQL structure не считаются injection при prepared-statement params.
+
+### ✅ Learned
+- **Contentless FTS5** возвращает count из source table не из индекса — check по count ненадёжен; rebuild через `user_version` pragma.
+- **Post-commit git hook** запускается только на `git commit`, а НЕ на `git pull` → VPS не тригерит hook при `git pull origin main`; для этого cron-based nightly regen делает то же самое без зависимости от hook'а.
+- **OpenRouter model IDs** с точками (4.5/4.6) — `anthropic/claude-haiku-4.5`, `anthropic/claude-sonnet-4.6`. Без точки (`claude-sonnet-4`) тоже работает но это previous generation.
+- **Node `\b` без `u` flag** не распознаёт границы слов между кириллицей — tests обязательны для non-Latin voice rules.
+
+### 🟡 Known issues
+- Exit scorecard overall = **58/100** (тестов много но type_safety=8, license_clarity=0, dep_freshness=52). Top focus для roadmap: LICENSE file, JSDoc coverage extension, npm deps update.
+- **3 high-severity** findings в security audit: innerHTML = в `plugins/popolkam-calculators/assets/tco-calc.js` (XSS risk в WP plugin context) — нужна санитаризация через DOMPurify.
+- **Local LLM не подключён** — ждём сигнала пользователя что home server online. Инфра готова (switch через .env + restart).
+
+---
+
 ## 2026-04-18 — часть 4 · Stage C день 1 (калибровка + интеграции + геймификация Phase A)
 
 ### ✅ Added
