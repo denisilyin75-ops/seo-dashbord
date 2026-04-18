@@ -102,4 +102,73 @@ router.get('/health/portfolio-quality', (req, res) => {
   }
 });
 
+// GET /api/activity/feed?limit=50
+// Объединённая лента всех agent runs / code-review runs / quality runs.
+// Пригодно для мониторинг-дашборда и exit-buyer'а (видит что agents реально работают).
+router.get('/activity/feed', (req, res) => {
+  const limit = Math.min(200, Math.max(1, Number(req.query.limit) || 50));
+  try {
+    // 3 source таблицы, унифицированная shape { source, id, label, status, started_at, finished_at, summary }
+    const agentRuns = db.prepare(`SELECT
+        'agent' AS source, id, agent_id AS label, status, started_at, finished_at,
+        substr(summary, 1, 120) AS summary, tokens_used, cost_usd
+      FROM agent_runs ORDER BY started_at DESC LIMIT ?`).all(limit);
+
+    const codeReviewRuns = db.prepare(`SELECT
+        'code_review' AS source, id, trigger AS label, status, started_at, finished_at,
+        commit_sha AS summary, llm_tokens_out AS tokens_used, llm_cost_usd AS cost_usd
+      FROM code_review_runs ORDER BY started_at DESC LIMIT ?`).all(limit);
+
+    const qualityRuns = db.prepare(`SELECT
+        'quality' AS source, id, trigger AS label, status, started_at, finished_at,
+        stats_json AS summary, NULL AS tokens_used, NULL AS cost_usd
+      FROM quality_runs ORDER BY started_at DESC LIMIT ?`).all(limit);
+
+    const all = [...agentRuns, ...codeReviewRuns, ...qualityRuns]
+      .sort((a, b) => (b.started_at || '').localeCompare(a.started_at || ''))
+      .slice(0, limit);
+
+    // Parse quality summary JSON в читаемый формат
+    for (const r of all) {
+      if (r.source === 'quality' && r.summary) {
+        try {
+          const s = JSON.parse(r.summary);
+          r.summary = `checked=${s.posts_checked ?? '?'} · issues=${s.issues_found ?? '?'} · red=${s.red_count ?? 0}`;
+        } catch {}
+      }
+      if (r.source === 'code_review' && r.summary) {
+        r.summary = `commit ${r.summary.slice(0, 7)}`;
+      }
+    }
+
+    // Aggregate counters (last 24h)
+    const agg24h = {
+      agent: db.prepare(`SELECT status, COUNT(*) AS n FROM agent_runs WHERE started_at > datetime('now', '-24 hours') GROUP BY status`).all(),
+      code_review: db.prepare(`SELECT status, COUNT(*) AS n FROM code_review_runs WHERE started_at > datetime('now', '-24 hours') GROUP BY status`).all(),
+      quality: db.prepare(`SELECT status, COUNT(*) AS n FROM quality_runs WHERE started_at > datetime('now', '-24 hours') GROUP BY status`).all(),
+    };
+
+    res.json({ items: all, agg_24h: agg24h });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/activity/agents-status — список всех agents + их статус на короткий взгляд
+router.get('/activity/agents-status', (req, res) => {
+  try {
+    const agents = db.prepare(`SELECT
+        a.id, a.name, a.kind, a.schedule, a.enabled,
+        a.last_run_at, a.last_run_status,
+        (SELECT COUNT(*) FROM agent_runs WHERE agent_id = a.id AND status = 'success' AND started_at > datetime('now', '-7 days')) AS successes_7d,
+        (SELECT COUNT(*) FROM agent_runs WHERE agent_id = a.id AND status = 'error' AND started_at > datetime('now', '-7 days')) AS errors_7d,
+        (SELECT SUM(tokens_used) FROM agent_runs WHERE agent_id = a.id AND started_at > datetime('now', '-30 days')) AS tokens_30d,
+        (SELECT SUM(cost_usd) FROM agent_runs WHERE agent_id = a.id AND started_at > datetime('now', '-30 days')) AS cost_30d
+      FROM agents a ORDER BY a.id`).all();
+    res.json({ agents });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 export default router;

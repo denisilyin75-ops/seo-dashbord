@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
 import { Btn, Inp, Sel } from '../components/ui.jsx';
 import { useTryToast } from '../components/Toast.jsx';
+import ActivityFeed from '../components/ActivityFeed.jsx';
 
 const SCHEDULE_OPTIONS = [
   { v: '', l: 'Не запускать (on-demand)' },
@@ -87,6 +88,19 @@ export default function Agents() {
           Все по расписанию или по запросу. Каждый можно настроить, отключить или запустить вручную.
         </div>
       </div>
+
+      {/* Unified Activity Feed — agent_runs + code_review_runs + quality_runs */}
+      <details open style={{
+        background: '#0f172a', border: '1px solid #1e293b', borderRadius: 7,
+        padding: '10px 14px', marginBottom: 14,
+      }}>
+        <summary style={{ cursor: 'pointer', userSelect: 'none', fontSize: 12, fontWeight: 700, color: '#94a3b8' }}>
+          📡 Activity feed <span style={{ color: '#64748b', fontWeight: 500 }}>— live лента всех автоматических запусков (auto-refresh 30s)</span>
+        </summary>
+        <div style={{ marginTop: 10 }}>
+          <ActivityFeed limit={50} />
+        </div>
+      </details>
 
       <div style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 1fr' : '1fr', gap: 16 }}>
         {/* Список */}

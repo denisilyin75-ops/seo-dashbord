@@ -91,6 +91,8 @@ export const api = {
   // Aggregate health (для dashboard widgets)
   exitReadiness: () => request('GET', '/api/health/exit-readiness'),
   portfolioQuality: () => request('GET', '/api/health/portfolio-quality'),
+  activityFeed: (limit = 50) => request('GET', `/api/activity/feed?limit=${limit}`),
+  agentsStatus: () => request('GET', '/api/activity/agents-status'),
 
   // Merge workflow (Phase 4)
   planMerge: (body) => request('POST', '/api/merge/preview', body),
