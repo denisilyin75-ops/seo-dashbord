@@ -56,10 +56,10 @@ router.get('/valuation', (_req, res) => {
   }
 
   // Цель из настроек агента site_valuation, либо дефолт $50k
-  const cfgRow = db.prepare("SELECT config FROM agents WHERE id = 'site_valuation'").get();
+  const cfgRow = db.prepare("SELECT config_json FROM agents WHERE id = 'site_valuation'").get();
   let target = 50000;
   try {
-    const cfg = cfgRow?.config ? JSON.parse(cfgRow.config) : null;
+    const cfg = cfgRow?.config_json ? JSON.parse(cfgRow.config_json) : null;
     if (cfg?.target_exit_valuation_usd) target = Number(cfg.target_exit_valuation_usd);
   } catch { /* ignore */ }
 
