@@ -8,6 +8,41 @@
 
 ---
 
+## 2026-04-18 — часть 4 · Stage C день 1 (калибровка + интеграции + геймификация Phase A)
+
+### ✅ Added
+- **P0-01 Site Valuation калибровка** — `PER_ARTICLE_VALUE` снижены (review 40→15, comparison 60→25, guide 35→10, quiz 70→30, tool 80→40, default 30→10), domain age ×$300 max $3000 → ×$100 max $800, momentum cap $800→$500. Methodology bumped to `v2.1_calibrated_2026-04-18`.
+- **Двухуровневая penalty** для asset-mode без revenue: −40% если сайт «zombie» (0 updates за 30 дн), −20% если активен. Раньше была единая −50% — популиruted активные сайты как покинутые.
+- **P0-03 OpenRouter credits в Settings UI** — `openRouterCredits()` в claude.js, `GET /api/ai/credits`, новая Card «AI-бюджет (OpenRouter)» с прогресс-баром. На момент коммита: $4.93/$5.00.
+- **P0-04 popolkam meta-fields end-to-end** — WP plugin `popolkam-calculators` bumped 1.0.0 → 1.1.0, добавлен `register_post_meta()` для 6 полей (`popolkam_machine_*`, `popolkam_buy_*`, `popolkam_tco_skip`) с `show_in_rest=true`. Backend `PUT /api/articles/:id` принимает `body.meta` и пушит в WP. UI `ArticleRow` — collapsible «🛠 Калькулятор / партнёрка» с 5 inputs, lazy-load через `GET /api/articles/:id/meta`.
+- **Gamification Phase A — Live Portfolio Value**
+  - `user_prefs` key/value table для toggle'ов и будущих настроек
+  - `GET /api/portfolio/valuation` — сумма последних site_valuations + delta 24h/30d + цель + прогресс %
+  - `PortfolioWidget` в шапке Layout: «💎 $X · +$Y/24h · progress bar» с 👁 toggle (backend всегда считает, скрытие только UI)
+  - Settings → новая карточка «🎮 Гамификация» с 3 toggle (портфель / toasts / impact config [заглушка Phase B])
+  - Dashboard: `updArt`/`addArt` добавляют суффикс «💎 +$N» в toast если включено (review $15, comparison $25, guide $10 — из `src/utils/impact.js`)
+  - **Delta windows**: baseline 24h берётся из окна [-3д, -1д]; 30d из [-45д, -30д]. Фильтрация по `methodology` — чтобы после рекалибровки формулы не показывать «−$15k за сутки»
+- **Legacy spec архив** в `docs/legacy-spec/` (6 файлов из `Downloads/files (1)/` + `GAMIFICATION.md` отдельно). Используем как справочник, не как действующую спецификацию.
+
+### 🧠 Decided
+- **Methodology versioning для Site Valuation** — при каждой калибровке формулы бампаем суффикс (сейчас `v2.1_calibrated_2026-04-18`). Это позволяет портфельному виджету не сравнивать post-calibration значения с pre-calibration.
+- **Гамификация — заниженные реалистичные цифры, не «motivational»** — review $15 равно тому что реально добавляет формула, а не $35-50 как в спеке. Принцип: цифра должна быть правдой, иначе это анти-мотивация после первого же сравнения с реальностью.
+- **Phased rollout gamification** (Phase A-E в backlog.md) — сейчас только Phase A (Live cap + toasts). XP/levels/achievements/rings/AI coach — потом, когда оператор запросит.
+- **Toggle-hide ≠ disable** — backend всегда считает. Пользователь прячет UI когда не хочет видеть цифры, но при возвращении видит актуальное состояние.
+
+### 🧠 Learned
+- **popolkam.ru имел 0 статей в SCC БД** — sync-all никогда не запускался с момента подключения. «Zombie-tier» penalty срабатывал из-за пустой `articles` таблицы (не из-за реальной пустоты сайта). После sync — 2 статьи, penalty −20% вместо −40%, валуация $660 → $2,104.
+- **WP REST не возвращает custom post meta без `register_post_meta` + `show_in_rest=true`** — даже если meta есть в БД. Фикс — в плагине.
+- **Docker compose recreate race** — при повторном `up -d --build` иногда остаётся orphan контейнер `/xxx_scc`. Лечится через `docker compose down` перед up. Замечено трижды за сессию.
+- **Python на Windows (cp1251)** падает на юникод-символах `Δ` при `print`. Используем латиницу `delta` в скриптах для curl-проверок.
+
+### ⚠️ Known issues
+- **popolkam overshoot** — $2,104 чуть выше target band $800-1500. Пока оставляем; решим после Phase 1 публикаций (9 обзоров) когда будет осмысленно сверять.
+- **Delta24h/30d пока $0** — после рекалибровки сегодня нет baseline с той же methodology. Заполнится натурально когда site_valuation агент запустится завтра и послезавтра.
+- **Плагин popolkam-calculators 1.1.0 скопирован только в wp-popolkam контейнер** — не в `wp-content/plugins/popolkam-calculators/.git`. Если WP обновит плагин через UI — затрёт. Нужен post-deploy hook или CI/CD для WP-плагинов (в P2 backlog).
+
+---
+
 ## 2026-04-18 — часть 3 (ночь) · закрытие ветки чата
 
 ### ✅ Added
