@@ -49,6 +49,39 @@
 
 ---
 
+## 🔧 Infra: Docker daemon DNS → 8.8.8.8 / 1.1.1.1 (P2)
+
+**Зачем:** хостинговый DNS (Timeweb) не отвечает на внешние запросы и медленно пропагирует новые записи. Когда регистрируем свежий домен (как сегодня `aykakchisto.ru`), SCC-контейнер кэширует NXDOMAIN и не может дотянуться до нового WP через HTTPS Traefik.
+
+**Сейчас (хотфикс):** `/opt/scc/docker-compose.yml` содержит `extra_hosts` для `aykakchisto.ru` → 5.129.245.98. Работает, но каждый новый сайт потребует правки. Не в repo.
+
+**Что сделать:**
+1. На `/etc/docker/daemon.json` добавить `"dns": ["8.8.8.8", "1.1.1.1"]`
+2. `systemctl restart docker` (все контейнеры bounce, ~30-60с простоя)
+3. Проверить что все сайты (cmd.bonaka.app, popolkam.ru, aykakchisto.ru) поднялись
+4. Удалить `extra_hosts` из SCC compose
+
+**Делать в спокойный момент**, не в пик работы.
+
+---
+
+## 🌐 Infra: настроить IPv6 на 5.129.245.98 (P2)
+
+**Зачем:** Timeweb выделяет каждому VPS IPv6 адрес (например `2a03:6f00:a::1:12f0` для нашего), но по умолчанию **не конфигурит** его на `eth0`. На интерфейсе только link-local `fe80::...`. Из-за этого AAAA записи доменов, указывающие на выданный IPv6, не работают — клиент идёт по v6, получает таймаут, fallback на v4 (лишние 5-10 секунд).
+
+**Сейчас:** popolkam.ru / 4beg.ru / cmd.bonaka.app без AAAA (только A). aykakchisto.ru — была AAAA от registrar автоматом, удалили 2026-04-18.
+
+**Что сделать:**
+1. Узнать IPv6 gateway через Router Advertisements (`rdisc6 eth0` или `ip -6 route`)
+2. Добавить в `/etc/netplan/*.yaml` IPv6 адрес и default route
+3. `netplan apply` (рискованно — держать rescue console Timeweb как fallback)
+4. Проверить `ping6 google.com`
+5. Вернуть AAAA записи для всех доменов → Let's Encrypt выпустит dual-stack cert
+
+**Blast radius:** высокий (ошибка в netplan = потеря SSH). Делать отдельной сессией.
+
+---
+
 ## 🆕 Stage C — следующий этап (выбрано из legacy spec + новые идеи)
 
 ### Из legacy spec (downloads/files (1)/, см. `docs/legacy-spec/`)
