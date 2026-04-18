@@ -19,15 +19,20 @@ router.get('/valuation', (_req, res) => {
     SELECT valuation_expected, date FROM site_valuations
     WHERE site_id = ? ORDER BY date DESC, id DESC LIMIT 1
   `);
-  // Оценка на дату не позже X
-  const atOrBeforeStmt = db.prepare(`
+  // Последняя оценка в диапазоне дат [from, to] — нам нужна именно близкая к baseline,
+  // иначе дельта за 24ч может сравниваться с оценкой месячной давности (например после
+  // рекалибровки формулы) и показывать дикие «−$15k за сутки», что анти-мотивационно.
+  const inRangeStmt = db.prepare(`
     SELECT valuation_expected, date FROM site_valuations
-    WHERE site_id = ? AND date <= ? ORDER BY date DESC, id DESC LIMIT 1
+    WHERE site_id = ? AND date >= ? AND date <= ?
+    ORDER BY date DESC, id DESC LIMIT 1
   `);
 
-  const today = new Date().toISOString().slice(0, 10);
-  const yesterday = new Date(Date.now() - 86400 * 1000).toISOString().slice(0, 10);
-  const monthAgo = new Date(Date.now() - 30 * 86400 * 1000).toISOString().slice(0, 10);
+  const today      = new Date().toISOString().slice(0, 10);
+  const d1daysAgo  = new Date(Date.now() -  1 * 86400 * 1000).toISOString().slice(0, 10);
+  const d3daysAgo  = new Date(Date.now() -  3 * 86400 * 1000).toISOString().slice(0, 10);
+  const d30daysAgo = new Date(Date.now() - 30 * 86400 * 1000).toISOString().slice(0, 10);
+  const d45daysAgo = new Date(Date.now() - 45 * 86400 * 1000).toISOString().slice(0, 10);
 
   let total = 0, t24h = 0, t30d = 0;
   const breakdown = [];
@@ -38,12 +43,13 @@ router.get('/valuation', (_req, res) => {
     const v = cur.valuation_expected || 0;
     total += v;
 
-    const prev24h = atOrBeforeStmt.get(s.id, yesterday);
-    const prev30d = atOrBeforeStmt.get(s.id, monthAgo);
+    // baseline 24h: ищем оценку в окне [3 дня назад, 1 день назад]. Если нет — считаем 0 delta.
+    const prev24h = inRangeStmt.get(s.id, d3daysAgo, d1daysAgo);
+    // baseline 30d: оценка в окне [45 дн назад, 30 дн назад]. Если нет — 0 delta.
+    const prev30d = inRangeStmt.get(s.id, d45daysAgo, d30daysAgo);
 
-    // Если истории за нужный момент нет — считаем что сайта тогда «не существовало» с точки зрения оценки.
-    t24h += prev24h?.valuation_expected || v;
-    t30d += prev30d?.valuation_expected || v;
+    t24h += prev24h?.valuation_expected ?? v;
+    t30d += prev30d?.valuation_expected ?? v;
 
     breakdown.push({
       siteId: s.id,
@@ -51,7 +57,9 @@ router.get('/valuation', (_req, res) => {
       value: v,
       date: cur.date,
       prev24h: prev24h?.valuation_expected ?? null,
+      prev24hDate: prev24h?.date ?? null,
       prev30d: prev30d?.valuation_expected ?? null,
+      prev30dDate: prev30d?.date ?? null,
     });
   }
 
