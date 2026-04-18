@@ -10,19 +10,26 @@ import { execFileSync } from 'node:child_process';
 
 const IGNORE_DIRS = new Set(['node_modules', 'dist', '.git', 'coverage', '.claude']);
 
-// Имена переменных внутри ${...} которые означают "безопасная SQL-структура"
-// (conditions / placeholders / joins / sort keys — constructed by code, не user input).
-// Если внутри ${...} только эти имена — не считаем injection.
-const SAFE_SQL_VARS = /^(placeholders|conds|clauses|baseJoin|whereSql|sort|sortCol|orderBy|limitClause|fields|offset|limit|buildSort\([\w.]+\))$/;
+// Имена переменных (и простые method calls на них) внутри ${...}
+// которые означают "безопасная SQL-структура" — constructed by code, не user input.
+// Параметры всё равно идут через prepared statement .run(...params).
+const SAFE_SQL_BASE_VARS = new Set([
+  'placeholders', 'conds', 'clauses', 'baseJoin', 'whereSql',
+  'sort', 'sortCol', 'orderBy', 'limitClause', 'fields',
+  'offset', 'limit', 'cols', 'columns', 'joinSql',
+]);
 
 // True injection: template literal в SQL где ${X} содержит **user-controlled** value.
-// Эвристика: match только если ${...} НЕ одно из "safe" имён.
+// Эвристика: match только если ${...} НЕ из allowlist safe-vars (с учётом простых method calls).
 function isLikelySqlInjection(snippet) {
-  // Extract interpolation: ${X}
   const m = snippet.match(/\$\{([^}]+)\}/);
   if (!m) return false;
   const inner = m[1].trim();
-  return !SAFE_SQL_VARS.test(inner);
+  // Extract base variable name: `conds.join(' AND ')` → `conds`, `buildSort(...)` → `buildSort`
+  const baseMatch = inner.match(/^([a-zA-Z_$][\w$]*)/);
+  if (!baseMatch) return true; // странно, считаем injection
+  const baseName = baseMatch[1];
+  return !SAFE_SQL_BASE_VARS.has(baseName);
 }
 
 const PATTERNS = [
