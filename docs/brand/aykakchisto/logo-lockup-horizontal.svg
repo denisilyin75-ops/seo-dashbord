@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Horizontal lockup: mark + wordmark + tagline.
+  Для использования в header / footer сайта + маркетинговых материалах.
+  Font: Unbounded Medium 500 (загрузить в WP через theme, в браузере fallback "Inter").
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 160" width="600" height="160">
+  <style>
+    .wordmark { font-family: 'Unbounded', 'Inter', sans-serif; font-weight: 500; font-size: 44px; fill: #1E3A5F; letter-spacing: -0.01em; }
+    .tagline { font-family: 'Inter', 'Helvetica Neue', sans-serif; font-weight: 400; font-size: 14px; fill: #1E3A5F; opacity: 0.62; letter-spacing: 0.04em; }
+  </style>
+
+  <!-- Mark (scaled to 112px, anchored left) -->
+  <g transform="translate(24, 24) scale(1.12)">
+    <line x1="18" y1="86" x2="50" y2="14" stroke="#1E3A5F" stroke-width="10" stroke-linecap="round"/>
+    <line x1="50" y1="14" x2="82" y2="86" stroke="#1E3A5F" stroke-width="10" stroke-linecap="round"/>
+    <path d="M 30 62 C 40 54, 48 66, 58 58 S 72 54, 72 54" stroke="#1E3A5F" stroke-width="7.2" stroke-linecap="round" fill="none"/>
+    <circle cx="72" cy="54" r="5.8" fill="#E8A04C"/>
+  </g>
+
+  <!-- Wordmark + Tagline (text, слева от символа 28px gap) -->
+  <text x="165" y="78" class="wordmark">ай как чисто!</text>
+  <text x="165" y="108" class="tagline">Дом, в котором дышится</text>
+</svg>

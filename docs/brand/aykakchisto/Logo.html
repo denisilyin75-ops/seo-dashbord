@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <title>Ай как чисто! — лого-система</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    html, body { margin: 0; padding: 0; background: #f0eee9; }
+    * { -webkit-font-smoothing: antialiased; }
+  </style>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <script type="text/babel" src="logo-mark.jsx"></script>
+  <script type="text/babel">
+    const { DesignCanvas, DCSection, DCArtboard, DCPostIt,
+            LockupHorizontal, LockupStacked, SymbolTile,
+            FaviconRow, MastheadMock, RejectionPanel, ConstructionPanel,
+            INK, COPPER, PAPER } = window;
+
+    function App() {
+      return (
+        <DesignCanvas>
+          {/* ── Section 1: Primary lockup ─────────────────────────── */}
+          <DCSection
+            title="Ай как чисто! — фирменный блок"
+            subtitle="Горизонтальный лейаут: знак + словесный знак + тэглайн. Концепция (a): кириллическая «А», поперечина которой — выдох."
+          >
+            <DCArtboard label="Primary lockup — horizontal · #F4F6F8" width={720} height={260}>
+              <LockupHorizontal />
+            </DCArtboard>
+            <DCArtboard label="Stacked lockup" width={420} height={360}>
+              <LockupStacked />
+            </DCArtboard>
+            <DCPostIt top={-8} left={640} rotate={3} width={200}>
+              концепция (a) — поперечина «А» как линия выдоха. одна идея, тихо проведённая через всю систему.
+            </DCPostIt>
+          </DCSection>
+
+          {/* ── Section 2: Symbol + construction ──────────────────── */}
+          <DCSection
+            title="Символ"
+            subtitle="Знак для фавикона, соцсетей, маленьких контекстов. Геометрическое построение задокументировано."
+          >
+            <DCArtboard label="Symbol — 240×240" width={260} height={260}>
+              <SymbolTile size={200} />
+            </DCArtboard>
+            <DCArtboard label="Construction" width={320} height={320}>
+              <ConstructionPanel />
+            </DCArtboard>
+            <DCArtboard label="Favicon scale test — 128 / 64 / 32 / 16" width={560} height={260}>
+              <FaviconRow />
+            </DCArtboard>
+          </DCSection>
+
+          {/* ── Section 3: Monochrome variants ────────────────────── */}
+          <DCSection
+            title="Монохром"
+            subtitle="Для печати, штампов, тёмных фонов. Единственный акцент — медно-оранжевый — здесь отсутствует; знак сохраняет смысл без цвета."
+          >
+            <DCArtboard label="Ink on white · #1E3A5F / #FFFFFF" width={320} height={320}>
+              <SymbolTile bg="#FFFFFF" fg={INK} showAccent={false} size={200} />
+            </DCArtboard>
+            <DCArtboard label="White on ink · #FFFFFF / #1E3A5F" width={320} height={320}>
+              <SymbolTile bg={INK} fg="#FFFFFF" showAccent={false} size={200} />
+            </DCArtboard>
+            <DCArtboard label="Lockup on ink" width={720} height={260}>
+              <LockupHorizontal bg={INK} fg="#F4F6F8" accent={COPPER} />
+            </DCArtboard>
+          </DCSection>
+
+          {/* ── Section 4: In-use ─────────────────────────────────── */}
+          <DCSection
+            title="В контексте"
+            subtitle="Редакционный сайт, а не продуктовая этикетка."
+          >
+            <DCArtboard label="Masthead (web)" width={720} height={420}>
+              <MastheadMock />
+            </DCArtboard>
+            <DCArtboard label="Чего в марке нет" width={320} height={320}>
+              <RejectionPanel />
+            </DCArtboard>
+            <DCPostIt top={40} left={740} rotate={-2} width={220}>
+              акцент используется ОДИН раз — точка выдоха на символе ИЛИ рубрикатор «№ 07». никогда одновременно.
+            </DCPostIt>
+          </DCSection>
+
+          {/* ── Section 5: Palette + type spec ─────────────────────── */}
+          <DCSection
+            title="Система"
+            subtitle="Палитра и типографика — строго и без добавок."
+          >
+            <DCArtboard label="Palette" width={520} height={200}>
+              <div style={{
+                width: '100%', height: '100%', background: PAPER,
+                display: 'grid', gridTemplateColumns: '1fr 1fr 1fr',
+              }}>
+                {[
+                  { c: INK,    n: 'Deep ink blue', h: '#1E3A5F', role: 'primary mark' },
+                  { c: COPPER, n: 'Copper',        h: '#E8A04C', role: 'single accent' },
+                  { c: PAPER,  n: 'Paper',         h: '#F4F6F8', role: 'background',
+                    border: true },
+                ].map((s, i) => (
+                  <div key={i} style={{
+                    display: 'flex', flexDirection: 'column',
+                    borderRight: i < 2 ? '1px solid rgba(30,58,95,0.08)' : 'none',
+                  }}>
+                    <div style={{
+                      flex: 1, background: s.c,
+                      borderBottom: s.border ? '1px solid rgba(30,58,95,0.12)' : 'none',
+                    }} />
+                    <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <div style={{ fontFamily: '"Unbounded", sans-serif', fontSize: 12, fontWeight: 500, color: INK }}>{s.n}</div>
+                      <div style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 11, color: INK, opacity: 0.6 }}>{s.h}</div>
+                      <div style={{ fontFamily: '"Inter", sans-serif', fontSize: 11, color: INK, opacity: 0.5, letterSpacing: '0.04em' }}>{s.role}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </DCArtboard>
+
+            <DCArtboard label="Type" width={520} height={200}>
+              <div style={{
+                width: '100%', height: '100%', background: PAPER,
+                padding: 28, boxSizing: 'border-box',
+                display: 'flex', flexDirection: 'column', gap: 18,
+              }}>
+                <div>
+                  <div style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 10, color: INK, opacity: 0.5, letterSpacing: '0.1em', marginBottom: 6 }}>
+                    WORDMARK · UNBOUNDED MEDIUM
+                  </div>
+                  <div style={{ fontFamily: '"Unbounded", sans-serif', fontSize: 28, fontWeight: 500, color: INK, letterSpacing: '-0.01em' }}>
+                    ай как чисто!
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 10, color: INK, opacity: 0.5, letterSpacing: '0.1em', marginBottom: 6 }}>
+                    TAGLINE · INTER REGULAR
+                  </div>
+                  <div style={{ fontFamily: '"Inter", sans-serif', fontSize: 16, color: INK, opacity: 0.75, letterSpacing: '0.04em' }}>
+                    Дом, в котором дышится
+                  </div>
+                </div>
+              </div>
+            </DCArtboard>
+          </DCSection>
+        </DesignCanvas>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Mono white — для тёмных фонов (тёмно-синий header, фото-hero).
+  Без медного акцента (single-color by definition).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <line x1="18" y1="86" x2="50" y2="14" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round"/>
+  <line x1="50" y1="14" x2="82" y2="86" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round"/>
+  <path d="M 30 62 C 40 54, 48 66, 58 58 S 72 54, 72 54" stroke="#FFFFFF" stroke-width="7.2" stroke-linecap="round" fill="none"/>
+</svg>

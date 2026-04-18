@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Ай как чисто! — символ (logo mark)
+  Concept: стилизованная кириллическая "А", перекладина которой — мягкая S-кривая
+  (читается как воздух / вдох), выход кривой отмечен одним медным акцентом.
+  Единственное использование медного цвета = одна точка.
+  Палитра: ink #1E3A5F, copper #E8A04C
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Left leg -->
+  <line x1="18" y1="86" x2="50" y2="14" stroke="#1E3A5F" stroke-width="10" stroke-linecap="round"/>
+  <!-- Right leg -->
+  <line x1="50" y1="14" x2="82" y2="86" stroke="#1E3A5F" stroke-width="10" stroke-linecap="round"/>
+  <!-- Exhale S-curve crossbar -->
+  <path d="M 30 62 C 40 54, 48 66, 58 58 S 72 54, 72 54" stroke="#1E3A5F" stroke-width="7.2" stroke-linecap="round" fill="none"/>
+  <!-- Copper accent dot — breath exit -->
+  <circle cx="72" cy="54" r="5.8" fill="#E8A04C"/>
+</svg>
