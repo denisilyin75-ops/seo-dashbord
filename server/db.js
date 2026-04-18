@@ -286,13 +286,19 @@ safeTrigger(`CREATE TRIGGER IF NOT EXISTS articles_au_fts AFTER UPDATE ON articl
   VALUES (new.rowid, new.title, new.notes, new.content_text, new.tags);
 END`);
 
-// Одноразовый rebuild FTS для существующих записей (если FTS пуст, а articles — нет).
-// Это покрывает upgrade-кейс: фича добавлена на существующую БД.
+// Rebuild FTS по user_version pragma.
+// Contentless FTS5: SELECT COUNT(*) FROM fts возвращает count source-таблицы, не индекса,
+// поэтому проверка ftsCount===0 ненадёжна. Используем user_version как migration flag.
+// Каждый bump FTS_SCHEMA_VERSION → одноразовый rebuild на всех инсталлах.
+const FTS_SCHEMA_VERSION = 1;
 try {
-  const ftsCount = db.prepare('SELECT COUNT(*) AS n FROM articles_fts').get().n;
-  const articlesCount = db.prepare('SELECT COUNT(*) AS n FROM articles').get().n;
-  if (articlesCount > 0 && ftsCount === 0) {
-    db.exec(`INSERT INTO articles_fts(articles_fts) VALUES('rebuild')`);
+  const cur = db.prepare('PRAGMA user_version').get().user_version ?? 0;
+  if (cur < FTS_SCHEMA_VERSION) {
+    const articlesCount = db.prepare('SELECT COUNT(*) AS n FROM articles').get().n;
+    if (articlesCount > 0) {
+      db.exec(`INSERT INTO articles_fts(articles_fts) VALUES('rebuild')`);
+    }
+    db.pragma(`user_version = ${FTS_SCHEMA_VERSION}`);
   }
 } catch (e) { /* ignore */ }
 
