@@ -18,6 +18,7 @@ import ContentPlanProgress from '../components/ContentPlanProgress.jsx';
 import BlogPanel from '../components/BlogPanel.jsx';
 import IdeasHistoryPanel from '../components/IdeasHistoryPanel.jsx';
 import PhilosophyPanel from '../components/PhilosophyPanel.jsx';
+import HealthWidget from '../components/HealthWidget.jsx';
 import { SiteCardSkeleton, RowSkeleton } from '../components/Skeleton.jsx';
 import { useTryToast } from '../components/Toast.jsx';
 import { useConfirm } from '../components/ConfirmDialog.jsx';
@@ -265,6 +266,9 @@ export default function Dashboard() {
           sx={{ marginBottom: '12px' }}
         />
       )}
+
+      {/* Health widgets: Exit Readiness + Portfolio Content Quality */}
+      <HealthWidget />
 
       {/* Философия портфеля — 5 принципов-якорей */}
       <PhilosophyPanel />

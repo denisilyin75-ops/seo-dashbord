@@ -88,6 +88,10 @@ export const api = {
   listActions: (source_type, source_id, limit = 20) =>
     request('GET', `/api/actions?source_type=${source_type}&source_id=${source_id}&limit=${limit}`),
 
+  // Aggregate health (для dashboard widgets)
+  exitReadiness: () => request('GET', '/api/health/exit-readiness'),
+  portfolioQuality: () => request('GET', '/api/health/portfolio-quality'),
+
   // Merge workflow (Phase 4)
   planMerge: (body) => request('POST', '/api/merge/preview', body),
   getMergePreview: (id) => request('GET', `/api/merge/preview/${id}`),
