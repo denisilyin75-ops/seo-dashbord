@@ -12,8 +12,8 @@
 
 import { db } from '../../db.js';
 
-const PER_ARTICLE_VALUE = { review: 40, comparison: 60, guide: 35, quiz: 70, tool: 80, category: 20 };
-const DEFAULT_ARTICLE_VALUE = 30;
+const PER_ARTICLE_VALUE = { review: 15, comparison: 25, guide: 10, quiz: 30, tool: 40, category: 20 };
+const DEFAULT_ARTICLE_VALUE = 10;
 
 function calcAssetBased(site, config) {
   const adjustments = [];
@@ -34,13 +34,13 @@ function calcAssetBased(site, config) {
   if (regAt) {
     ageYears = Math.round((Date.now() - Date.parse(regAt)) / (365.25 * 86400 * 1000) * 10) / 10;
   }
-  const ageImpact = Math.min(Math.round(ageYears * 300), 3000);
+  const ageImpact = Math.min(Math.round(ageYears * 100), 800);
   adjustments.push({
     factor: 'domain_age', label: 'Возраст домена',
     current: regAt ? `${ageYears} лет` : 'не указан',
     impact_usd: ageImpact, positive: ageImpact > 0,
     actionable: !regAt ? 'Указать дату регистрации (WHOIS) в настройках сайта' : null,
-    reason: 'Google даёт бонус траста за возраст. Максимум при 10+ лет ($3000).',
+    reason: 'Google даёт бонус траста за возраст. ~$100/год, максимум $800 (8+ лет).',
   });
   total += ageImpact;
 
@@ -61,11 +61,22 @@ function calcAssetBased(site, config) {
       : 'нет',
     impact_usd: contentImpact, positive: contentImpact > 0,
     actionable: articlesTotal < 30
-      ? `Написать ещё ${30 - articlesTotal} обзоров → +$${(30 - articlesTotal) * 40}`
+      ? `Написать ещё ${30 - articlesTotal} обзоров → +$${(30 - articlesTotal) * 15}`
       : null,
-    reason: 'Каждая опубликованная статья = долгосрочный SEO-актив. Comparison ($60) ценится выше review ($40) из-за RPM.',
+    reason: 'Каждая опубликованная статья = долгосрочный SEO-актив. Comparison ($25) ценится выше review ($15) из-за RPM.',
   });
   total += contentImpact;
+
+  // 2b. Bonus к возрасту домена — старый домен с контентом ценнее пустого старого домена
+  if (ageYears >= 1 && articlesTotal > 20) {
+    adjustments.push({
+      factor: 'domain_age_bonus', label: 'Бонус: возраст + наполненность',
+      current: `${ageYears} лет × ${articlesTotal} статей`,
+      impact_usd: 200, positive: true, actionable: null,
+      reason: 'Старый домен с реальным контентом ценится дороже, чем просто старый пустой домен.',
+    });
+    total += 200;
+  }
 
   // 3. Momentum — статей опубликованных/обновлённых за последние 30 дней
   const momentumRow = db.prepare(`
@@ -74,7 +85,7 @@ function calcAssetBased(site, config) {
       AND updated_at >= date('now', '-30 days')
   `).get(site.id);
   const momentum = momentumRow?.n || 0;
-  const momentumImpact = Math.min(momentum * 100, 800);
+  const momentumImpact = Math.min(momentum * 100, 500);
   adjustments.push({
     factor: 'momentum', label: 'Momentum (активность за 30 дн)',
     current: `${momentum} статей`,
@@ -287,6 +298,22 @@ export const siteValuationAgent = {
         mode = 'asset_based';
         total = asset.total;
         adjustments = asset.adjustments;
+      }
+
+      // Penalty: asset-mode без подтверждённого revenue — оценка чисто теоретическая
+      if (mode === 'asset_based' && avgMonthlyRevenue === 0) {
+        const penalty = -Math.round(total * 0.5);
+        adjustments = [
+          ...adjustments,
+          {
+            factor: 'no_revenue_penalty', label: '⚠️ Нет подтверждённого revenue',
+            current: 'нет site_metrics с revenue',
+            impact_usd: penalty, positive: false,
+            actionable: `Подключить GA4 + affiliate API для регистрации revenue → возврат +$${Math.abs(penalty)}`,
+            reason: 'Без подтверждённого cash flow покупатель платит только за инфраструктуру и контент, не за бизнес. Скидка −50% к "теоретической" оценке актива.',
+          },
+        ];
+        total = Math.max(0, total + penalty);
       }
 
       const valuationExpected = Math.round(total);
