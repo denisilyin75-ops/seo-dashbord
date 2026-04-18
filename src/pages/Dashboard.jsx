@@ -16,6 +16,7 @@ import EmptyState from '../components/EmptyState.jsx';
 import ScrollToTop from '../components/ScrollToTop.jsx';
 import ContentPlanProgress from '../components/ContentPlanProgress.jsx';
 import BlogPanel from '../components/BlogPanel.jsx';
+import PhilosophyPanel from '../components/PhilosophyPanel.jsx';
 import { SiteCardSkeleton, RowSkeleton } from '../components/Skeleton.jsx';
 import { useTryToast } from '../components/Toast.jsx';
 import { useConfirm } from '../components/ConfirmDialog.jsx';
@@ -263,6 +264,9 @@ export default function Dashboard() {
           sx={{ marginBottom: '12px' }}
         />
       )}
+
+      {/* Философия портфеля — 5 принципов-якорей */}
+      <PhilosophyPanel />
 
       {/* Блог «что сделано» — мотивационная лента */}
       <details
