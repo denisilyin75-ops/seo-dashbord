@@ -1,6 +1,19 @@
 # SEO Command Center
 
-Панель управления портфелем SEO/affiliate-сайтов. Полная спецификация — в [CLAUDE.md](./CLAUDE.md).
+Панель управления портфелем SEO/affiliate-сайтов. **Built in public** — [docs/public-blog/](./docs/public-blog/) описывает как оно живёт в реальности. Полная спецификация — в [CLAUDE.md](./CLAUDE.md).
+
+## Что здесь live
+
+- **3 сайта** подключены: popolkam.ru (RU, бытовая техника), aykakchisto.ru (RU, чистота), 4beg.ru (RU, беговые)
+- **8 автоматических агентов** + **6 cron jobs** работают на VPS
+- **4 agent-системы** построены для масштабирования (Code Review, Content Quality, Article Import, Deploy Wizard)
+- **60 API endpoints** в 15 группах ([auto-generated api-reference](./docs/api-reference.md))
+- **21 tables**, 13k LOC, [architecture snapshot](./docs/architecture.md) регенерится nightly
+- **Exit readiness** — 58/100 ([scorecard](./docs/exit-readiness.md)) с monthly trend
+
+Cost агентов прямо сейчас: **~$0.15-2/мес** на весь stack (Haiku для bulk, Sonnet для publication-critical).
+
+Full-text search работает на 366 статей 4beg через SQLite FTS5 + cyrillic tokenizer (unicode61 + u-flag regex).
 
 ## Быстрый старт
 
