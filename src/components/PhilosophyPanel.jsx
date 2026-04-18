@@ -17,31 +17,31 @@ const PRINCIPLES = [
     emoji: '🎯',
     title: 'Supreme — пользователь, не комиссия',
     body: 'Каждое рекомендованное действие должно быть лучшим для читателя. Нет «ангажированного» рейтинга, нет подкрашенных обзоров. Доверие = единственный MOAT, который нельзя купить.',
-    ref: 'memory/project_supreme_principle.md',
+    docRef: 'memory/project_supreme_principle.md',
   },
   {
     emoji: '🌳',
     title: 'Смежный плод — растём в adjacent semantic cluster',
     body: 'Следующая рубрика отстоит от предыдущей не дальше «adjacent keyword»: та же аудитория, те же мерчанты, тот же голос. Кофемашины → чайники, бытовая химия → пылесосы. Семантическая пропасть = новый сайт, не новая рубрика.',
-    ref: 'docs/business-model.md §11 Adjacent Fruit',
+    docRef: 'docs/business-model.md §11 Adjacent Fruit',
   },
   {
     emoji: '💎',
     title: 'Expected Value UX — цифра за действием',
     body: '«Опубликовать review → +$15 к капитализации», «Refresh статьи → +$5». Каждое предложение операторской работы показывает свой $-эффект. Абстракт не мотивирует, число мотивирует.',
-    ref: 'memory/feedback_expected_value_ux.md',
+    docRef: 'memory/feedback_expected_value_ux.md',
   },
   {
     emoji: '🤖',
     title: 'Автоматизация для новичка',
     body: 'Каждое повторяющееся действие = кнопка в SCC. Новичок без IT-опыта должен управлять портфелем через UI. Ни SSH, ни CLI для рутины.',
-    ref: 'CLAUDE.md §главное правило',
+    docRef: 'CLAUDE.md §главное правило',
   },
   {
     emoji: '🔄',
     title: 'Итеративность контента',
     body: 'Статья публикуется → собирает трафик → обновляется через 3-6 мес с новыми данными → растёт позициями. Refresh — наш основной механизм роста, не только публикация нового.',
-    ref: 'memory/feedback_common_mistakes.md',
+    docRef: 'memory/feedback_common_mistakes.md',
   },
 ];
 
@@ -72,7 +72,7 @@ export default function PhilosophyPanel() {
   );
 }
 
-function PrincipleCard({ emoji, title, body, ref }) {
+function PrincipleCard({ emoji, title, body, docRef }) {
   const [expanded, setExpanded] = useState(false);
   return (
     <div style={{
@@ -99,7 +99,7 @@ function PrincipleCard({ emoji, title, body, ref }) {
         >
           {expanded ? '⌃ свернуть' : 'развернуть ⌄'}
         </button>
-        <code style={{ fontSize: 9, color: '#475569', fontFamily: 'var(--mn)' }}>{ref}</code>
+        <code style={{ fontSize: 9, color: '#475569', fontFamily: 'var(--mn)' }}>{docRef}</code>
       </div>
     </div>
   );
