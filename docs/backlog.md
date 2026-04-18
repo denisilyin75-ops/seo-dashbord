@@ -11,7 +11,20 @@
 
 ---
 
-## 🔥 P0 — срочно
+## 🔥 P0 — срочно (следующая сессия, первым)
+
+### [ ] ⚡ Откалибровать формулу Site Valuation
+**Проблема:** текущая asset-based оценка завышает в 2-4 раза vs реальный рынок (Flippa/Empire Flippers):
+- popolkam.ru сейчас $3300, реально ~$800-1500
+- 4beg.ru сейчас $19360, реально ~$3500-5500 (без revenue подтверждённого)
+
+**Что делать:**
+- Снизить `PER_ARTICLE_VALUE`: review 40→15, comparison 60→25, guide 35→10, quiz 70→30, tool 80→40
+- Capp `domain_age × $100` (не ×$300), max $800 (не $3000). Bonus +$200 только если articles > 20.
+- Добавить penalty «нет revenue подтверждённого» = −50% от итога в asset-mode (пока не подключены GA4/GSC + partner API)
+- `momentum cap` с $800 до $500
+
+**Файл:** `server/services/agents/site-valuation.js`
 
 ### [ ] Продлить домен 4beg.ru
 **Дедлайн:** до 2026-07-04 (осталось ~2.5 мес)
@@ -25,6 +38,15 @@
 - SSH/FTP к Timeweb (для экспорта БД + uploads)
 - Доступ к GA4 + Search Console (email, который там зарегистрирован)
 - Список активных партнёрских аккаунтов (если есть)
+
+### [ ] Expected Value UX везде — применить principle
+**Где:**
+- Daily Brief Quick Win — переформулировать в «сделай X → +$Y»
+- Plan items — показывать +$N к капитализации при создании обзора
+- Offer Health алерты — «Заменить битую → +$N/мес EPC»
+- Content Freshness алерты — «Refresh → возврат $N»
+
+**Принцип:** `memory/feedback_expected_value_ux.md`
 
 ---
 

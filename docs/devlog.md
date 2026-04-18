@@ -8,17 +8,31 @@
 
 ---
 
-## 2026-04-18 — часть 3 (ночь)
+## 2026-04-18 — часть 3 (ночь) · закрытие ветки чата
 
 ### ✅ Added
 - **Site Valuation v2** — двухрежимная модель (asset-based ↔ hybrid ↔ revenue-based) с детальными adjustments. Каждый фактор имеет `impact_usd`, `actionable_hint`, `reason`.
 - **ValuationPanel** на SiteDetail (новая вкладка 💰 Капитализация) — текущая оценка с диапазоном + line chart динамики + список факторов с цветовыми маркерами (🟢/🟡/🔴) и конкретными действиями для роста
 - **Endpoint `/api/sites/:id/valuations`** — история для графика
 - **Soft ALTER migrations** — новые колонки добавляются автоматом при startup (domain_registered_at, adjustments_json, mode, phase, rubric, tokens_used, cost_usd)
+- Domain registration dates захардкожены: popolkam 2009-01-03 (17 лет), 4beg 2016-07-04 (10 лет)
+- Первые оценки получены: popolkam=$3300, 4beg=$19360 (asset-based) — **завышены**, требуют калибровки
 
 ### 🧠 Decided
 - **Expected Value UX как product principle** — каждое действие показывает $-эффект («Refresh → +$150», «+1 обзор → +$60»). Зафиксировано в `memory/feedback_expected_value_ux.md`. Применяем везде где применимо.
 - **Site Valuation two-mode:** asset-based для новых сайтов (0-$50 profit), hybrid ($50-$500), revenue × multiple (от $500). Переключается автоматически по avg_monthly_profit.
+- **Валюация сейчас завышена** — нужна калибровка (задача №1 в следующей сессии). Снизить per-article value в asset-mode (review: 40→15), cap domain_age с $3000 до $800, добавить penalty "нет revenue".
+
+### 🧠 Learned
+- **OpenRouter credits check** — GET `https://openrouter.ai/api/v1/credits` с Bearer ключом возвращает `{total_credits, total_usage}`. Текущий баланс: $4.94 из $5 (потрачено 6 центов за всю разработку).
+- **529 overloaded_error** — периодически случается у Anthropic/Claude API. Retry восстанавливает. Ни одна задача не потеряна при текущей сессии (проверено git log + prod API).
+
+### ⚠️ Known issues / TODO первой очереди
+- **Валюация завышена** — корректировать формулу (review value, cap age, penalty за нет revenue)
+- **Expected Value UX не применён везде** — только в ValuationPanel. Добавить в Daily Brief Quick Win, Plan items, Offer Health, Content Freshness
+- **OpenRouter credits не показаны в SCC** — эндпоинт есть, UI нет (добавить на Settings или Dashboard)
+- **Meta-fields popolkam_machine_\* в ArticleRow** — чтобы заполнять из SCC без wp-cli (для TCO-калькулятора)
+- **4beg миграция** — ждёт доступов SSH + продления домена (истекает 2026-07-04)
 
 ## 2026-04-18 — часть 2 (вечер)
 
