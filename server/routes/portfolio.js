@@ -16,15 +16,15 @@ router.get('/valuation', (_req, res) => {
 
   // Последняя оценка каждого сайта
   const latestStmt = db.prepare(`
-    SELECT valuation_expected, date FROM site_valuations
+    SELECT valuation_expected, date, methodology FROM site_valuations
     WHERE site_id = ? ORDER BY date DESC, id DESC LIMIT 1
   `);
-  // Последняя оценка в диапазоне дат [from, to] — нам нужна именно близкая к baseline,
-  // иначе дельта за 24ч может сравниваться с оценкой месячной давности (например после
-  // рекалибровки формулы) и показывать дикие «−$15k за сутки», что анти-мотивационно.
+  // Последняя оценка в диапазоне дат [from, to] **той же methodology**, что текущая —
+  // иначе дельта за 24ч могла бы сравниваться с оценкой по другой формуле (после
+  // рекалибровки) и показывать дикие «−$15k за сутки» = анти-мотивация.
   const inRangeStmt = db.prepare(`
     SELECT valuation_expected, date FROM site_valuations
-    WHERE site_id = ? AND date >= ? AND date <= ?
+    WHERE site_id = ? AND date >= ? AND date <= ? AND methodology = ?
     ORDER BY date DESC, id DESC LIMIT 1
   `);
 
@@ -43,10 +43,11 @@ router.get('/valuation', (_req, res) => {
     const v = cur.valuation_expected || 0;
     total += v;
 
-    // baseline 24h: ищем оценку в окне [3 дня назад, 1 день назад]. Если нет — считаем 0 delta.
-    const prev24h = inRangeStmt.get(s.id, d3daysAgo, d1daysAgo);
-    // baseline 30d: оценка в окне [45 дн назад, 30 дн назад]. Если нет — 0 delta.
-    const prev30d = inRangeStmt.get(s.id, d45daysAgo, d30daysAgo);
+    const methodology = cur.methodology || '';
+    // baseline 24h: оценка в окне [3 дн, 1 дн] той же methodology. Иначе 0 delta.
+    const prev24h = inRangeStmt.get(s.id, d3daysAgo, d1daysAgo, methodology);
+    // baseline 30d: оценка в окне [45 дн, 30 дн] той же methodology. Иначе 0 delta.
+    const prev30d = inRangeStmt.get(s.id, d45daysAgo, d30daysAgo, methodology);
 
     t24h += prev24h?.valuation_expected ?? v;
     t30d += prev30d?.valuation_expected ?? v;

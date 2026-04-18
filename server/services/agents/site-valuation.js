@@ -353,7 +353,7 @@ export const siteValuationAgent = {
         valuationLow, valuationExpected, valuationHigh,
         JSON.stringify(adjustments),
         mode,
-        'v2_two_mode',
+        'v2.1_calibrated_2026-04-18',
         confidence,
       );
 
