@@ -36,6 +36,11 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/package.json ./
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/server ./server
+# docs/ нужен для code-review-agent (api-reference gen, exit-readiness scorecard).
+# Включает api-reference.md, architecture.md, exit-readiness.md, security-audit.md и т.д.
+COPY --from=build /app/docs ./docs
+# .env.example для secret_hygiene check в scorecard
+COPY --from=build /app/.env.example ./.env.example
 
 # Каталог для SQLite (mount volume извне)
 RUN mkdir -p /app/data
