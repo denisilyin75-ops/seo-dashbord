@@ -75,23 +75,34 @@ function findOrphans(files, repoRoot) {
     importedBy.set(f.rel, new Set());
   }
 
+  // Static imports: `import X from './path'`
+  // Dynamic imports: `import('./path')` / `await import('./path')` / `await import('/app/server/...')`
+  // Require: `require('./path')`
+  const regexes = [
+    /import\s+[^'"]*?\s+from\s+['"]([^'"]+)['"]/g,  // static
+    /import\s*\(\s*['"]([^'"]+)['"]/g,              // dynamic (wait for)
+    /require\s*\(\s*['"]([^'"]+)['"]/g,             // CJS
+  ];
+
   for (const f of files) {
     try {
       const content = fs.readFileSync(f.full, 'utf8');
-      const importRegex = /import\s+[^'"]*?\s+from\s+['"]([^'"]+)['"]/g;
-      let m;
-      while ((m = importRegex.exec(content)) !== null) {
-        let importedPath = m[1];
-        if (importedPath.startsWith('.')) {
-          // Resolve relative to f.rel
-          const dir = path.posix.dirname(f.rel);
-          let resolved = path.posix.normalize(path.posix.join(dir, importedPath));
-          // Try matching with various extensions
-          for (const candidate of [resolved, resolved + '.js', resolved + '.jsx', resolved + '/index.js']) {
-            if (importedBy.has(candidate)) {
-              importedBy.get(candidate).add(f.rel);
-              imports.get(f.rel).add(candidate);
-              break;
+      for (const regex of regexes) {
+        regex.lastIndex = 0;
+        let m;
+        while ((m = regex.exec(content)) !== null) {
+          let importedPath = m[1];
+          // Нормализуем absolute-like dynamic imports вида '/app/server/...'
+          if (importedPath.startsWith('/app/')) importedPath = importedPath.replace(/^\/app\//, './');
+          if (importedPath.startsWith('.')) {
+            const dir = path.posix.dirname(f.rel);
+            let resolved = path.posix.normalize(path.posix.join(dir, importedPath));
+            for (const candidate of [resolved, resolved + '.js', resolved + '.jsx', resolved + '/index.js']) {
+              if (importedBy.has(candidate)) {
+                importedBy.get(candidate).add(f.rel);
+                imports.get(f.rel).add(candidate);
+                break;
+              }
             }
           }
         }
