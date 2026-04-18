@@ -6,6 +6,14 @@ import { fmt } from '../utils/format.js';
 import { api } from '../api/client.js';
 import RevisionsModal, { freshnessLevel } from './RevisionsModal.jsx';
 
+const META_FIELDS = [
+  { k: 'popolkam_machine_price', label: 'Цена (₽)',          placeholder: 'напр. 35000', kind: 'number' },
+  { k: 'popolkam_machine_name',  label: 'Название модели',    placeholder: "DeLonghi Magnifica S" },
+  { k: 'popolkam_machine_type',  label: 'Тип',                placeholder: 'automatic / horn / capsule' },
+  { k: 'popolkam_buy_url',       label: 'Buy URL (CTA)',      placeholder: 'https://...' },
+  { k: 'popolkam_buy_label',     label: 'Buy label',          placeholder: 'Смотреть на Я.Маркете' },
+];
+
 export default function ArticleRow({ article, onUpdate, onDelete }) {
   const [cmd, setCmd] = useState('');
   const [ld, setLd] = useState(false);
@@ -13,7 +21,46 @@ export default function ArticleRow({ article, onUpdate, onDelete }) {
   const [editing, setEditing] = useState(false);
   const [dr, setDr] = useState(article);
   const [showHistory, setShowHistory] = useState(false);
+  const [meta, setMeta] = useState({});
+  const [metaLoading, setMetaLoading] = useState(false);
+  const [metaErr, setMetaErr] = useState(null);
+  const [metaDirty, setMetaDirty] = useState(false);
   const fresh = freshnessLevel(article.updated);
+
+  const openEdit = async () => {
+    setDr({ ...article });
+    setEditing(true);
+    setMeta({});
+    setMetaErr(null);
+    setMetaDirty(false);
+    if (!article.wpPostId) return;
+    setMetaLoading(true);
+    try {
+      const r = await api.articleMeta(article.id);
+      setMeta(r.meta || {});
+    } catch (e) {
+      setMetaErr(e.message);
+    } finally {
+      setMetaLoading(false);
+    }
+  };
+
+  const saveAll = async () => {
+    const payload = { ...dr };
+    if (metaDirty && article.wpPostId) {
+      payload.meta = META_FIELDS.reduce((acc, f) => {
+        const v = meta[f.k];
+        if (v != null && v !== '') acc[f.k] = v;
+        return acc;
+      }, {});
+    }
+    try {
+      await onUpdate(payload);
+      setEditing(false);
+    } catch (e) {
+      setMetaErr(e.message);
+    }
+  };
 
   const runAI = async () => {
     if (!cmd.trim()) return;
@@ -57,7 +104,7 @@ export default function ArticleRow({ article, onUpdate, onDelete }) {
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: fresh.color, display: 'inline-block' }} />
               {fresh.label}
             </button>
-            <Btn onClick={() => { setDr({ ...article }); setEditing(true); }} v="ghost" sx={{ fontSize: '12px' }}>✏️</Btn>
+            <Btn onClick={openEdit} v="ghost" sx={{ fontSize: '12px' }}>✏️</Btn>
             <Btn onClick={() => onDelete(article.id)} v="ghost" sx={{ fontSize: '12px', color: '#ef4444' }}>🗑</Btn>
           </div>
           {showHistory && <RevisionsModal article={article} onClose={() => setShowHistory(false)} />}
@@ -94,9 +141,43 @@ export default function ArticleRow({ article, onUpdate, onDelete }) {
             <Inp value={dr.clicks} onChange={(v) => setDr({ ...dr, clicks: +v || 0 })} placeholder="Clicks" sx={{ width: '75px' }} />
             <Inp value={dr.cr} onChange={(v) => setDr({ ...dr, cr: +v || 0 })} placeholder="CR%" sx={{ width: '65px' }} />
           </div>
+          <details style={{ background: '#0a0e17', border: '1px solid #1e293b', borderRadius: '5px', padding: '6px 10px' }}>
+            <summary style={{ fontSize: '11px', fontWeight: 700, color: '#60a5fa', cursor: 'pointer', userSelect: 'none' }}>
+              🛠 Калькулятор / партнёрка (popolkam meta)
+              {!article.wpPostId && <span style={{ color: '#64748b', fontWeight: 400, marginLeft: 6 }}>· недоступно (нет wp_post_id)</span>}
+              {metaLoading && <span style={{ color: '#64748b', fontWeight: 400, marginLeft: 6 }}>· загрузка…</span>}
+              {metaDirty && <span style={{ color: '#fbbf24', fontWeight: 400, marginLeft: 6 }}>· несохранённые изменения</span>}
+            </summary>
+            {article.wpPostId ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '6px', marginTop: '8px' }}>
+                {META_FIELDS.map((f) => (
+                  <label key={f.k} style={{ display: 'flex', flexDirection: 'column', gap: '3px', fontSize: '10px', color: '#94a3b8' }}>
+                    <span style={{ fontWeight: 700 }}>{f.label}</span>
+                    <Inp
+                      value={meta[f.k] ?? ''}
+                      onChange={(v) => { setMeta({ ...meta, [f.k]: v }); setMetaDirty(true); }}
+                      placeholder={f.placeholder}
+                      type={f.kind === 'number' ? 'number' : 'text'}
+                    />
+                  </label>
+                ))}
+                {metaErr && (
+                  <div style={{ gridColumn: '1 / -1', fontSize: '11px', color: '#ef4444' }}>⚠️ {metaErr}</div>
+                )}
+                <div style={{ gridColumn: '1 / -1', fontSize: '10px', color: '#64748b' }}>
+                  Сохраняется в WP при нажатии 💾 (push через REST API). Поля используются плагином popolkam-calculators.
+                </div>
+              </div>
+            ) : (
+              <div style={{ fontSize: '11px', color: '#64748b', marginTop: '6px' }}>
+                Чтобы редактировать meta, статья должна быть синхронизирована с WordPress (иметь wp_post_id).
+                Используйте кнопку Sync в списке.
+              </div>
+            )}
+          </details>
           <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
             <Btn onClick={() => setEditing(false)}>Отмена</Btn>
-            <Btn onClick={() => { onUpdate(dr); setEditing(false); }} v="acc">💾</Btn>
+            <Btn onClick={saveAll} v="acc">💾</Btn>
           </div>
         </div>
       )}

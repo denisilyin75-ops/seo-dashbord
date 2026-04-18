@@ -2,14 +2,44 @@
 /**
  * Plugin Name: Popolkam Calculators
  * Description: Интерактивные калькуляторы для обзоров popolkam.ru (TCO кофемашины, окупаемость и др.)
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: Popolkam
  * Text Domain: popolkam-calc
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('POPOLKAM_CALC_VERSION', '1.0.0');
+define('POPOLKAM_CALC_VERSION', '1.1.0');
+
+/**
+ * Регистрация post meta с доступом через REST API.
+ * Это позволяет SCC (или любому REST-клиенту) читать/писать поля калькулятора:
+ *   GET  /wp-json/wp/v2/posts/:id          → объект {meta: {popolkam_machine_price: ...}}
+ *   POST /wp-json/wp/v2/posts/:id          → body: {meta: {popolkam_machine_price: 35000}}
+ *
+ * Без show_in_rest=true WP REST игнорирует custom meta.
+ */
+function popolkam_register_calculator_meta() {
+    $fields = [
+        'popolkam_machine_price' => ['type' => 'string',  'description' => 'Цена кофемашины в рублях'],
+        'popolkam_machine_name'  => ['type' => 'string',  'description' => 'Название модели (если отличается от заголовка)'],
+        'popolkam_machine_type'  => ['type' => 'string',  'description' => 'Тип: automatic | horn | capsule'],
+        'popolkam_buy_url'       => ['type' => 'string',  'description' => 'Партнёрская ссылка для CTA'],
+        'popolkam_buy_label'     => ['type' => 'string',  'description' => 'Подпись CTA-кнопки'],
+        'popolkam_tco_skip'      => ['type' => 'boolean', 'description' => 'Не вставлять TCO-калькулятор автоматически'],
+    ];
+    foreach ($fields as $key => $cfg) {
+        register_post_meta('post', $key, [
+            'show_in_rest'  => true,
+            'single'        => true,
+            'type'          => $cfg['type'],
+            'description'   => $cfg['description'],
+            // Любой авторизованный редактор поста может править эти meta
+            'auth_callback' => function () { return current_user_can('edit_posts'); },
+        ]);
+    }
+}
+add_action('init', 'popolkam_register_calculator_meta');
 define('POPOLKAM_CALC_URL', plugin_dir_url(__FILE__));
 
 /**

@@ -55,7 +55,7 @@ router.post('/sites/:siteId/articles', (req, res) => {
 });
 
 // PUT /api/articles/:id
-router.put('/articles/:id', (req, res) => {
+router.put('/articles/:id', async (req, res) => {
   const b = req.body || {};
   const existing = db.prepare('SELECT * FROM articles WHERE id = ?').get(req.params.id);
   if (!existing) return res.status(404).json({ error: 'Article not found' });
@@ -90,7 +90,47 @@ router.put('/articles/:id', (req, res) => {
       { changes: changed });
   }
 
-  res.json(hydrateArticle(db.prepare('SELECT * FROM articles WHERE id = ?').get(req.params.id)));
+  // Опциональный пуш WP-meta (popolkam_machine_*, popolkam_buy_*) — если переданы и есть wp_post_id
+  let metaResult = null;
+  if (b.meta && typeof b.meta === 'object' && Object.keys(b.meta).length > 0) {
+    if (!existing.wp_post_id) {
+      metaResult = { ok: false, error: 'Article has no wp_post_id — meta может быть записан только после первой синхронизации с WP' };
+    } else {
+      const site = db.prepare('SELECT * FROM sites WHERE id = ?').get(existing.site_id);
+      try {
+        const wp = clientFromSiteRow(site);
+        if (!wp) throw new Error('WordPress not configured for this site');
+        await wp.updatePost(existing.wp_post_id, { meta: b.meta });
+        const metaKeys = Object.keys(b.meta).join(', ');
+        logRevision(req.params.id, existing.site_id, REVISION_KINDS.WP_SYNC_PUSH,
+          `Push meta в WordPress: ${metaKeys}`,
+          { meta_keys: Object.keys(b.meta) });
+        metaResult = { ok: true, pushed: Object.keys(b.meta) };
+      } catch (e) {
+        metaResult = { ok: false, error: e.message };
+      }
+    }
+  }
+
+  const fresh = hydrateArticle(db.prepare('SELECT * FROM articles WHERE id = ?').get(req.params.id));
+  res.json(metaResult ? { ...fresh, _meta: metaResult } : fresh);
+});
+
+// GET /api/articles/:id/meta — подтянуть meta-поля из WP (для редактора)
+router.get('/articles/:id/meta', async (req, res) => {
+  const article = db.prepare('SELECT * FROM articles WHERE id = ?').get(req.params.id);
+  if (!article) return res.status(404).json({ error: 'Article not found' });
+  if (!article.wp_post_id) return res.json({ meta: {}, source: 'no-wp-post' });
+  const site = db.prepare('SELECT * FROM sites WHERE id = ?').get(article.site_id);
+  try {
+    const wp = clientFromSiteRow(site);
+    if (!wp) return res.status(400).json({ error: 'WordPress not configured for this site' });
+    const post = await wp.getPost(article.wp_post_id);
+    res.json({ meta: post.meta || {}, source: 'wp' });
+  } catch (e) {
+    if (e instanceof WordPressApiError) return res.status(502).json({ error: e.message, status: e.status });
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // DELETE /api/articles/:id

@@ -55,6 +55,7 @@ export const api = {
   syncArticleWp: (id, direction = 'pull') => request('POST', `/api/articles/${id}/sync-wp?direction=${direction}`),
   syncAllWp:    (siteId) => request('POST', `/api/sites/${siteId}/articles/sync-all`),
   articleRevisions: (id, limit = 50) => request('GET', `/api/articles/${id}/revisions?limit=${limit}`),
+  articleMeta:  (id) => request('GET', `/api/articles/${id}/meta`),
 
   // plan
   listPlan:     (siteId) => request('GET',    `/api/sites/${siteId}/plan`),
