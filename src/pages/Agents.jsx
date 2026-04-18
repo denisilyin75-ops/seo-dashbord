@@ -3,6 +3,7 @@ import { api } from '../api/client.js';
 import { Btn, Inp, Sel } from '../components/ui.jsx';
 import { useTryToast } from '../components/Toast.jsx';
 import ActivityFeed from '../components/ActivityFeed.jsx';
+import LlmCostPanel from '../components/LlmCostPanel.jsx';
 
 const SCHEDULE_OPTIONS = [
   { v: '', l: 'Не запускать (on-demand)' },
@@ -88,6 +89,19 @@ export default function Agents() {
           Все по расписанию или по запросу. Каждый можно настроить, отключить или запустить вручную.
         </div>
       </div>
+
+      {/* LLM Cost & Frequency — из llm_calls table */}
+      <details open style={{
+        background: '#0f172a', border: '1px solid #1e293b', borderRadius: 7,
+        padding: '10px 14px', marginBottom: 10,
+      }}>
+        <summary style={{ cursor: 'pointer', userSelect: 'none', fontSize: 12, fontWeight: 700, color: '#94a3b8' }}>
+          💰 LLM cost & frequency <span style={{ color: '#64748b', fontWeight: 500 }}>— точная стоимость каждого запроса</span>
+        </summary>
+        <div style={{ marginTop: 10 }}>
+          <LlmCostPanel />
+        </div>
+      </details>
 
       {/* Unified Activity Feed — agent_runs + code_review_runs + quality_runs */}
       <details open style={{

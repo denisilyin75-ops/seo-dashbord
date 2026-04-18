@@ -66,9 +66,25 @@ async function main() {
   // Appendим review_log.md
   const appendRes = appendReviewLog({ repoRoot, diffCtx, llmResult });
 
-  // Записываем в БД (best-effort; если DB недоступна — не ломаем flow)
+  // Accurate llm_calls log + code_review_runs (best-effort)
   try {
     const { db } = await import('../db.js');
+    let costUsd = 0;
+    if (llmResult.ok && llmResult.tokensUsed > 0) {
+      const { trackLlmCall } = await import('../services/llm-tracker.js');
+      const tracked = trackLlmCall({
+        source: 'code_review',
+        source_id: diffCtx.sha.slice(0, 12),
+        operation: trigger,
+        provider: llmResult.provider || 'unknown',
+        model: llmResult.model || 'unknown',
+        tokensIn: llmResult.tokensIn || 0,
+        tokensOut: llmResult.tokensOut || llmResult.tokensUsed || 0,
+        latencyMs: elapsedMs,
+        status: 'success',
+      });
+      costUsd = tracked.cost_usd;
+    }
     db.prepare(`INSERT INTO code_review_runs
       (trigger, commit_sha, started_at, finished_at, status, output_files, llm_provider, llm_tokens_in, llm_tokens_out, llm_cost_usd, error)
       VALUES (?, ?, datetime('now', '-' || ? || ' seconds'), datetime('now'), ?, ?, ?, ?, ?, ?, ?)`)
@@ -79,9 +95,9 @@ async function main() {
         llmResult.ok ? 'completed' : 'partial',
         JSON.stringify([appendRes.path]),
         llmResult.provider || null,
-        null,                                     // tokens_in (не различаем в openrouter text response)
-        llmResult.tokensUsed || 0,
-        null,                                     // cost — подсчитаем позже
+        llmResult.tokensIn || null,
+        llmResult.tokensOut || llmResult.tokensUsed || 0,
+        costUsd,
         llmResult.ok ? null : (llmResult.reason || 'unknown'),
       );
   } catch (e) {

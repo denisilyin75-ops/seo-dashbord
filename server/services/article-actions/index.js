@@ -12,6 +12,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { db } from '../../db.js';
+import { trackLlmCall } from '../llm-tracker.js';
 
 const ACTION_TYPES = [
   'translate',
@@ -206,10 +207,20 @@ export async function runAction({ action_type, source_type, source_ids, params =
     if (!r) throw new Error('AI returned null');
 
     const elapsedMs = Date.now() - startedAt;
+    // Accurate cost через llm-tracker (получает precise prompt/completion tokens + pricing table)
+    const tracked = trackLlmCall({
+      source: 'article_action',
+      source_id: id,
+      operation: action_type,
+      provider: r.provider || status.provider,
+      model,
+      tokensIn: r.tokensIn || 0,
+      tokensOut: r.tokensOut || 0,
+      latencyMs: elapsedMs,
+      status: 'success',
+    });
     const tokensOut = r.tokensUsed || 0;
-    // Approximate cost (per_1k_in + per_1k_out based on model pricing)
-    const c = COST_ESTIMATES[action_type];
-    const costUsd = (tokensOut / 1000) * (c.per_1k_in + c.per_1k_out) / 2; // rough avg
+    const costUsd = tracked.cost_usd;
 
     // Determine output_type
     let output_type = 'text';

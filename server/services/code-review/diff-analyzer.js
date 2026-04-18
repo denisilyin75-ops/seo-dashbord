@@ -105,7 +105,15 @@ export async function analyzeDiffWithLlm(diffCtx) {
       model,
     });
     if (!r) return { ok: false, reason: 'empty_response', text: null };
-    return { ok: true, text: r.text, tokensUsed: r.tokensUsed || 0, model, provider: status.provider };
+    return {
+      ok: true,
+      text: r.text,
+      tokensIn: r.tokensIn || 0,
+      tokensOut: r.tokensOut || 0,
+      tokensUsed: r.tokensUsed || 0,
+      model,
+      provider: status.provider,
+    };
   } catch (e) {
     return { ok: false, reason: 'llm_error', error: e.message, text: null };
   }

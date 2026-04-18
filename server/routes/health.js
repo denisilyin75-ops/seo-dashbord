@@ -154,6 +154,36 @@ router.get('/activity/feed', (req, res) => {
   }
 });
 
+// GET /api/activity/llm-costs?days=30&groupBy=source|model|operation|provider|day
+// Aggregate statistics по LLM-запросам: calls / tokens / cost / avg latency / errors.
+router.get('/activity/llm-costs', async (req, res) => {
+  const { days = 30, groupBy = 'source' } = req.query;
+  try {
+    const { aggregateLlmCost, totalsLlm } = await import('../services/llm-tracker.js');
+    const totals = totalsLlm({ days: Number(days) });
+    const groups = aggregateLlmCost({ days: Number(days), groupBy });
+    res.json({ days: Number(days), groupBy, totals, groups });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/activity/llm-calls?limit=100&source=&model=
+// Recent raw calls — для drill-down / debug.
+router.get('/activity/llm-calls', async (req, res) => {
+  try {
+    const { recentLlmCalls } = await import('../services/llm-tracker.js');
+    const items = recentLlmCalls({
+      limit: req.query.limit,
+      source: req.query.source,
+      model: req.query.model,
+    });
+    res.json({ items });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // GET /api/activity/agents-status — список всех agents + их статус на короткий взгляд
 router.get('/activity/agents-status', (req, res) => {
   try {

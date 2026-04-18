@@ -93,6 +93,12 @@ export const api = {
   portfolioQuality: () => request('GET', '/api/health/portfolio-quality'),
   activityFeed: (limit = 50) => request('GET', `/api/activity/feed?limit=${limit}`),
   agentsStatus: () => request('GET', '/api/activity/agents-status'),
+  llmCosts: (days = 30, groupBy = 'source') => request('GET', `/api/activity/llm-costs?days=${days}&groupBy=${groupBy}`),
+  llmCalls: (filters = {}) => {
+    const qs = new URLSearchParams();
+    for (const [k, v] of Object.entries(filters)) if (v != null && v !== '') qs.set(k, String(v));
+    return request('GET', `/api/activity/llm-calls${qs.toString() ? '?' + qs : ''}`);
+  },
 
   // Merge workflow (Phase 4)
   planMerge: (body) => request('POST', '/api/merge/preview', body),

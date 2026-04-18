@@ -119,9 +119,13 @@ async function callAnthropic({ system, userMessage, maxTokens = 2000, model }) {
     system,
     messages: [{ role: 'user', content: userMessage }],
   });
+  const tokensIn = res.usage?.input_tokens || 0;
+  const tokensOut = res.usage?.output_tokens || 0;
   return {
     text:       res.content?.map((i) => i.text || '').join('\n') || '',
-    tokensUsed: (res.usage?.input_tokens || 0) + (res.usage?.output_tokens || 0),
+    tokensIn,
+    tokensOut,
+    tokensUsed: tokensIn + tokensOut,
   };
 }
 
@@ -152,9 +156,12 @@ async function callLocal({ system, userMessage, maxTokens = 2000, model }) {
     });
     if (!res.ok) throw new Error(`Local LLM ${res.status}: ${await res.text()}`);
     const data = await res.json();
+    const tokensIn = data.usage?.prompt_tokens || 0;
+    const tokensOut = data.usage?.completion_tokens || 0;
     return {
       text: data.choices?.[0]?.message?.content || '',
-      tokensUsed: (data.usage?.prompt_tokens || 0) + (data.usage?.completion_tokens || 0),
+      tokensIn, tokensOut,
+      tokensUsed: tokensIn + tokensOut,
     };
   }
 
@@ -172,9 +179,12 @@ async function callLocal({ system, userMessage, maxTokens = 2000, model }) {
   });
   if (!res.ok) throw new Error(`Ollama ${res.status}: ${await res.text()}`);
   const data = await res.json();
+  const tokensIn = data.prompt_eval_count || 0;
+  const tokensOut = data.eval_count || 0;
   return {
     text: data.response || '',
-    tokensUsed: (data.prompt_eval_count || 0) + (data.eval_count || 0),
+    tokensIn, tokensOut,
+    tokensUsed: tokensIn + tokensOut,
   };
 }
 
@@ -235,11 +245,13 @@ async function callOpenRouter({ system, userMessage, maxTokens = 2000, model }) 
     throw new Error(`OpenRouter ${res.status}: ${body.slice(0, 400)}`);
   }
   const data = await res.json();
+  const tokensIn = data.usage?.prompt_tokens || 0;
+  const tokensOut = data.usage?.completion_tokens || 0;
   return {
     text:       data.choices?.[0]?.message?.content || '',
-    tokensUsed: data.usage?.total_tokens
-      || ((data.usage?.prompt_tokens || 0) + (data.usage?.completion_tokens || 0))
-      || 0,
+    tokensIn,
+    tokensOut,
+    tokensUsed: data.usage?.total_tokens || (tokensIn + tokensOut) || 0,
   };
 }
 

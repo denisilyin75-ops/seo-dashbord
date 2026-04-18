@@ -12,6 +12,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { db } from '../../db.js';
+import { trackLlmCall } from '../llm-tracker.js';
 
 const MAX_SOURCES = 5;
 const MAX_CONTENT_PER_SOURCE_CHARS = 15_000; // truncation to fit context window
@@ -167,9 +168,21 @@ export async function planMerge({ site_id, article_ids, params = {}, created_by 
     const fallbackSource = [...hydrated].sort((a, b) => (b.wordCount - a.wordCount))[0];
     const proposedSlug = parsed.proposed_url_slug || fallbackSource.url || '/' + slugify(parsed.proposed_title) + '/';
 
-    // Cost estimate (roughly Sonnet $3/1M input + $15/1M output; avg)
+    // Accurate cost через llm-tracker
     const tokens = r.tokensUsed || 0;
-    const costUsd = (tokens / 1000) * 0.009;
+    const tracked = trackLlmCall({
+      source: 'merge',
+      source_id: id,
+      site_id: effectiveSiteId,
+      operation: 'merge_planning',
+      provider: r.provider || status.provider,
+      model,
+      tokensIn: r.tokensIn || 0,
+      tokensOut: r.tokensOut || 0,
+      latencyMs: null,
+      status: 'success',
+    });
+    const costUsd = tracked.cost_usd;
 
     db.prepare(`UPDATE merge_previews SET
       proposed_title = ?, proposed_url_slug = ?, proposed_content = ?, proposed_excerpt = ?,

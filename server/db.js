@@ -439,6 +439,31 @@ CREATE TABLE IF NOT EXISTS article_actions (
 CREATE INDEX IF NOT EXISTS idx_actions_status ON article_actions(status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_actions_type ON article_actions(action_type);
 
+-- llm_calls — единая таблица всех LLM-запросов для точного cost tracking.
+-- Все агенты (code-review, content-quality, actions, merge, daily-brief) должны logging в эту таблицу.
+-- Индексы на (created_at DESC, model, source, provider) — для aggregation dashboard.
+CREATE TABLE IF NOT EXISTS llm_calls (
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  source          TEXT NOT NULL,           -- 'code_review' | 'article_action' | 'merge' | 'agent:daily_brief' | 'quality:voice' | ...
+  source_id       TEXT,                    -- FK к исходной операции (action_id / run_id / etc.) — для drill-down
+  site_id         TEXT,                    -- если привязано к сайту
+  provider        TEXT NOT NULL,           -- 'openrouter' | 'anthropic' | 'local'
+  model           TEXT NOT NULL,
+  operation       TEXT,                    -- 'translate' | 'rewrite_voice' | 'post_commit_review' | 'structural_analysis' | ...
+  tokens_in       INTEGER DEFAULT 0,
+  tokens_out      INTEGER DEFAULT 0,
+  tokens_total    INTEGER DEFAULT 0,
+  cost_usd        REAL DEFAULT 0,          -- computed через ai-pricing.js
+  latency_ms      INTEGER,
+  status          TEXT DEFAULT 'success',  -- success | error | timeout
+  error           TEXT,
+  created_at      TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_llm_calls_created ON llm_calls(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_llm_calls_source ON llm_calls(source, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_llm_calls_model ON llm_calls(model, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_llm_calls_site ON llm_calls(site_id, created_at DESC);
+
 -- Article merge workflow (Phase 4 из features/article-import-and-actions.md).
 -- merge_previews: черновик объединения 2+ наших статей. LLM (Sonnet) анализирует
 -- и предлагает merged HTML + redirects plan + конфликты на решение оператору.
