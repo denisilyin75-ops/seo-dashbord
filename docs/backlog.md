@@ -371,6 +371,14 @@ Per-site widget: uptime, SSL expiry, GA4/GSC connected, last metric sync, broken
 **Фаза 1a:** schema + Tier A fetching (Admitad feeds) + WP plugin basic integration
 **Фаза 1b:** Audit/Optimize mode + OpenRouter Flux + concept AI-gen для pillar
 
+#### [ ] 🔍 Code Review + Documentation Agent
+**Спец:** `docs/agents/code-review-agent.md`
+**Зачем:** exit-ready кодовая база. Accumulated documentation как byproduct разработки: api-reference, architecture, review_log, security-audit, exit-readiness scorecard — всё автосинх. Покупатель видит реальное качество, не marketing.
+**Триггеры:** post-commit (sync, ~10s Haiku review) + nightly summary + weekly audits + monthly scorecard.
+**Cost:** $5-6/мес cloud, ~$1/мес когда Qwen online.
+**Phase 1 (MVP, 1 сессия):** post-commit hook + diff analyzer + docs/review_log.md
+**Phase 2-5:** api-reference gen + arch snapshot + security audit + code smells + exit scorecard + UI /code-health
+
 #### [ ] 📥 Article Import & Actions — Phase 1 (P1, quick win)
 **Спец:** `docs/features/article-import-and-actions.md`
 **Зачем:** оператор тратит 30-60 мин на competitor research per статью → с модулем 5 мин. Плюс fixes cannibalization через AI-merge. Плюс search+filters — давно просится в большом списке.
