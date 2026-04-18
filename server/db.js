@@ -286,6 +286,76 @@ safeTrigger(`CREATE TRIGGER IF NOT EXISTS articles_au_fts AFTER UPDATE ON articl
   VALUES (new.rowid, new.title, new.notes, new.content_text, new.tags);
 END`);
 
+// Content Quality Agent Phase 1 — deterministic checks (SEO hygiene/link/schema).
+// content_health: единый лог проблем со статьями (любого источника: quality-agent, site-guardian, image-curator).
+// content_quality_scores: per-post snapshot агрегата + per-dim (null для не-запущенных).
+// quality_runs: агрегатная история запусков (аналогично agent_runs, но специфично для quality).
+db.exec(`
+CREATE TABLE IF NOT EXISTS content_health (
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  site_id         TEXT NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
+  post_id         INTEGER,
+  post_url        TEXT,
+  signal_category TEXT NOT NULL,          -- factual | voice | seo_hygiene | eeat | readability | link_health | schema | freshness | image_issue
+  signal_code     TEXT NOT NULL,          -- snake_case: meta_desc_too_short | missing_h1 | broken_link_internal
+  severity        TEXT NOT NULL,          -- red | yellow | green
+  message         TEXT NOT NULL,
+  detail          TEXT,                   -- JSON с конкретикой
+  suggestion      TEXT,
+  auto_fixable    INTEGER DEFAULT 0,      -- 0/1
+  detected_by     TEXT NOT NULL,          -- 'content-quality' | 'site-guardian' | 'image-curator'
+  detection_run_id INTEGER,
+  detected_at     TEXT DEFAULT (datetime('now')),
+  resolved_at     TEXT,
+  resolved_by     TEXT,
+  snooze_until    TEXT,
+  ignored         INTEGER DEFAULT 0,
+  ignore_reason   TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_health_site_severity ON content_health(site_id, severity, detected_at);
+CREATE INDEX IF NOT EXISTS idx_health_post ON content_health(post_id);
+CREATE INDEX IF NOT EXISTS idx_health_category ON content_health(signal_category, severity);
+CREATE INDEX IF NOT EXISTS idx_health_open ON content_health(site_id) WHERE resolved_at IS NULL AND ignored = 0;
+
+CREATE TABLE IF NOT EXISTS content_quality_scores (
+  id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+  site_id              TEXT NOT NULL,
+  post_id              INTEGER,
+  post_url             TEXT,
+  post_type            TEXT,
+  score_factual        INTEGER,
+  score_voice          INTEGER,
+  score_seo_hygiene    INTEGER,
+  score_eeat           INTEGER,
+  score_readability    INTEGER,
+  score_link_health    INTEGER,
+  score_schema         INTEGER,
+  score_freshness      INTEGER,
+  score_overall        INTEGER,
+  word_count           INTEGER,
+  image_count          INTEGER,
+  internal_links_count INTEGER,
+  external_links_count INTEGER,
+  analyzed_at          TEXT DEFAULT (datetime('now')),
+  llm_provider         TEXT,
+  llm_tokens_used      INTEGER,
+  llm_cost_usd         REAL
+);
+CREATE INDEX IF NOT EXISTS idx_qscores_site ON content_quality_scores(site_id, score_overall);
+CREATE INDEX IF NOT EXISTS idx_qscores_post ON content_quality_scores(post_id, analyzed_at DESC);
+
+CREATE TABLE IF NOT EXISTS quality_runs (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  site_id      TEXT,
+  trigger      TEXT,                     -- 'cron_nightly' | 'post_publish' | 'manual'
+  started_at   TEXT DEFAULT (datetime('now')),
+  finished_at  TEXT,
+  status       TEXT,                     -- running | completed | failed
+  stats_json   TEXT                      -- JSON {posts_checked, issues_found, red_count, yellow_count}
+);
+CREATE INDEX IF NOT EXISTS idx_qruns_site ON quality_runs(site_id, started_at DESC);
+`);
+
 // Rebuild FTS по user_version pragma.
 // Contentless FTS5: SELECT COUNT(*) FROM fts возвращает count source-таблицы, не индекса,
 // поэтому проверка ftsCount===0 ненадёжна. Используем user_version как migration flag.

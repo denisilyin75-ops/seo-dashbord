@@ -72,6 +72,17 @@ export const api = {
   articleRevisions: (id, limit = 50) => request('GET', `/api/articles/${id}/revisions?limit=${limit}`),
   articleMeta:  (id) => request('GET', `/api/articles/${id}/meta`),
 
+  // Content Quality Agent (Phase 1: deterministic checks)
+  contentHealth: (siteId, params = {}) => {
+    const qs = new URLSearchParams();
+    for (const [k, v] of Object.entries(params)) if (v != null && v !== '') qs.set(k, String(v));
+    return request('GET', `/api/sites/${siteId}/content-health${qs.toString() ? '?' + qs : ''}`);
+  },
+  resolveHealthIssue: (id, action, reason) => request('PATCH', `/api/content-health/${id}`, { action, reason }),
+  analyzePost: (body) => request('POST', '/api/quality/analyze', body),
+  analyzeSiteBatch: (siteId, limit = 10) => request('POST', `/api/sites/${siteId}/quality/batch?limit=${limit}`),
+  qualityScores: (siteId, limit = 50) => request('GET', `/api/sites/${siteId}/quality/scores?limit=${limit}`),
+
   // plan
   listPlan:     (siteId) => request('GET',    `/api/sites/${siteId}/plan`),
   createPlan:   (siteId, data) => request('POST',   `/api/sites/${siteId}/plan`, data),

@@ -5,6 +5,7 @@ import { Badge, Btn, Metric, Modal, XLink } from '../components/ui.jsx';
 import { TI, PC } from '../utils/constants.js';
 import ArticleRow from '../components/ArticleRow.jsx';
 import ArticlesPanel from '../components/ArticlesPanel.jsx';
+import ContentHealthPanel from '../components/ContentHealthPanel.jsx';
 import AIPanel from '../components/AIPanel.jsx';
 import ValuationPanel from '../components/ValuationPanel.jsx';
 import LogPanel from '../components/LogPanel.jsx';
@@ -132,6 +133,7 @@ export default function SiteDetail() {
     { id: 'articles',   l: 'Статьи',       ic: '📄', n: articles.length },
     { id: 'plan',       l: 'План',         ic: '📋', n: plan.length },
     { id: 'valuation',  l: 'Капитализация', ic: '💰' },
+    { id: 'quality',    l: 'Quality',      ic: '🩺' },
     { id: 'ai',         l: 'AI',           ic: '🤖' },
     { id: 'log',        l: 'Лог',          ic: '📜', n: log.length },
   ];
@@ -253,6 +255,7 @@ export default function SiteDetail() {
         )}
 
         {tab === 'valuation' && <ValuationPanel siteId={id} />}
+        {tab === 'quality' && <ContentHealthPanel siteId={id} />}
         {tab === 'ai' && <AIPanel siteId={id} />}
         {tab === 'log' && (log.length ? <LogPanel log={log} /> : (
           <EmptyState icon="📜" title="Лог пуст" description="AI-команды по этому сайту будут здесь." />

@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ssh root@5.129.245.98 \"docker exec wp-aykakchisto wp plugin activate greenshiftgsap one-click-demo-import envato-market --allow-root 2>&1\")",
+      "Bash(ssh root@5.129.245.98 \"cd /opt/scc && git status && echo '---' && git branch -v\")",
+      "Bash(ssh root@5.129.245.98 \"cd /opt/scc && git fetch origin main && git merge origin/main --no-edit 2>&1 | tail -10\")",
+      "Bash(ssh root@5.129.245.98 \"cd /opt/scc && npm run build 2>&1 | tail -5 && docker compose restart scc 2>&1 | tail -3\")",
+      "Bash(ssh root@5.129.245.98 \"cd /opt/scc && npm run build 2>&1 | tail -30\")",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(ssh root@5.129.245.98 \"cd /opt/scc && git fetch origin main && git merge origin/main --no-edit 2>&1 | tail -3 && npm run build 2>&1 | tail -5 && docker compose restart scc 2>&1 | tail -3\")",
+      "Bash(curl -s -o /dev/null -w \"HTTP: %{http_code}\\\\n\" https://cmd.bonaka.app/)",
+      "Bash(ssh root@5.129.245.98 'grep SCC_TOKEN /opt/scc/.env 2>/dev/null | cut -d= -f2-')",
+      "Bash(curl -s \"https://cmd.bonaka.app/api/sites/site_a43088d3/articles?paged=1&q=&limit=5\" -H \"Authorization: Bearer $\\(ssh root@5.129.245.98 'grep SCC_TOKEN /opt/scc/.env 2>/dev/null | cut -d= -f2-'\\)\")",
+      "Bash(ssh root@5.129.245.98 \"grep -E 'SCC_TOKEN|API_TOKEN|AUTH_TOKEN' /opt/scc/.env 2>/dev/null | head\")",
+      "Bash(curl -s \"https://cmd.bonaka.app/api/sites/site_a43088d3/articles?paged=1&limit=3\" -H \"Authorization: Bearer SeoCmd2026!\")",
+      "Bash(curl -s \"https://cmd.bonaka.app/api/sites/site_a43088d3/articles?q=test&limit=3\" -H \"Authorization: Bearer SeoCmd2026!\")",
+      "Bash(curl -s \"https://cmd.bonaka.app/api/sites\" -H \"Authorization: Bearer SeoCmd2026!\")",
+      "Bash(curl -s \"https://cmd.bonaka.app/api/sites/site_f981a1bc/articles?paged=1&limit=3\" -H \"Authorization: Bearer SeoCmd2026!\")",
+      "Bash(curl -s \"https://cmd.bonaka.app/api/sites/site_f981a1bc/articles?q=кроссовки&limit=2\" -H \"Authorization: Bearer SeoCmd2026!\")",
+      "Bash(ssh root@5.129.245.98 \"docker exec scc sqlite3 /app/data/seo.sqlite 'SELECT COUNT\\(*\\) FROM articles_fts' 2>&1 && docker exec scc sqlite3 /app/data/seo.sqlite 'SELECT COUNT\\(*\\) FROM articles' 2>&1 && docker exec scc sqlite3 /app/data/seo.sqlite \\\\\"SELECT rowid, title FROM articles_fts WHERE articles_fts MATCH 'кроссов*' LIMIT 3\\\\\" 2>&1\")",
+      "Bash(ssh root@5.129.245.98 \"docker exec scc node -e 'import\\(\\\\\"better-sqlite3\\\\\"\\).then\\(m=>{const db=new m.default\\(\\\\\"/app/data/seo.sqlite\\\\\"\\); console.log\\(\\\\\"articles:\\\\\", db.prepare\\(\\\\\"SELECT COUNT\\(*\\) AS n FROM articles\\\\\"\\).get\\(\\).n\\); console.log\\(\\\\\"fts:\\\\\", db.prepare\\(\\\\\"SELECT COUNT\\(*\\) AS n FROM articles_fts\\\\\"\\).get\\(\\).n\\); try{const r=db.prepare\\(\\\\\"SELECT rowid,title FROM articles_fts WHERE articles_fts MATCH ? LIMIT 3\\\\\"\\).all\\(\\\\\"кроссов*\\\\\"\\); console.log\\(\\\\\"match:\\\\\", r\\);}catch\\(e\\){console.log\\(\\\\\"err:\\\\\",e.message\\);}}\\);' 2>&1\")",
+      "Bash(ssh root@5.129.245.98 \"docker exec scc node -e 'import\\(\\\\\"better-sqlite3\\\\\"\\).then\\(m=>{const db=new m.default\\(\\\\\"/app/data/seo.sqlite\\\\\"\\); const r1=db.prepare\\(\\\\\"SELECT rowid,title FROM articles_fts WHERE articles_fts MATCH ? LIMIT 5\\\\\"\\).all\\(\\\\\"кроссовки\\\\\"\\); console.log\\(\\\\\"kross:\\\\\", r1.length, r1[0]?.title\\); const r2=db.prepare\\(\\\\\"SELECT rowid,title FROM articles_fts WHERE articles_fts MATCH ? LIMIT 5\\\\\"\\).all\\(\\\\\"ASICS\\\\\"\\); console.log\\(\\\\\"asics:\\\\\", r2.length, r2[0]?.title\\); const r3=db.prepare\\(\\\\\"SELECT rowid,title FROM articles_fts WHERE articles_fts MATCH ? LIMIT 5\\\\\"\\).all\\(\\\\\"кроссовки*\\\\\"\\); console.log\\(\\\\\"kross*:\\\\\", r3.length\\); const r4=db.prepare\\(\\\\\"SELECT rowid,title FROM articles_fts WHERE title MATCH ?\\\\\"\\).all\\(\\\\\"кроссовки\\\\\"\\); console.log\\(\\\\\"title-col:\\\\\", r4.length\\);}\\);' 2>&1\")",
+      "Bash(ssh root@5.129.245.98 \"docker exec scc node -e 'import\\(\\\\\"better-sqlite3\\\\\"\\).then\\(m=>{const db=new m.default\\(\\\\\"/app/data/seo.sqlite\\\\\"\\); const r=db.prepare\\(\\\\\"SELECT rowid,title FROM articles_fts LIMIT 3\\\\\"\\).all\\(\\); console.log\\(JSON.stringify\\(r,null,2\\)\\);}\\);' 2>&1\")",
+      "Bash(ssh root@5.129.245.98 \"docker exec scc node -e 'import\\(\\\\\"better-sqlite3\\\\\"\\).then\\(m=>{const db=new m.default\\(\\\\\"/app/data/seo.sqlite\\\\\"\\); const r1=db.prepare\\(\\\\\"SELECT * FROM articles_fts WHERE articles_fts MATCH ?\\\\\"\\).all\\(\\\\\"Обзор\\\\\"\\); console.log\\(\\\\\"match Обзор:\\\\\", r1.length\\); const r2=db.prepare\\(\\\\\"SELECT * FROM articles_fts WHERE articles_fts MATCH ?\\\\\"\\).all\\(\\\\\"asics\\\\\"\\); console.log\\(\\\\\"match asics:\\\\\", r2.length\\); const r3=db.prepare\\(\\\\\"SELECT * FROM articles_fts WHERE articles_fts MATCH ?\\\\\"\\).all\\(\\\\\"Nike\\\\\"\\); console.log\\(\\\\\"match Nike:\\\\\", r3.length\\);}\\);' 2>&1\")",
+      "Bash(ssh root@5.129.245.98 \"docker exec scc node -e 'import\\(\\\\\"better-sqlite3\\\\\"\\).then\\(m=>{const db=new m.default\\(\\\\\"/app/data/seo.sqlite\\\\\"\\); const r=db.prepare\\(\\\\\"SELECT sql FROM sqlite_master WHERE name = ?\\\\\"\\).all\\(\\\\\"articles_fts\\\\\"\\); console.log\\(JSON.stringify\\(r,null,2\\)\\);}\\);' 2>&1\")",
+      "Bash(ssh root@5.129.245.98 \"docker exec scc node -e 'import\\(\\\\\"better-sqlite3\\\\\"\\).then\\(m=>{const db=new m.default\\(\\\\\"/app/data/seo.sqlite\\\\\"\\); db.exec\\(\\\\\"INSERT INTO articles_fts\\(articles_fts\\) VALUES\\(\\\\\\\\x27rebuild\\\\\\\\x27\\)\\\\\"\\); const r=db.prepare\\(\\\\\"SELECT rowid,title FROM articles_fts WHERE articles_fts MATCH ? LIMIT 3\\\\\"\\).all\\(\\\\\"кроссовки\\\\\"\\); console.log\\(\\\\\"after rebuild:\\\\\", r.length, r[0]?.title\\);}\\);' 2>&1\")",
+      "Bash(ssh root@5.129.245.98 \"cd /opt/scc && git fetch origin main && git merge origin/main --no-edit 2>&1 | tail -3 && docker compose restart scc 2>&1 | tail -3\")",
+      "Bash(curl -s \"https://cmd.bonaka.app/api/sites/site_f981a1bc/articles?q=кроссовки&limit=3\" -H \"Authorization: Bearer SeoCmd2026!\")",
+      "Bash(curl -s \"https://cmd.bonaka.app/api/sites/site_f981a1bc/articles?q=%D0%BA%D1%80%D0%BE%D1%81%D1%81%D0%BE%D0%B2%D0%BA%D0%B8&limit=3\" -H \"Authorization: Bearer SeoCmd2026!\")",
+      "Bash(curl -s \"https://cmd.bonaka.app/api/sites/site_f981a1bc/articles?q=%D0%BA%D1%80%D0%BE%D1%81%D1%81%D0%BE%D0%B2&limit=5\" -H \"Authorization: Bearer SeoCmd2026!\")",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('total:',d['total']\\); [print\\(i['title']\\) for i in d['items'][:5]]\")",
+      "Bash(node --check server/db.js)",
+      "Bash(node --check server/services/content-quality/index.js)",
+      "Bash(node --check server/services/content-quality/seo-hygiene.js)",
+      "Bash(node --check server/services/content-quality/link-health.js)",
+      "Bash(node --check server/services/content-quality/schema-validator.js)"
+    ]
+  }
+}
