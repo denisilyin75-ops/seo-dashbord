@@ -140,7 +140,25 @@ async function buildIdeaCard(site) {
 }
 
 /**
+ * Expected Value UX per memory feedback_expected_value_ux.md — каждое действие
+ * с вычислимым эффектом показывает + $X к капитализации или потенциалу EPC/мес.
+ * Значения синхронизированы с PER_ARTICLE_VALUE из agents/site-valuation.js.
+ */
+const IMPACT = {
+  WP_SETUP:        '+$500 к капитализации (разблокирует ежедневный пайплайн)',
+  GA4_SETUP:       '+$200 к капитализации (без метрик невозможно оптимизировать)',
+  GSC_SETUP:       '+$150 к капитализации (видишь что ранжируется)',
+  OLD_DRAFT:       '+$15-40 к капитализации (каждая публикация = бесплатный актив)',
+  IDEA_BRIEF:      '+$15-40 к капитализации когда пост выйдет (шаг к публикации)',
+  OVERDUE:         'Держит momentum (momentum факторы ×$500 к valuation)',
+  FIRST_ARTICLE:   '+$40 к капитализации + разблокирует все остальное',
+  CONTENT_HEALTH_RED: 'Красные issue снижают quality score → GSC position → -$N/мес',
+  CONTENT_HEALTH_BATCH: '1 запуск = ~$0 (всё локально), результат = список fix-able issues',
+};
+
+/**
  * Quick win — детерминированные проверки, наиболее срочное первым.
+ * Каждая check теперь содержит поле impact — expected value на бюджет оператора.
  */
 function buildQuickWinCard(site) {
   const checks = [];
@@ -150,7 +168,8 @@ function buildQuickWinCard(site) {
     checks.push({
       priority: 10,
       title: 'Подключи WordPress',
-      summary: 'Зайди в настройки сайта и добавь WP API URL + Application Password — без этого синк статей не работает',
+      summary: 'Без Application Password — синк статей, WP meta, редактирование из SCC не работают',
+      impact: IMPACT.WP_SETUP,
       action: { type: 'edit_site', siteId: site.id },
     });
   }
@@ -160,7 +179,8 @@ function buildQuickWinCard(site) {
     checks.push({
       priority: 8,
       title: 'Подключи GA4',
-      summary: 'Без GA4 не увидишь трафик и revenue. Добавь GA4 Property ID в настройках сайта',
+      summary: 'Без GA4 не увидишь трафик и revenue — невозможно считать RPM / EPC',
+      impact: IMPACT.GA4_SETUP,
       action: { type: 'edit_site', siteId: site.id },
     });
   }
@@ -168,36 +188,44 @@ function buildQuickWinCard(site) {
     checks.push({
       priority: 7,
       title: 'Подключи Search Console',
-      summary: 'Добавь GSC site URL — увидишь топ-запросы и CTR по ним',
+      summary: 'GSC = источник Ранг-позиций, топ-запросов, CTR сниппетов',
+      impact: IMPACT.GSC_SETUP,
       action: { type: 'edit_site', siteId: site.id },
     });
   }
 
   // 3. Старые черновики
-  const oldDraft = db.prepare(`SELECT id, title FROM articles
+  const oldDraft = db.prepare(`SELECT id, title, type FROM articles
     WHERE site_id = ? AND status = 'draft' AND updated_at < date('now', '-7 days')
     ORDER BY updated_at ASC LIMIT 1`).get(site.id);
   if (oldDraft) {
+    // PER_ARTICLE_VALUE — synced с site-valuation agent
+    const VALUES = { review: 15, comparison: 25, guide: 10, quiz: 30, tool: 40, category: 20 };
+    const v = VALUES[oldDraft.type] || 15;
     checks.push({
       priority: 6,
       title: `Опубликуй черновик "${oldDraft.title.slice(0, 50)}"`,
-      summary: 'Лежит в drafts больше недели — доведи до публикации',
+      summary: `Лежит в drafts больше недели — доведи до публикации`,
+      impact: `+$${v} к капитализации после публикации`,
       action: { type: 'open_article', articleId: oldDraft.id },
     });
   }
 
   // 4. Идеи без брифа
-  const ideaNoBrief = db.prepare(`SELECT id, title FROM content_plan
+  const ideaNoBrief = db.prepare(`SELECT id, title, type FROM content_plan
     WHERE site_id = ? AND status = 'idea' AND (ai_brief IS NULL OR ai_brief = '')
     ORDER BY
       CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END,
       deadline ASC
     LIMIT 1`).get(site.id);
   if (ideaNoBrief) {
+    const VALUES = { review: 15, comparison: 25, guide: 10, quiz: 30, tool: 40, category: 20 };
+    const v = VALUES[ideaNoBrief.type] || 15;
     checks.push({
       priority: 5,
       title: `Сгенерируй бриф для "${ideaNoBrief.title.slice(0, 50)}"`,
-      summary: 'В плане есть идея без брифа — нажми кнопку, AI подготовит структуру статьи',
+      summary: 'В плане есть идея без брифа — AI подготовит структуру статьи',
+      impact: `+$${v} к капитализации когда пост выйдет (шаг к публикации)`,
       action: { type: 'generate_brief', planId: ideaNoBrief.id },
     });
   }
@@ -211,6 +239,7 @@ function buildQuickWinCard(site) {
       priority: 9,
       title: `Просрочен: "${overdue.title.slice(0, 50)}"`,
       summary: `Дедлайн был ${overdue.deadline} — перенеси или закрой`,
+      impact: IMPACT.OVERDUE,
       action: { type: 'open_plan', planId: overdue.id },
     });
   }
@@ -221,10 +250,38 @@ function buildQuickWinCard(site) {
     checks.push({
       priority: 3,
       title: 'Напиши первую статью',
-      summary: 'Каталог пуст. Начни с обзора одной ключевой модели в нише',
+      summary: 'Каталог пуст. Начни с обзора одной ключевой модели',
+      impact: IMPACT.FIRST_ARTICLE,
       action: { type: 'new_article', siteId: site.id },
     });
   }
+
+  // 7. Content Quality red issues
+  try {
+    const healthRed = db.prepare(`SELECT COUNT(*) AS n FROM content_health
+      WHERE site_id = ? AND severity = 'red' AND resolved_at IS NULL AND ignored = 0`).get(site.id).n;
+    if (healthRed > 0) {
+      checks.push({
+        priority: 7,
+        title: `${healthRed} red issue${healthRed > 1 ? 's' : ''} в Content Health`,
+        summary: 'Проверка качества нашла критичные проблемы — открой таб Quality и закрой топ-3',
+        impact: IMPACT.CONTENT_HEALTH_RED,
+        action: { type: 'open_quality', siteId: site.id },
+      });
+    } else if (healthRed === 0) {
+      // Если quality-прогон ещё не запускался, подталкиваем к batch-анализу
+      const hasAnyScore = db.prepare(`SELECT 1 FROM content_quality_scores WHERE site_id = ? LIMIT 1`).get(site.id);
+      if (!hasAnyScore && articleCount > 0) {
+        checks.push({
+          priority: 4,
+          title: 'Запусти Content Quality batch',
+          summary: 'Проверка ещё не запускалась — SEO/schema/links для 10 последних постов за минуту',
+          impact: IMPACT.CONTENT_HEALTH_BATCH,
+          action: { type: 'quality_batch', siteId: site.id },
+        });
+      }
+    }
+  } catch (_) { /* таблицы могут отсутствовать на старых БД до миграции */ }
 
   checks.sort((a, b) => b.priority - a.priority);
   const top = checks[0];
@@ -244,6 +301,7 @@ function buildQuickWinCard(site) {
     status: top.priority >= 8 ? 'red' : top.priority >= 5 ? 'yellow' : 'green',
     title: top.title,
     summary: top.summary,
+    impact: top.impact,
     action: top.action,
     details: { totalChecks: checks.length, allSuggestions: checks.slice(0, 5) },
   };

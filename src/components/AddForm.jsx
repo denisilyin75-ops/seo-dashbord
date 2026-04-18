@@ -2,6 +2,11 @@ import { useState } from 'react';
 import { Btn, Inp, Sel } from './ui.jsx';
 import Field, { isDate, isSlug } from './Field.jsx';
 
+// Expected-value per article type — synced с PER_ARTICLE_VALUE из server/services/agents/site-valuation.js.
+// Показывается при создании plan-item / статьи: "+$X к капитализации после публикации".
+// См. memory feedback_expected_value_ux.md
+const TYPE_VALUE_USD = { review: 15, comparison: 25, guide: 10, quiz: 30, tool: 40, category: 20 };
+
 function validate(d, isArticle) {
   const e = {};
   if (!d.title?.trim()) e.title = 'Введите название';
@@ -83,7 +88,13 @@ export default function AddForm({ type, onAdd }) {
         </Field>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        gap: 8, paddingTop: 4, borderTop: '1px dashed #1e293b',
+      }}>
+        <span style={{ fontSize: 11, color: '#60a5fa', fontWeight: 600 }}>
+          💰 +${TYPE_VALUE_USD[d.type] || 15} к капитализации {isA ? 'при публикации' : 'когда выйдет'}
+        </span>
         <Btn type="submit" v="acc" disabled={disabled}>{isA ? 'Создать' : 'Добавить'}</Btn>
       </div>
     </form>

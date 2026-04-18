@@ -43,6 +43,19 @@ function Card({ card }) {
       <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.5 }}>
         {card.summary}
       </div>
+      {card.impact && (
+        <div style={{
+          marginTop: 'auto',
+          paddingTop: 6,
+          fontSize: 10,
+          color: '#60a5fa',
+          fontWeight: 600,
+          letterSpacing: .2,
+          borderTop: `1px dashed ${c.border}`,
+        }}>
+          💰 {card.impact}
+        </div>
+      )}
     </div>
   );
 }

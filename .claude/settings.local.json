@@ -35,7 +35,17 @@
       "Bash(node --check server/services/content-quality/index.js)",
       "Bash(node --check server/services/content-quality/seo-hygiene.js)",
       "Bash(node --check server/services/content-quality/link-health.js)",
-      "Bash(node --check server/services/content-quality/schema-validator.js)"
+      "Bash(node --check server/services/content-quality/schema-validator.js)",
+      "Bash(ssh root@5.129.245.98 \"cd /opt/scc && git fetch origin main && git merge origin/main --no-edit 2>&1 | tail -3 && npm install --silent --no-audit 2>&1 | tail -3 && npm run build 2>&1 | tail -5 && docker compose restart scc 2>&1 | tail -3\")",
+      "Bash(curl -s \"https://cmd.bonaka.app/api/sites/site_04197e82/content-health\" -H \"Authorization: Bearer SeoCmd2026!\")",
+      "Bash(curl -s -X POST \"https://cmd.bonaka.app/api/quality/analyze\" -H \"Authorization: Bearer SeoCmd2026!\" -H \"Content-Type: application/json\" -d '{\"site_id\":\"site_04197e82\",\"post_url\":\"https://popolkam.ru/\"}')",
+      "Bash(ssh root@5.129.245.98 \"docker logs scc --tail 30 2>&1\")",
+      "Bash(ssh root@5.129.245.98 \"docker exec scc node -e 'import\\(\\\\\"/app/server/routes/content-health.js\\\\\"\\).then\\(m=>console.log\\(\\\\\"OK:\\\\\", typeof m.default\\)\\).catch\\(e=>console.log\\(\\\\\"FAIL:\\\\\",e.message\\)\\)' 2>&1\")",
+      "Bash(ssh root@5.129.245.98 \"docker exec scc ls /app/server/routes/ 2>&1 | head && echo '---' && docker exec scc ls /app/server/services/content-quality/ 2>&1\")",
+      "Bash(ssh root@5.129.245.98 \"cat /opt/scc/docker-compose.yml | head -30\")",
+      "Bash(ssh root@5.129.245.98 \"cd /opt/scc && docker compose up -d --build scc 2>&1 | tail -10\")",
+      "Bash(grep -rln \"daily.\\\\|impact\\\\|Expected\\\\|+\\\\$\" src/components/DailyBrief.jsx)",
+      "Bash(node --check server/services/dailyBrief.js)"
     ]
   }
 }
