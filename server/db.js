@@ -354,6 +354,26 @@ CREATE TABLE IF NOT EXISTS quality_runs (
   stats_json   TEXT                      -- JSON {posts_checked, issues_found, red_count, yellow_count}
 );
 CREATE INDEX IF NOT EXISTS idx_qruns_site ON quality_runs(site_id, started_at DESC);
+
+-- Code Review Agent Phase 1 — post-commit analysis.
+-- code_review_runs: каждый запуск (post-commit / nightly / manual).
+-- code_health: issues найденные автоматическими audits (security, smells и т.д. Phase 3+).
+CREATE TABLE IF NOT EXISTS code_review_runs (
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  trigger         TEXT NOT NULL,
+  commit_sha      TEXT,
+  started_at      TEXT DEFAULT (datetime('now')),
+  finished_at     TEXT,
+  status          TEXT,
+  output_files    TEXT,
+  llm_provider    TEXT,
+  llm_tokens_in   INTEGER,
+  llm_tokens_out  INTEGER,
+  llm_cost_usd    REAL,
+  error           TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_crr_trigger ON code_review_runs(trigger, started_at DESC);
+CREATE INDEX IF NOT EXISTS idx_crr_commit ON code_review_runs(commit_sha);
 `);
 
 // Rebuild FTS по user_version pragma.

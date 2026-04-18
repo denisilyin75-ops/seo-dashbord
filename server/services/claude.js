@@ -95,6 +95,10 @@ async function callAnthropic({ system, userMessage, maxTokens = 2000, model }) {
 }
 
 // ---------- OpenRouter (OpenAI-compatible) ----------
+// Exported для специализированных агентов (code-review), которые хотят
+// вызывать LLM с собственными system/model/maxTokens без общего buildSystemPrompt.
+export { callAnthropic, callOpenRouter };
+
 async function callOpenRouter({ system, userMessage, maxTokens = 2000, model }) {
   const key = process.env.OPENROUTER_API_KEY;
   if (!key) return null;
