@@ -300,17 +300,28 @@ export const siteValuationAgent = {
         adjustments = asset.adjustments;
       }
 
-      // Penalty: asset-mode без подтверждённого revenue — оценка чисто теоретическая
+      // Penalty: asset-mode без подтверждённого revenue — оценка чисто теоретическая.
+      // Двухуровневая: -40% если сайт «зомби» (нет momentum), -20% если активный.
       if (mode === 'asset_based' && avgMonthlyRevenue === 0) {
-        const penalty = -Math.round(total * 0.5);
+        const momentumRow = db.prepare(`
+          SELECT COUNT(*) AS n FROM articles
+          WHERE site_id = ? AND status IN ('published','draft')
+            AND updated_at >= date('now', '-30 days')
+        `).get(site.id);
+        const isZombie = (momentumRow?.n || 0) === 0;
+        const penaltyRate = isZombie ? 0.4 : 0.2;
+        const penalty = -Math.round(total * penaltyRate);
+        const pctLabel = `${Math.round(penaltyRate * 100)}%`;
         adjustments = [
           ...adjustments,
           {
-            factor: 'no_revenue_penalty', label: '⚠️ Нет подтверждённого revenue',
-            current: 'нет site_metrics с revenue',
+            factor: 'no_revenue_penalty', label: `⚠️ Нет подтверждённого revenue (−${pctLabel})`,
+            current: isZombie ? 'нет revenue + 0 активности за 30 дн' : 'нет revenue, но сайт активен',
             impact_usd: penalty, positive: false,
             actionable: `Подключить GA4 + affiliate API для регистрации revenue → возврат +$${Math.abs(penalty)}`,
-            reason: 'Без подтверждённого cash flow покупатель платит только за инфраструктуру и контент, не за бизнес. Скидка −50% к "теоретической" оценке актива.',
+            reason: isZombie
+              ? 'Сайт без cash flow и без активности воспринимается покупателем как «зомби»: −40% к asset-оценке.'
+              : 'Сайт активен (контент обновляется), но без подтверждённого revenue покупатель закладывает риск что монетизация не взлетит: умеренная скидка −20%.',
           },
         ];
         total = Math.max(0, total + penalty);
