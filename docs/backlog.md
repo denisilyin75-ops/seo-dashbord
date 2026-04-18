@@ -353,15 +353,30 @@ Per-site widget: uptime, SSL expiry, GA4/GSC connected, last metric sync, broken
 **Что:** виджет на SiteDetail, группировка plan-items по phase, progress bar, счётчик
 **Данные:** `content_plan.phase` (поле уже добавлено в схему)
 
-#### [ ] 🤖 Content Freshness Agent — MVP (Phase 1)
-**Спец:** memory `project_content_freshness_agent.md`
-**Зачем:** supreme principle #2 (итеративность) — без агента оператор физически не может следить за 200-500 статьями
+#### [ ] 🤖 Content Quality Agent — MVP (Phase 1)
+**Спец:** `docs/agents/content-quality-agent.md` (superseded Content Freshness — теперь freshness = 1 из 8 измерений)
+**Зачем:** supreme principle #1+#2 — качественный контент = trust, без агента оператор физически не может следить за 200-500 статьями по 8 осям
 **Фаза 1 (минимум):**
-- Таблица `content_health` в SQLite
+- `content_health` + `content_quality_scores` таблицы
+- 3 deterministic dimensions: SEO hygiene + Link health + Schema
 - Cron `offer-ping` (пинг партнёрских URL раз в час)
-- Новая страница `/content-health/:siteId` в SCC: read-only список с severity и action-кнопками
-- Эндпоинты: `GET/PATCH /api/content-health`
-**Фаза 2-4:** price-drift, SEO-drift, AI-refresh, автоматика (см. spec)
+- Новая страница `/content-health/:siteId` в SCC: quality dashboard + issues list
+- Эндпоинты: `GET/PATCH /api/content-health`, `POST /api/quality/analyze`
+**Фаза 2-5:** LLM dimensions (voice/factual/readability/E-E-A-T), catalog integration, auto-fix, AI-refresh
+
+#### [ ] 🖼 Image Curator Agent — внутри catalog-service (Phase 1b)
+**Спец:** `docs/agents/image-curator.md`
+**Зачем:** централизация всех images портфеля + legal audit trail + quality monitoring. Поддерживает SUPREME (честное attribution, никаких AI-fake'ов товаров).
+**Провайдер abstraction:** Phase 1 OpenRouter Flux (~$0.04/image), Phase 2 local SDXL (~$0.002/image). Интерфейс `ImageGenProvider` — смена = swap адаптера.
+**Фаза 1a:** schema + Tier A fetching (Admitad feeds) + WP plugin basic integration
+**Фаза 1b:** Audit/Optimize mode + OpenRouter Flux + concept AI-gen для pillar
+
+#### [ ] 📦 Catalog Module — Product Finder (Phase 1 core)
+**Спец:** `docs/catalog-module-architecture.md`
+**Зачем:** превращает портфель из «блог с обзорами» в independent product finder. Усиливает SUPREME, E-E-A-T, exit-мультипликатор 2-3×.
+**Стек:** отдельный Node.js + TypeScript + Fastify + PostgreSQL сервис. Внутренний только, доступ через API keys per-site.
+**Фаза 1 (Week 3-6):** Admitad XML + Я.Маркет YML → 200-500 SKU кофемашин → REST endpoint → WP Gutenberg block «Каталог кофемашин» на popolkam
+**Блокеры:** VPS upgrade 48→120GB, Admitad partner feed access
 
 #### [ ] Content Egg: подключение к API
 **Зачем:** автообновление цен в блоках «где купить» без ручной правки
