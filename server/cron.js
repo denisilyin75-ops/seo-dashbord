@@ -105,6 +105,36 @@ function exitScorecardMonthly() {
   log('registered exitScorecardMonthly (0 8 1 * * UTC)');
 }
 
+/**
+ * Content Quality nightly batch — 02:30 UTC для каждого active сайта.
+ * Анализирует 10 последних published статей per-site, данные копятся в
+ * content_quality_scores + content_health. UI HealthWidget показывает trend.
+ *
+ * Осторожно: всё deterministic (без LLM) — zero cost. Когда добавим LLM dims —
+ * тогда добавим budget cap.
+ */
+function contentQualityNightly() {
+  cron.schedule('30 2 * * *', async () => {
+    try {
+      const { analyzeBatch } = await import('./services/content-quality/index.js');
+      const sites = db.prepare("SELECT id, name FROM sites WHERE status = 'active' AND wp_api_url IS NOT NULL").all();
+      if (!sites.length) { log('contentQualityNightly: нет active сайтов с WP'); return; }
+      log(`contentQualityNightly: ${sites.length} сайтов`);
+      for (const s of sites) {
+        try {
+          const r = await analyzeBatch({ site_id: s.id, limit: 10, trigger: 'cron_nightly' });
+          log(`  ${s.name}: checked=${r.posts_checked}, results=${r.results.length}`);
+        } catch (e) {
+          log(`  ${s.name}: error ${e.message}`);
+        }
+      }
+    } catch (e) {
+      log(`contentQualityNightly fatal: ${e.message}`);
+    }
+  }, { timezone: 'UTC' });
+  log('registered contentQualityNightly (30 2 * * * UTC)');
+}
+
 /** Agents ticker — проверяет registry агентов каждые 5 минут и запускает due */
 function agentsTicker() {
   cron.schedule('*/5 * * * *', async () => {
@@ -129,6 +159,7 @@ export function startCron() {
   }
   dailyMetricsSync();
   hourlyHealth();
+  contentQualityNightly();
   codeReviewNightly();
   codeReviewWeekly();
   exitScorecardMonthly();
