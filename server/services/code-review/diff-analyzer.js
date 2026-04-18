@@ -88,9 +88,11 @@ export async function analyzeDiffWithLlm(diffCtx) {
   if (override) {
     model = override;
   } else if (status.provider === 'openrouter') {
-    model = diffLines > 300 ? 'anthropic/claude-sonnet-4' : 'anthropic/claude-haiku-4';
+    // OpenRouter model IDs с точками (4.5/4.6). Haiku 4.5 для быстрых review,
+    // Sonnet 4.6 для крупных diff'ов (>300 строк).
+    model = diffLines > 300 ? 'anthropic/claude-sonnet-4.6' : 'anthropic/claude-haiku-4.5';
   } else {
-    model = diffLines > 300 ? 'claude-sonnet-4-20250514' : 'claude-haiku-4-20250514';
+    model = diffLines > 300 ? 'claude-sonnet-4-6' : 'claude-haiku-4-5-20251001';
   }
 
   const userPrompt = buildUserPrompt(diffCtx);
