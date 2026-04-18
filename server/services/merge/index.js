@@ -12,7 +12,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { db } from '../../db.js';
-import { trackLlmCall } from '../llm-tracker.js';
+import { trackLlmCall, checkSiteBudget } from '../llm-tracker.js';
 
 const MAX_SOURCES = 5;
 const MAX_CONTENT_PER_SOURCE_CHARS = 15_000; // truncation to fit context window
@@ -143,6 +143,12 @@ export async function planMerge({ site_id, article_ids, params = {}, created_by 
     throw new Error('Все source articles должны принадлежать одному сайту (cross-site merge = Phase 5)');
   }
   const effectiveSiteId = site_id || sources[0].site_id;
+
+  // Per-site budget guard (sprint finalization): отклонить если превышен monthly cap.
+  const budget = checkSiteBudget(effectiveSiteId, 0.15);
+  if (!budget.allowed) {
+    throw new Error(`Monthly LLM budget для сайта исчерпан (spent $${budget.spent_mtd.toFixed(2)} / $${budget.budget.toFixed(2)}). Увеличьте budget в Settings или ждите следующего месяца.`);
+  }
 
   // Pre-insert preview row для tracking
   const id = genId('mp');

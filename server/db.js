@@ -243,6 +243,10 @@ softAlter(`ALTER TABLE site_valuations ADD COLUMN mode TEXT DEFAULT 'asset_based
 softAlter(`ALTER TABLE agent_runs ADD COLUMN site_id TEXT`);
 softAlter(`ALTER TABLE agent_runs ADD COLUMN tokens_used INTEGER DEFAULT 0`);
 softAlter(`ALTER TABLE agent_runs ADD COLUMN cost_usd REAL DEFAULT 0`);
+// Per-site LLM budget cap (финализация sprint'а 2026-04-19).
+// NULL = no cap. Проверяется в llm-tracker перед каждым LLM call по site_id.
+// При превышении — call reject'ится, alert в Daily Brief.
+softAlter(`ALTER TABLE sites ADD COLUMN monthly_llm_budget_usd REAL`);
 
 // Article Import & Actions Phase 1 — search/filter/bulk
 // content_text: plain-text проекция body (для FTS); naturals = title + notes.

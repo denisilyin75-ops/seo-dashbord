@@ -97,6 +97,50 @@ export function totalsLlm({ days = 30 } = {}) {
   return row || { calls: 0, tokens: 0, cost: 0 };
 }
 
+/**
+ * Проверяет не превышает ли сайт monthly budget перед LLM call.
+ * Вызывается caller'ом перед tracker.trackLlmCall когда site_id known.
+ *
+ * @param {string} site_id
+ * @param {number} [estimatedCost=0.1] — грубый estimate чтобы заблочить до потенциала
+ * @returns {{ allowed: boolean, spent_mtd: number, budget: number|null, remaining: number|null, reason?: string }}
+ */
+export function checkSiteBudget(site_id, estimatedCost = 0.1) {
+  if (!site_id) return { allowed: true, spent_mtd: 0, budget: null, remaining: null };
+  const site = db.prepare('SELECT monthly_llm_budget_usd FROM sites WHERE id = ?').get(site_id);
+  if (!site || site.monthly_llm_budget_usd == null) {
+    return { allowed: true, spent_mtd: 0, budget: null, remaining: null };
+  }
+  const budget = Number(site.monthly_llm_budget_usd);
+  // Этот месяц: с 1-го числа по now
+  const row = db.prepare(`SELECT COALESCE(SUM(cost_usd), 0) AS spent FROM llm_calls
+    WHERE site_id = ? AND strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')`).get(site_id);
+  const spent = row.spent || 0;
+  const remaining = budget - spent;
+  if (remaining <= 0) {
+    return { allowed: false, spent_mtd: spent, budget, remaining, reason: 'budget_exceeded' };
+  }
+  if (remaining < estimatedCost) {
+    return { allowed: false, spent_mtd: spent, budget, remaining, reason: 'insufficient_for_estimate' };
+  }
+  return { allowed: true, spent_mtd: spent, budget, remaining };
+}
+
+/**
+ * Portfolio-wide monthly cost: для Dashboard + proactive alert когда > target.
+ * @returns {{ current_month: string, spent: number, by_site: Array }}
+ */
+export function monthlyCostByBite() {
+  const current_month = new Date().toISOString().slice(0, 7);
+  const by_site = db.prepare(`SELECT site_id, SUM(cost_usd) AS spent, COUNT(*) AS calls
+    FROM llm_calls
+    WHERE strftime('%Y-%m', created_at) = ?
+    GROUP BY site_id
+    ORDER BY spent DESC`).all(current_month);
+  const total = by_site.reduce((a, b) => a + (b.spent || 0), 0);
+  return { current_month, spent: total, by_site };
+}
+
 /** Recent calls — для drill-down / debug. */
 export function recentLlmCalls({ limit = 100, source, model } = {}) {
   const conds = [];

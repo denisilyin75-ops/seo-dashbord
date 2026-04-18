@@ -24,6 +24,7 @@ function hydrateSite(row) {
     ga4: row.ga4_property_id,
     gsc: row.gsc_site_url,
     affiliate: row.affiliate_url,
+    monthlyLlmBudgetUsd: row.monthly_llm_budget_usd,
     createdAt: row.created_at,
     metrics: {
       sessions: metrics.sessions,
@@ -82,10 +83,20 @@ router.put('/:id', (req, res) => {
   const newAppPwd = (appPwd == null || appPwd === '')
     ? existing.wp_app_password
     : appPwd;
+  // Budget: пустая строка / null = "no cap"; отрицательное / NaN → игнорируем (keep existing).
+  const budgetRaw = b.monthlyLlmBudgetUsd ?? b.monthly_llm_budget_usd;
+  let nextBudget = existing.monthly_llm_budget_usd;
+  if (budgetRaw === '' || budgetRaw === null) nextBudget = null;
+  else if (budgetRaw !== undefined) {
+    const parsed = Number(budgetRaw);
+    if (!Number.isNaN(parsed) && parsed >= 0) nextBudget = parsed;
+  }
+
   db.prepare(`UPDATE sites SET
     name = ?, market = ?, niche = ?, status = ?,
     wp_admin_url = ?, wp_api_url = ?, wp_user = ?, wp_app_password = ?,
     ga4_property_id = ?, gsc_site_url = ?, affiliate_url = ?,
+    monthly_llm_budget_usd = ?,
     updated_at = datetime('now')
     WHERE id = ?`).run(
     b.name ?? existing.name,
@@ -99,6 +110,7 @@ router.put('/:id', (req, res) => {
     (b.ga4 ?? b.ga4_property_id) ?? existing.ga4_property_id,
     (b.gsc ?? b.gsc_site_url) ?? existing.gsc_site_url,
     (b.affiliate ?? b.affiliate_url) ?? existing.affiliate_url,
+    nextBudget,
     req.params.id,
   );
   res.json(hydrateSite(db.prepare('SELECT * FROM sites WHERE id = ?').get(req.params.id)));

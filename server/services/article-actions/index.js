@@ -12,7 +12,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { db } from '../../db.js';
-import { trackLlmCall } from '../llm-tracker.js';
+import { trackLlmCall, checkSiteBudget } from '../llm-tracker.js';
 
 const ACTION_TYPES = [
   'translate',
@@ -182,6 +182,15 @@ export async function runAction({ action_type, source_type, source_ids, params =
     const source = loadSource(source_type, source_ids[0]);
     if (!source) throw new Error('source not found');
     const content = getSourceContent(source_type, source);
+
+    // Per-site budget guard. Actions по our articles имеют site_id; imported — no site constraint.
+    const siteId = source_type === 'article' ? source.site_id : null;
+    if (siteId) {
+      const budget = checkSiteBudget(siteId, 0.08);
+      if (!budget.allowed) {
+        throw new Error(`Monthly LLM budget для сайта исчерпан (spent $${budget.spent_mtd.toFixed(2)} / $${budget.budget.toFixed(2)}).`);
+      }
+    }
 
     // Truncate if too large (LLM context limit)
     const maxChars = 40_000;
