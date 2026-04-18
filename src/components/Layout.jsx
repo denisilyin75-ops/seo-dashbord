@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { setToken } from '../api/client.js';
 import useHotkeys from '../hooks/useHotkeys.js';
 import HotkeysHelp from './HotkeysHelp.jsx';
+import PortfolioWidget from './PortfolioWidget.jsx';
 
 const navLinks = [
   { to: '/',         label: 'Dashboard', icon: '📊' },
@@ -48,6 +49,7 @@ export default function Layout({ children, headerExtra }) {
           </nav>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+          <PortfolioWidget />
           {headerExtra}
           <button
             type="button"

@@ -89,6 +89,14 @@ export const api = {
 
   health: () => request('GET', '/api/health'),
 
+  // Portfolio (gamification — Live Capitalization widget)
+  portfolioValuation: () => request('GET', '/api/portfolio/valuation'),
+
+  // User prefs (key/value JSON store)
+  getPref:  (key) => request('GET', `/api/prefs/${encodeURIComponent(key)}`),
+  setPref:  (key, value) => request('PUT', `/api/prefs/${encodeURIComponent(key)}`, { value }),
+  delPref:  (key) => request('DELETE', `/api/prefs/${encodeURIComponent(key)}`),
+
   // daily brief (health/pulse/idea/quick-win карточки для оператора)
   dailyBrief:       ({ siteId, refresh = false } = {}) => {
     const qs = new URLSearchParams();

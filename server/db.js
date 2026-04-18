@@ -193,6 +193,14 @@ CREATE TABLE IF NOT EXISTS article_revisions (
   created_at TEXT DEFAULT (datetime('now'))
 );
 
+-- Простой key/value store для пользовательских настроек (MVP single-user).
+-- Используется для gamification toggle, impact_per_action overrides и т.д.
+CREATE TABLE IF NOT EXISTS user_prefs (
+  key        TEXT PRIMARY KEY,
+  value      TEXT,                                    -- JSON
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
 CREATE INDEX IF NOT EXISTS idx_articles_site ON articles(site_id);
 CREATE INDEX IF NOT EXISTS idx_plan_site    ON content_plan(site_id);
 CREATE INDEX IF NOT EXISTS idx_metrics_site ON site_metrics(site_id, date);

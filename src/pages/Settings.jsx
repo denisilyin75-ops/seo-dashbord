@@ -4,6 +4,7 @@ import { api, getToken, setToken as saveAuthToken } from '../api/client.js';
 import { Btn, Inp, Badge } from '../components/ui.jsx';
 import { useToast } from '../components/Toast.jsx';
 import { Skeleton } from '../components/Skeleton.jsx';
+import { notifyGamificationChanged } from '../components/PortfolioWidget.jsx';
 
 export default function Settings() {
   const toast = useToast();
@@ -14,6 +15,7 @@ export default function Settings() {
   const [aiStatus, setAiStatus] = useState(null);
   const [credits, setCredits] = useState(null);
   const [creditsErr, setCreditsErr] = useState(null);
+  const [gamPrefs, setGamPrefs] = useState(null);  // { showPortfolio, showToasts, useImpactConfig }
 
   const checkHealth = async () => {
     setHealthErr(null);
@@ -35,9 +37,34 @@ export default function Settings() {
     }
   };
 
+  const loadGamPrefs = async () => {
+    const [p, t, c] = await Promise.all([
+      api.getPref('gamification.show_portfolio').catch(() => ({ value: null })),
+      api.getPref('gamification.show_toasts').catch(() => ({ value: null })),
+      api.getPref('gamification.show_impact_config').catch(() => ({ value: null })),
+    ]);
+    setGamPrefs({
+      showPortfolio: p.value === null ? true : !!p.value,
+      showToasts: t.value === null ? true : !!t.value,
+      useImpactConfig: c.value === null ? false : !!c.value,
+    });
+  };
+
+  const setGamPref = async (key, value) => {
+    setGamPrefs((s) => ({ ...s, [key]: value }));
+    const map = { showPortfolio: 'show_portfolio', showToasts: 'show_toasts', useImpactConfig: 'show_impact_config' };
+    try {
+      await api.setPref(`gamification.${map[key]}`, value);
+      notifyGamificationChanged();
+    } catch (e) {
+      toast.error('Не удалось сохранить: ' + e.message);
+    }
+  };
+
   useEffect(() => {
     checkHealth();
     refreshCredits();
+    loadGamPrefs();
     api.listSites().then(setSites).catch(() => {});
     // дёрнем dummy AI command — заглушка ответит stub:true, реальный ключ — stub:false
     api.aiCommand('ping', {}).then((r) => setAiStatus(r)).catch((e) => setAiStatus({ error: e.message }));
@@ -142,6 +169,37 @@ export default function Settings() {
         </div>
       </Card>
 
+      <Card title="🎮 Гамификация / мотивация">
+        <p style={{ fontSize: '12px', color: '#94a3b8', margin: '0 0 10px' }}>
+          Phase A — Live Portfolio Value в шапке + toast «+$X к капитализации» после действий.
+          Цифры реальные (берём из Site Valuation), <b>заниженные</b>, не выдуманные.
+          Скрытие = только UI; backend всегда продолжает считать в фоне.
+        </p>
+        {!gamPrefs ? <Skeleton w={300} h={70} /> : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <Toggle
+              checked={gamPrefs.showPortfolio}
+              onChange={(v) => setGamPref('showPortfolio', v)}
+              label="💎 Портфель в шапке"
+              hint="Pill с текущей капитализацией и дельтой за 24ч/30д. Можно скрыть прямо в шапке (👁), сюда дублируется."
+            />
+            <Toggle
+              checked={gamPrefs.showToasts}
+              onChange={(v) => setGamPref('showToasts', v)}
+              label="🎉 Toast «+$X к капитализации» после публикации/обновления статьи"
+              hint="Показывает предсказанное влияние на оценку (review +$15, comparison +$25, guide +$10 — те же значения что в формуле валюации)."
+            />
+            <Toggle
+              checked={gamPrefs.useImpactConfig}
+              onChange={(v) => setGamPref('useImpactConfig', v)}
+              label="🛠 Кастомные значения impact (Phase B — пока не реализовано)"
+              hint="В будущем сюда добавится таблица «action → impact $», чтобы редактировать самому."
+              disabled
+            />
+          </div>
+        )}
+      </Card>
+
       <Card title="AI-бюджет (OpenRouter)">
         {!credits && !creditsErr && <Skeleton w={260} h={24} />}
         {creditsErr && (
@@ -219,6 +277,28 @@ DB_PATH=./data/seo.sqlite`}
         </pre>
       </Card>
     </div>
+  );
+}
+
+function Toggle({ checked, onChange, label, hint, disabled }) {
+  return (
+    <label style={{
+      display: 'flex', gap: 10, alignItems: 'flex-start', cursor: disabled ? 'not-allowed' : 'pointer',
+      padding: '8px 10px', background: '#0f172a', borderRadius: 5, border: '1px solid #1e293b',
+      opacity: disabled ? 0.55 : 1,
+    }}>
+      <input
+        type="checkbox"
+        checked={checked}
+        disabled={disabled}
+        onChange={(e) => !disabled && onChange(e.target.checked)}
+        style={{ marginTop: 2, accentColor: '#3b82f6', cursor: disabled ? 'not-allowed' : 'pointer' }}
+      />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: '#e2e8f0' }}>{label}</span>
+        {hint && <span style={{ fontSize: 10, color: '#64748b' }}>{hint}</span>}
+      </div>
+    </label>
   );
 }
 

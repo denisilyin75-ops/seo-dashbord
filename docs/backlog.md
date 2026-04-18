@@ -93,6 +93,40 @@
 - Реальная проблема при 50+ статьях; **в нашем backlog отсутствует**
 - Источник: `AGENTS.md §2.12`
 
+### 🎮 Gamification — фазовый rollout (новый блок, см. `docs/legacy-spec/GAMIFICATION.md`)
+
+**Цель:** преодолеть «SEO-разрыв» (12 мес от действия до результата) — показать немедленный feedback на каждое действие.
+
+**Принципы пользователя:**
+- ⚠️ **Реальные заниженные суммы** — не $35-50 за review (как в спеке), а $15 (= то что реально добавляет наш Site Valuation). Никакого «надувания»
+- 🎚 **Настраиваемые** — оператор сам редактирует impact_per_action
+- 👁 **Toggle hide/show** — backend всегда считает в фоне; toggle прячет UI. Включил → видишь актуальные цифры
+- 🚫 Никакого «токсичного сравнения» — без public leaderboards в MVP
+
+**Phase A — Live Capitalization (P1, делаем сейчас)**
+- Виджет в шапке: Portfolio Value $X · ↑ +$Y/24h · прогресс к target
+- Toast «+$X к капитализации» после publish/update статьи
+- Toggle в Settings (eye icon в виджете тоже)
+- Backend: `GET /api/portfolio/valuation` (сумма + delta 24h/30d), `user_prefs` table
+
+**Phase B — Configurable impacts (P2)**
+- Полная таблица «Action → Impact $» в Settings (редактируемая)
+- Source-of-truth для toast'ов
+- Сохранять реальные impact в `xp_log` (для калибровки в будущем)
+
+**Phase C — XP / Levels / Streaks (P2)**
+- `user_profile` таблица (level, total_xp, current_streak, longest_streak)
+- Daily streak с 2 freezes/мес
+- Levels 1-30 с unlock'ами (тоже toggleable)
+
+**Phase D — Achievements + Daily Rings (P3)**
+- 30-40 ачивок (Apple-Watch-style 3 кольца Create/Earn/Automate)
+- Подбор низкая-средняя-высокая значимость
+
+**Phase E — AI Coach + Hidden Metrics + Burnout protection (P3)**
+- Morning brief, contextual reactions, 8 «невидимых пузомерок» (Topical Authority, Internal Link Density, etc — нужны Ahrefs/SEMrush API для honest расчёта)
+- Anti-burnout: detect перегруз → предложить freeze
+
 ### Дополнительные идеи (мои 5)
 
 #### [ ] **A. Site Health summary card** — P1

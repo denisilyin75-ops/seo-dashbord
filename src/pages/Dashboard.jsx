@@ -19,6 +19,8 @@ import { SiteCardSkeleton, RowSkeleton } from '../components/Skeleton.jsx';
 import { useTryToast } from '../components/Toast.jsx';
 import { useConfirm } from '../components/ConfirmDialog.jsx';
 import useHotkeys, { useDigitHotkey } from '../hooks/useHotkeys.js';
+import { impactForCreate, impactForUpdate, buildToastSuffix } from '../utils/impact.js';
+import { notifyGamificationChanged } from '../components/PortfolioWidget.jsx';
 
 export default function Dashboard() {
   const [sites, setSites] = useState([]);
@@ -108,13 +110,39 @@ export default function Dashboard() {
 
   const refreshLog = async () => { try { setLog(await api.listLog({ limit: 50 })); } catch {} };
 
-  const updArt = (u)  => tryToast(async () => { await api.updateArticle(u.id, u); await loadSiteData(sel); refreshLog(); }, { success: 'Сохранено' });
+  // Phase A гамификации: toggle на toast-суффиксы «💎 +$N». Backend считает всегда — это только UI.
+  const [gamToasts, setGamToasts] = useState(true);
+  useEffect(() => {
+    const loadGam = () => api.getPref('gamification.show_toasts')
+      .then((r) => setGamToasts(r.value === null ? true : !!r.value))
+      .catch(() => {});
+    loadGam();
+    document.addEventListener('scc:gamification-changed', loadGam);
+    return () => document.removeEventListener('scc:gamification-changed', loadGam);
+  }, []);
+
+  const updArt = (u)  => {
+    const impact = impactForUpdate(u);
+    return tryToast(async () => {
+      await api.updateArticle(u.id, u);
+      await loadSiteData(sel);
+      refreshLog();
+      notifyGamificationChanged();
+    }, { success: `💾 Сохранено${buildToastSuffix(impact, gamToasts)}` });
+  };
   const delArt = async (aid) => {
     const title = articles.find((a) => a.id === aid)?.title || 'статью';
     const ok = await confirm({ message: `Удалить "${title}"?`, okLabel: 'Удалить', danger: true });
-    if (ok) tryToast(async () => { await api.deleteArticle(aid); await loadSiteData(sel); }, { success: 'Удалено' });
+    if (ok) tryToast(async () => { await api.deleteArticle(aid); await loadSiteData(sel); notifyGamificationChanged(); }, { success: 'Удалено' });
   };
-  const addArt = (a)  => tryToast(async () => { await api.createArticle(sel, a); await loadSiteData(sel); }, { success: 'Создано' });
+  const addArt = (a)  => {
+    const impact = impactForCreate(a);
+    return tryToast(async () => {
+      await api.createArticle(sel, a);
+      await loadSiteData(sel);
+      notifyGamificationChanged();
+    }, { success: `✨ Создано${buildToastSuffix(impact, gamToasts)}` });
+  };
   const addPl  = (p)  => tryToast(async () => { await api.createPlan(sel, p); await loadSiteData(sel); }, { success: 'В план' });
   const delPl  = async (pid) => {
     const ok = await confirm({ message: 'Удалить пункт плана?', okLabel: 'Удалить', danger: true });
