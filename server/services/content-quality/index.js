@@ -16,16 +16,24 @@ import { db } from '../../db.js';
 import { checkSeoHygiene } from './seo-hygiene.js';
 import { checkLinkHealth } from './link-health.js';
 import { checkSchema } from './schema-validator.js';
+import { checkReadability } from './readability.js';
+import { checkEeat } from './eeat.js';
+import { checkVoice } from './voice.js';
 
 const USER_AGENT = 'Popolkam SCC Content-Quality-Bot';
 const FETCH_TIMEOUT_MS = 15_000;
 
-// Phase 1 weights. Freshness/voice/factual пока не считаем — NULL в row.
-// Веса нормализуются по enabled-dims.
+// Phase 2 weights (after adding readability/eeat/voice). Freshness/factual пока NULL.
+// Веса нормализуются по enabled-dims. Match design doc §3 aggregate formula.
 const WEIGHTS = {
-  seo_hygiene: 0.40,
-  link_health: 0.30,
-  schema:      0.30,
+  seo_hygiene: 0.20,
+  eeat:        0.18,
+  voice:       0.15,
+  link_health: 0.12,
+  schema:      0.10,
+  readability: 0.10,
+  freshness:   0.10,   // placeholder, считается когда catalog будет
+  factual:     0.05,   // placeholder
 };
 
 async function fetchPageHtml(url) {
@@ -83,16 +91,22 @@ export async function analyzePost(opts) {
     return { score_overall: 0, scores: {}, issues: allIssues, stats: {}, run_id };
   }
 
-  // Parallel: SEO + Schema (синхронные). Link health — async (fetch нужен).
+  // Synchronous checkers (все in-process, fast). Link health — async (HTTP).
   const seo = checkSeoHygiene({ html, siteBaseUrl });
   const schema = checkSchema({ html });
+  const readability = checkReadability({ html });
+  const eeat = checkEeat({ html });
+  const voice = checkVoice({ html, siteBaseUrl });
   const link = await checkLinkHealth({ html, siteBaseUrl });
 
   results.seo_hygiene = seo;
   results.schema = schema;
+  results.readability = readability;
+  results.eeat = eeat;
+  results.voice = voice;
   results.link_health = link;
 
-  allIssues.push(...seo.issues, ...schema.issues, ...link.issues);
+  allIssues.push(...seo.issues, ...schema.issues, ...readability.issues, ...eeat.issues, ...voice.issues, ...link.issues);
 
   // Aggregate score (weighted по enabled-dims)
   let enabledWeightSum = 0;
@@ -112,6 +126,9 @@ export async function analyzePost(opts) {
     score_seo_hygiene: seo.score,
     score_schema: schema.score,
     score_link_health: link.score,
+    score_readability: readability.score,
+    score_eeat: eeat.score,
+    score_voice: voice.score,
     score_overall,
     word_count: seo.stats.word_count,
     image_count: seo.stats.image_count,
@@ -133,12 +150,18 @@ export async function analyzePost(opts) {
       seo_hygiene: seo.score,
       link_health: link.score,
       schema: schema.score,
+      readability: readability.score,
+      eeat: eeat.score,
+      voice: voice.score,
     },
     issues: allIssues,
     stats: {
       seo: seo.stats,
       link: link.stats,
       schema: schema.stats,
+      readability: readability.stats,
+      eeat: eeat.stats,
+      voice: voice.stats,
     },
     run_id,
   };
