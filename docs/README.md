@@ -12,6 +12,7 @@
 | [`devlog.md`](devlog.md) | Хронология изменений и решений | Для понимания «как мы до этого дошли» |
 | [`migration-plan.md`](migration-plan.md) | Runbook миграции на новый сервер + disaster recovery | При переезде или ЧП |
 | [`scaling-checklist.md`](scaling-checklist.md) | Чек-лист запуска нового сайта портфеля (от 0 до боевого за 30-60 мин) | При добавлении нового сайта |
+| [`sources.md`](sources.md) | Каталог источников информации по рубрикам (производители, форумы, YouTube, SEO-ресёрч, партнёрки) | При подготовке обзоров и сравнений |
 | [`gamification.md`](gamification.md) | User guide к Live Portfolio Value виджету + toast'ам (Phase A) | При вопросах «откуда эта цифра в шапке?» |
 
 ## Операционные стратегии (контент, SEO, монетизация)
