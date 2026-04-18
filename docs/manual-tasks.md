@@ -1,0 +1,196 @@
+# Manual tasks — что нужно сделать руками
+
+> **Назначение:** единый список задач, которые требуют ручной работы пользователя (логины в админки, покупки лицензий, AI-артефакты в claude.ai, работа с DNS/почтой). Всё, что **не может сделать Claude Code** из текущего сетапа.
+> **Не дублирует `backlog.md`** — там общий список всех задач с приоритетами. Здесь только **manual hand-work**.
+> **Статус:** v1 — 2026-04-18
+> **Проверять:** раз в сессию, отмечать выполненное.
+
+---
+
+## 🔴 P0 — блокирующие (делать первыми)
+
+### Лицензии / покупки (aykakchisto блокер)
+
+- [ ] **REHub theme** (~$59, ThemeForest)
+  - После покупки: Purchase Code из ThemeForest → wp-admin aykakchisto → Appearance → Upload Theme → активировать → Registration tab → ввести код
+  - Плагины REHub ставить **по одному** (bulk-TGMPA падает на WP 6.9+)
+- [ ] **Content Egg Pro** (~$59, CodeCanyon)
+  - Upload Plugin → активировать → API keys: Admitad / Я.Маркет / Ozon (те же что на popolkam)
+- [ ] **WP All Import Pro + 3 addon** (~$199, wpallimport.com)
+  - Upload Plugin × 4 → активировать лицензию
+- [ ] **envato-market** (бесплатный, но только через envato.com) — для auto-updates купленного
+
+### popolkam.ru — перенос контента в WordPress
+
+> **Есть готовые templates** в `docs/templates/` — копипаст-ready Gutenberg + REHub shortcodes.
+
+- [ ] **Homepage** — по `docs/templates/popolkam-homepage-blueprint.md`
+  - 6 блоков: hero → latest reviews → pillar/comparison → 3 price-tier → об авторе → popular
+- [ ] **Category `/kofemashiny/`** — по `docs/templates/popolkam-kofemashiny-category-blueprint.md`
+  - 7 блоков: breadcrumbs+H1 → intro Дмитрия → 3 tier cards → pillar+quiz → archive → FAQ → author card
+- [ ] **4 обзора** — контент в `content/popolkam/reviews/`:
+  - [ ] De'Longhi Magnifica S ECAM22.110 (`obzor-delonghi-magnifica-s-ecam22-110.md`)
+  - [ ] Philips 3200 LatteGo EP3241 (`obzor-philips-3200-lattego-ep3241.md`)
+  - [ ] Saeco PicoBaristo Deluxe SM5572 (`obzor-saeco-picobaristo-deluxe-sm5572.md`)
+  - [ ] Jura E8 (`obzor-jura-e8.md`)
+- [ ] **Сравнение** — `content/popolkam/comparisons/delonghi-magnifica-s-vs-philips-3200-lattego.md`
+- [ ] **Страница `/o-avtore/`** — `content/popolkam/pages/o-avtore.md`
+  - + Schema.org Person по `docs/templates/schema-person.md`
+
+### aykakchisto.ru — перенос контента
+
+- [ ] **Страница `/o-avtore/`** — `content/aykakchisto/pages/o-avtore.md`
+  - + Schema.org Person (Дарья Метёлкина) по `docs/templates/schema-person.md`
+
+### Инфра — срочно
+
+- [ ] **Продлить домен 4beg.ru** до 2026-07-04 (осталось ~2.5 мес)
+- [ ] **Собрать доступы 4beg.ru** (для миграции):
+  - wp-admin логин/пароль
+  - SSH/FTP Timeweb
+  - GA4 + Search Console email
+  - Активные партнёрские аккаунты
+
+---
+
+## 🟡 P1 — ближайшие 1-2 недели
+
+### AI-генерация через claude.ai (artifacts)
+
+- [ ] **Портрет Дмитрия Полкина** — по промпту в `docs/personas/popolkam-dmitri-polkin.md §5.3`
+  - Сохранить как `dmitri-polkin-portrait.png` в WP media (`/wp-content/uploads/`)
+- [ ] **Портрет Дарьи Метёлкиной** — по промпту в `docs/personas/aykakchisto-darya-metyolkina.md`
+  - Сохранить как `darya-metyolkina-portrait.png`
+- [ ] **Маскот ПО-3000** (popolkam — робот-помощник)
+- [ ] **Маскот Дроп** (aykakchisto)
+- [ ] **Popolkam brand visual upgrade** — React-артефакт → WP plugin (обновление визуала сайта)
+
+### Google / Analytics setup
+
+- [ ] **GA4 Service Account JSON** — создать в Google Cloud Console → скачать ключ → добавить в SCC Settings
+  - Дать Service Account email доступ к GA4 property (Viewer)
+- [ ] **GSC property access** — для того же Service Account email
+- [ ] **Проверить GA4 property_id** для popolkam + aykakchisto (в SCC `sites.ga4_property_id`)
+
+### API keys в SCC `.env`
+
+- [ ] **`ANTHROPIC_API_KEY`** или **`OPENROUTER_API_KEY`** (OpenRouter дешевле, уже $4.93/$5 на балансе)
+- [ ] **Admitad** — партнёр ID + SubID для каждого сайта
+- [ ] **Яндекс.Маркет** — API key
+- [ ] **Ozon** — API key
+- [ ] **Bol.com** / **Awin** — когда запустим koffie-expert.nl
+
+### Email setup
+
+- [ ] **dmitri@popolkam.ru** (Yandex 360 или Timeweb mail)
+- [ ] **darya@aykakchisto.ru** — аналогично
+- [ ] MX-записи настроены на DNS обоих доменов
+
+### Schema.org Person deploy
+
+- [ ] **popolkam.ru** — через Rank Math (вариант A из `docs/templates/schema-person.md`)
+  - wp-admin → Rank Math → Edit `/o-avtore/` → Schema → Custom → вставить JSON
+- [ ] **aykakchisto.ru** — аналогично
+- [ ] **Валидация** через https://search.google.com/test/rich-results для обоих
+- [ ] **Organization schema** на `/` главной (отдельный JSON)
+
+### Testing после переноса контента в WP
+
+- [ ] **Google Rich Results Test** — для каждой страницы: review / comparison / category / homepage / o-avtore
+- [ ] **Schema duplicate check** — не должно быть 2× Person (Rank Math + custom = penalty)
+- [ ] **Mobile Core Web Vitals** (PageSpeed Insights): LCP < 2.5s, CLS < 0.1, INP < 200ms
+  - По каждой странице: homepage, /kofemashiny/, 1-2 обзора
+- [ ] **Broken links check** — Screaming Frog или в WP admin → Broken Link Checker
+- [ ] **Breadcrumbs** — визуально + в Rich Results
+- [ ] **OG image** (1200×630) для каждой страницы — Facebook debugger / Twitter card validator
+
+### Telegram (опционально Phase 1)
+
+- [ ] **`@popolkam_review`** канал создать, описание, закреп с `/o-avtore/`
+- [ ] **`@aykakchisto_notes`** канал создать
+- [ ] Ссылки добавить в footer сайтов + в Schema.org `sameAs`
+
+---
+
+## 🟢 P2 — месяц
+
+### Инфраструктура (SSH работа)
+
+- [ ] **LLM host online** — user side, сервер 2×RTX 3090 48GB VRAM / 96GB RAM
+  - Tailscale VPN установка
+  - Ollama + Qwen-72B (или через vLLM) для bulk compute
+  - Endpoint expose в SCC `.env` → `LOCAL_LLM_URL`
+- [ ] **VPS upgrade** 48GB/3.8GB RAM → 120GB/8GB RAM (Timeweb panel)
+  - Без этого не влезет Phase 1 (Content Egg Pro + WPAI + 3 сайта)
+- [ ] **Docker daemon DNS fix** (30 сек работы + 1 мин простоя)
+  - На VPS: `/etc/docker/daemon.json` → `{"dns": ["8.8.8.8", "1.1.1.1"]}`
+  - `systemctl restart docker`
+  - Удалить `extra_hosts` из `/opt/scc/docker-compose.yml`
+- [ ] **IPv6 на 5.129.245.98** (P2, отдельной сессией — рискованно, держать rescue console Timeweb)
+  - `/etc/netplan/*.yaml` → IPv6 adress + default route
+  - `netplan apply`
+  - Вернуть AAAA записи для popolkam / 4beg / cmd.bonaka / aykakchisto
+
+### popolkam.ru — финальные шлифовки
+
+- [ ] **Rank Math wizard полностью** (сейчас базово)
+  - Meta-templates для review/comparison/guide
+  - sitemap.xml проверка
+  - Breadcrumbs полная настройка
+- [ ] **Главная визуально на mobile** — проверить что не ломается в REHub стилях
+- [ ] **Footer disclaimer** обоих сайтов — малым шрифтом про псевдоним + про партнёрские ссылки
+- [ ] **Admitad SubID** — проверить что работает для каждого партнёра
+
+### aykakchisto.ru — после лицензий
+
+- [ ] **ReCompare preset** перенести с popolkam (после активации REHub Registration)
+- [ ] **Status → active** в SCC (сейчас setup)
+- [ ] **Первые 30 plan-items** создать по `docs/strategies/cleaning.md` (когда стратегия готова)
+
+### 4beg.ru — миграция
+
+- [ ] **Экспорт БД + uploads из Timeweb** (когда доступы собраны)
+- [ ] **Contentный аудит** старых статей для refresh 2026
+
+---
+
+## ⚪ Optional / будущие
+
+### Claude.ai artefacts (когда будет слот)
+
+- [ ] **Quiz "Подбор кофемашины"** — React-артефакт → WP plugin (6 вопросов: бюджет / чашек / молоко / место / простота / эспрессо)
+- [ ] **Quiz "Подбор робота-пылесоса"** (aykakchisto)
+- [ ] **TCO-калькулятор кофемашины** — React-артефакт с эксперт/normal режимами
+- [ ] **SVG-иконки категорий popolkam** — заменить emoji ☕🧹🍲❄️👕
+
+### Phase 2 контент
+
+- [ ] **Phase 1 публикации кофе** — 9 обзоров из `docs/strategies/coffee-machines.md` (после того как первые 4 + comparison залиты и работают)
+- [ ] **Phase 1 публикации чайники** — после 9 кофе-обзоров
+- [ ] **Phase 1 публикации роботы-пылесосы** (aykakchisto)
+
+---
+
+## 📌 Как пользоваться этим файлом
+
+1. **Перед каждой сессией** — глянуть P0 секцию, отметить сделанное галочкой `[x]`
+2. **Закрыл задачу** — вычеркнуть или переместить в раздел «Сделано» (внизу)
+3. **Новая ручная задача из разговора** — сразу сюда, не в backlog
+4. **Правило:** если Claude Code может это сделать сам → это в `backlog.md`, не сюда
+
+---
+
+## ✅ Сделано
+
+*(пустой — добавлять по мере выполнения с датой)*
+
+---
+
+## Связанные документы
+
+- `docs/backlog.md` — общий backlog задач (автоматизируемых + ручных)
+- `docs/templates/popolkam-homepage-blueprint.md` — copy-paste блок для homepage
+- `docs/templates/popolkam-kofemashiny-category-blueprint.md` — copy-paste для category
+- `docs/templates/schema-person.md` — JSON-LD snippets для обоих сайтов
+- `docs/templates/rehub-review-template.md` — шаблон single review
+- `docs/scaling-checklist.md` — чек-лист запуска нового сайта

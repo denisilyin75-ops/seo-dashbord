@@ -468,6 +468,7 @@ Per-site widget: uptime, SSL expiry, GA4/GSC connected, last metric sync, broken
 ## 📚 Документы, на которые ссылаемся
 
 - **Supreme principle** (память) — всё для пользователя
+- [`docs/manual-tasks.md`](manual-tasks.md) — **ручные задачи пользователя** (WP-клики, покупки лицензий, AI-артефакты, DNS/email). Проверять каждую сессию.
 - [`docs/scaling-checklist.md`](scaling-checklist.md) — чек-лист запуска нового сайта (Фаза 1-3)
 - [`docs/gamification.md`](gamification.md) — user guide к Live Portfolio Value виджету
 - [`docs/strategies/coffee-machines.md`](strategies/coffee-machines.md) — стратегия кофемашин
