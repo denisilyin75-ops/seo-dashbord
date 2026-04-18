@@ -11,6 +11,7 @@ import DeploysPanel from '../components/DeploysPanel.jsx';
 import AddForm from '../components/AddForm.jsx';
 import SiteForm from '../components/SiteForm.jsx';
 import DeployWizard from '../components/DeployWizard.jsx';
+import DeployWizardV2 from '../components/DeployWizardV2.jsx';
 import DailyBrief from '../components/DailyBrief.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import ScrollToTop from '../components/ScrollToTop.jsx';
@@ -509,10 +510,10 @@ export default function Dashboard() {
       )}
 
       {showDeploy && (
-        <DeployWizard
-          sites={sites}
-          onDeployed={async () => { await loadBase(); }}
+        <DeployWizardV2
+          open={showDeploy}
           onClose={() => { setShowDeploy(false); loadBase(); }}
+          onComplete={async () => { await loadBase(); setShowDeploy(false); }}
         />
       )}
 

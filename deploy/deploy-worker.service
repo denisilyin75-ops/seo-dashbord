@@ -1,0 +1,17 @@
+[Unit]
+Description=SCC Deploy Worker — polls SCC for queued provision tasks
+After=network.target docker.service
+
+[Service]
+Type=simple
+User=root
+Environment="SCC_URL=http://localhost:3001"
+EnvironmentFile=/opt/scc/.env.deploy-worker
+ExecStart=/usr/bin/bash /opt/scc/server/scripts/deploy-worker.sh
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

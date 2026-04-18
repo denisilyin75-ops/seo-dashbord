@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "template_id": "electronics",
+    "label": "🔌 Гаджеты и электроника (generic)",
+    "description": "Universal гаджеты — смартфоны, ноутбуки, наушники, умные часы. Для сайтов-обзорников широкой электроники."
+  },
+  "defaults": {
+    "LOCALE": "ru_RU",
+    "TIMEZONE": "Europe/Moscow",
+    "PLUGINS": "seo-by-rank-math woocommerce wordpress-importer cyr2lat",
+    "CATEGORIES": "Смартфоны|slug=smartfony|desc=Обзоры и сравнения Android и iPhone.;Ноутбуки|slug=noutbuki|desc=Для работы, игр, учёбы — разбор процессоров, дисплеев, автономности.;Наушники и аудио|slug=naushniki|desc=TWS, over-ear, wired — разбор звука, ANC, комфорта.;Умные часы|slug=umnye-chasy|desc=Apple Watch, Galaxy Watch, Huawei, Xiaomi.;Гаджеты|slug=gadzhety|desc=Колонки, трекеры, периферия."
+  },
+  "polish": {
+    "AUTHOR_NAME": "Редакция",
+    "CATEGORY_DESCRIPTIONS": "smartfony=Обзоры и сравнения смартфонов 2024-2026. Android и iPhone.;noutbuki=Ноутбуки для разных задач — workflow, игры, учёба. Разбор CPU/GPU/дисплеев.;naushniki=TWS, over-ear и проводные наушники. Разбор звука, ANC, латенции.;umnye-chasy=Apple Watch, Galaxy Watch, Huawei — функции, автономность, интеграции.;gadzhety=Колонки, трекеры, игровые аксессуары."
+  }
+}

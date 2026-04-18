@@ -91,6 +91,19 @@ export const api = {
   // Aggregate health (для dashboard widgets)
   exitReadiness: () => request('GET', '/api/health/exit-readiness'),
   portfolioQuality: () => request('GET', '/api/health/portfolio-quality'),
+  // Deploy Wizard
+  listTemplates: () => request('GET', '/api/deploy/templates'),
+  getTemplate: (id) => request('GET', `/api/deploy/template/${id}`),
+  enqueueDeploy: (body) => request('POST', '/api/deploy', body),
+  listDeployTasks: (status, limit = 50) => {
+    const qs = new URLSearchParams();
+    if (status) qs.set('status', status);
+    qs.set('limit', String(limit));
+    return request('GET', `/api/deploy/tasks?${qs}`);
+  },
+  getDeployTask: (id) => request('GET', `/api/deploy/tasks/${id}`),
+  cancelDeployTask: (id) => request('POST', `/api/deploy/tasks/${id}/cancel`),
+
   activityFeed: (limit = 50) => request('GET', `/api/activity/feed?limit=${limit}`),
   agentsStatus: () => request('GET', '/api/activity/agents-status'),
   llmCosts: (days = 30, groupBy = 'source') => request('GET', `/api/activity/llm-costs?days=${days}&groupBy=${groupBy}`),

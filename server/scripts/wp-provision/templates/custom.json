@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "template_id": "custom",
+    "label": "⚙️ Custom — пустой шаблон",
+    "description": "Без preset'а категорий и полей. Заполнить вручную в wizard'е."
+  },
+  "defaults": {
+    "LOCALE": "ru_RU",
+    "TIMEZONE": "Europe/Moscow",
+    "PLUGINS": "seo-by-rank-math cyr2lat wordpress-importer",
+    "CATEGORIES": "",
+    "BLOG_PAGE_TITLE": "Blog",
+    "BLOG_PAGE_SLUG": "blog",
+    "MENU_NAME": "Main menu"
+  },
+  "polish": {}
+}

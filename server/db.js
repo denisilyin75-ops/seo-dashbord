@@ -464,6 +464,29 @@ CREATE INDEX IF NOT EXISTS idx_llm_calls_source ON llm_calls(source, created_at 
 CREATE INDEX IF NOT EXISTS idx_llm_calls_model ON llm_calls(model, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_llm_calls_site ON llm_calls(site_id, created_at DESC);
 
+-- Deploy Wizard Phase 1 — queue для host-worker'а, который запускает
+-- provision-site.sh на хост-машине. SCC в контейнере не имеет docker socket,
+-- поэтому паттерн queue+poll: SCC пишет task, host-worker его подхватывает.
+CREATE TABLE IF NOT EXISTS deploy_tasks (
+  id              TEXT PRIMARY KEY,
+  task_type       TEXT NOT NULL DEFAULT 'provision',   -- provision | polish | migrate | delete
+  domain          TEXT NOT NULL,
+  site_slug       TEXT NOT NULL,
+  template        TEXT,                                -- 'coffee-review' | 'cleaning' | 'electronics' | 'custom'
+  config_json     TEXT NOT NULL,                       -- все env-переменные preset'а
+  status          TEXT DEFAULT 'queued',               -- queued | running | success | failed | cancelled
+  log             TEXT,                                -- append-only текст stdout/stderr
+  exit_code       INTEGER,
+  created_at      TEXT DEFAULT (datetime('now')),
+  started_at      TEXT,
+  finished_at     TEXT,
+  site_id         TEXT REFERENCES sites(id) ON DELETE SET NULL,  -- linked когда complete
+  worker_host     TEXT,                                -- кто забрал task
+  error           TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_deploy_tasks_status ON deploy_tasks(status, created_at);
+CREATE INDEX IF NOT EXISTS idx_deploy_tasks_domain ON deploy_tasks(domain);
+
 -- Article merge workflow (Phase 4 из features/article-import-and-actions.md).
 -- merge_previews: черновик объединения 2+ наших статей. LLM (Sonnet) анализирует
 -- и предлагает merged HTML + redirects plan + конфликты на решение оператору.

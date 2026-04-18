@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "template_id": "cleaning",
+    "label": "🧹 Чистота дома / бытовая химия / уборочная техника",
+    "description": "Ниша aykakchisto.ru — роботы-пылесосы, пароочистители, бытовая химия, пятна, запахи."
+  },
+  "defaults": {
+    "LOCALE": "ru_RU",
+    "TIMEZONE": "Europe/Moscow",
+    "PLUGINS": "seo-by-rank-math woocommerce wordpress-importer cyr2lat",
+    "CATEGORIES": "Роботы-пылесосы|slug=roboty-pylesosy|desc=Обзоры и сравнения роботов-пылесосов Dreame, Roborock, iRobot, Xiaomi.;Пароочистители|slug=parochistiteli|desc=Вертикальные моющие пылесосы, паровые швабры, пароочистители.;Бытовая химия|slug=bytovaya-himiya|desc=Стиральные порошки, средства для посуды, пятновыводители — разбор состава и эффективности.;Сложные случаи|slug=slozhnye-sluchai|desc=Плесень, запахи от животных, пятна от вина, жира, краски.;Уборка по комнатам|slug=uborka|desc=Кухня, ванная, спальня — как поддерживать порядок и чистоту.",
+    "BLOG_PAGE_TITLE": "Гайды",
+    "BLOG_PAGE_SLUG": "gayd",
+    "MENU_NAME": "Главное меню"
+  },
+  "polish": {
+    "AUTHOR_NAME": "Редакция",
+    "CATEGORY_DESCRIPTIONS": "roboty-pylesosy=Обзоры и тесты роботов-пылесосов: Dreame, Roborock, iRobot, Xiaomi. Реальное время уборки, шум, цена владения.;parochistiteli=Вертикальные моющие пылесосы и паровые швабры — что реально работает против разводов.;bytovaya-himiya=Разбираем состав стиральных порошков, гелей для посуды, пятновыводителей. Химик объясняет что действует, а что маркетинг.;slozhnye-sluchai=Плесень, запахи от животных, застарелые пятна — пошаговые гайды решения.;uborka=Уборка по комнатам с пошаговыми инструкциями."
+  }
+}

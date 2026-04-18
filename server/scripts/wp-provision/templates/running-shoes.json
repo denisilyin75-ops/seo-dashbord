@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "template_id": "running-shoes",
+    "label": "👟 Беговые кроссовки / спортивная обувь",
+    "description": "Ниша 4beg.ru — Nike, Asics, Adidas, Saucony, Salomon. Марафон, трейл, шоссе."
+  },
+  "defaults": {
+    "LOCALE": "ru_RU",
+    "TIMEZONE": "Europe/Moscow",
+    "PLUGINS": "seo-by-rank-math woocommerce wordpress-importer cyr2lat",
+    "CATEGORIES": "Шоссейные|slug=shosseynye|desc=Кроссовки для асфальта — ежедневные тренировки, марафон, темп.;Трейловые|slug=treylovye|desc=Кроссовки для пересечённой местности и гор.;Марафон и соревнования|slug=marafon|desc=Carbon plate кроссовки, racing shoes для PB.;Для начинающих|slug=nachinayushchim|desc=Первые беговые — максимум амортизации, устойчивость, бюджет.;Бренды|slug=brendy|desc=Nike, Asics, Adidas, Saucony, Salomon, Brooks, Hoka.",
+    "BLOG_PAGE_TITLE": "Обзоры",
+    "BLOG_PAGE_SLUG": "obzory",
+    "MENU_NAME": "Главное меню"
+  },
+  "polish": {
+    "AUTHOR_NAME": "Редакция 4beg",
+    "CATEGORY_DESCRIPTIONS": "shosseynye=Обзоры шоссейных кроссовок: Nike Pegasus, Asics GT, Saucony Ride. Разбор амортизации, веса, долговечности.;treylovye=Трейловые кроссовки для гор и лесов: Salomon, La Sportiva, Hoka Speedgoat. Грип, защита, водостойкость.;marafon=Carbon plate обувь: Nike Alphafly, Asics Metaspeed, Saucony Endorphin Pro. Для каких ног подходит и на каких дистанциях.;nachinayushchim=Первые беговые — мягкие, устойчивые, бюджетные варианты.;brendy=Разбор линеек производителей: линейка Nike, линейка Asics и т.д."
+  }
+}
