@@ -10,6 +10,7 @@
 //
 // Не требует AUTH_TOKEN — это локальный script, запускаемый git-hook'ом.
 
+import 'dotenv/config';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
