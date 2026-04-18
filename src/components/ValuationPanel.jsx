@@ -114,6 +114,26 @@ export default function ValuationPanel({ siteId }) {
             Avg monthly revenue: <b>{fmtMoney(latest.avgMonthlyRevenue)}</b>
           </div>
         )}
+
+        {/* Метаданные оценки — версия формулы и timestamp последнего пересчёта.
+            Помогает понять «почему сегодня цифра другая» (формула менялась) и насколько давно считалось. */}
+        <div style={{
+          fontSize: 10, color: '#64748b', fontFamily: 'var(--mn)',
+          padding: '6px 0 0', marginTop: 6, borderTop: '1px dashed #1e293b',
+          display: 'flex', flexWrap: 'wrap', gap: 12,
+        }}>
+          {latest.methodology && (
+            <span title="Версия формулы. Бампается при каждой калибровке — гарантия что delta24h не сравнивает несравнимое.">
+              📐 формула: <b style={{ color: '#94a3b8' }}>{latest.methodology}</b>
+            </span>
+          )}
+          <span title="Timestamp последнего пересчёта (UTC). Если давно — нажми ↻ Пересчитать выше.">
+            🕐 расчёт: <b style={{ color: '#94a3b8' }}>{latest.createdAt || latest.date}</b>
+          </span>
+          <span style={{ color: '#475569' }}>
+            всего замеров: <b style={{ color: '#64748b' }}>{history.length}</b>
+          </span>
+        </div>
       </div>
 
       {/* Chart */}

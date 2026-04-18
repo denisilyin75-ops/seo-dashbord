@@ -146,7 +146,7 @@ router.get('/:id/valuations', (req, res) => {
   const limit = Math.max(1, Math.min(500, Number(req.query.limit) || 180));
   const rows = db.prepare(`
     SELECT
-      id, date, mode, confidence,
+      id, date, mode, confidence, methodology,
       avg_monthly_revenue, avg_monthly_profit,
       valuation_low, valuation_expected, valuation_high,
       adjustments_json, created_at
@@ -160,6 +160,7 @@ router.get('/:id/valuations', (req, res) => {
     date: r.date,
     mode: r.mode,
     confidence: r.confidence,
+    methodology: r.methodology,
     avgMonthlyRevenue: r.avg_monthly_revenue,
     avgMonthlyProfit: r.avg_monthly_profit,
     valuationLow: r.valuation_low,
