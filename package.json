@@ -13,7 +13,8 @@
     "preview": "vite preview",
     "seed": "node server/scripts/seed.js",
     "install-hooks": "node server/scripts/install-hooks.js",
-    "code-review": "node server/scripts/code-review.js --trigger=manual --sha=HEAD"
+    "code-review": "node server/scripts/code-review.js --trigger=manual --sha=HEAD",
+    "test": "node --test --test-reporter=spec server/services/__tests__"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.0",
