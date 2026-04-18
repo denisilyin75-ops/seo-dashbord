@@ -58,15 +58,24 @@ export default function ActivityFeed({ limit = 50 }) {
 
   const agg = data.agg_24h || {};
 
+  // Для группировки: показывать date только на смене дня
+  let prevDate = '';
+  const rowsWithDate = items.map(it => {
+    const d = (it.started_at || '').slice(0, 10);
+    const showDate = d !== prevDate;
+    prevDate = d;
+    return { ...it, showDate };
+  });
+
   return (
     <div>
-      {/* 24h aggregate header */}
+      {/* Compact header — 1 line */}
       <div style={{
-        display: 'flex', gap: 8, marginBottom: 10, padding: '10px 12px',
-        background: '#0f172a', border: '1px solid #1e293b', borderRadius: 5,
-        flexWrap: 'wrap', alignItems: 'center',
+        display: 'flex', gap: 6, marginBottom: 6, padding: '4px 8px',
+        background: '#0f172a', border: '1px solid #1e293b', borderRadius: 4,
+        flexWrap: 'wrap', alignItems: 'center', fontSize: 10,
       }}>
-        <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>24h:</span>
+        <span style={{ color: '#64748b', fontWeight: 600 }}>24h</span>
         {Object.entries(agg).map(([source, stats]) => (
           <SourceBadge
             key={source}
@@ -79,24 +88,23 @@ export default function ActivityFeed({ limit = 50 }) {
         {filter && (
           <button
             onClick={() => setFilter('')}
-            style={{ fontSize: 10, background: 'transparent', border: 'none', color: '#60a5fa', cursor: 'pointer', marginLeft: 'auto' }}
-          >✕ Clear filter</button>
+            style={{ fontSize: 9, background: 'transparent', border: 'none', color: '#60a5fa', cursor: 'pointer' }}
+          >✕</button>
         )}
-        <span style={{ marginLeft: filter ? 0 : 'auto', fontSize: 10, color: '#475569', fontFamily: 'var(--mn)' }}>
-          {loading ? 'обновляю…' : `auto-refresh 30s · ${items.length}/${data.items.length}`}
+        <span style={{ marginLeft: 'auto', color: '#475569', fontFamily: 'var(--mn)' }}>
+          {loading ? '…' : `${items.length}/${data.items.length} · auto 30s`}
         </span>
       </div>
 
-      {/* Item list */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-        {items.map((it, i) => (
-          <Row key={`${it.source}_${it.id}_${i}`} item={it} />
-        ))}
-        {items.length === 0 && (
-          <div style={{ padding: 12, color: '#64748b', fontSize: 12, textAlign: 'center' }}>
-            {filter ? `Нет записей из ${filter} за последние 50` : 'Activity feed пуст'}
+      {/* Dense list — no gap between rows, ~22px each */}
+      <div style={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: 4, overflow: 'hidden' }}>
+        {rowsWithDate.length === 0 ? (
+          <div style={{ padding: 10, color: '#64748b', fontSize: 11, textAlign: 'center' }}>
+            {filter ? `Нет записей из ${filter}` : 'Activity feed пуст'}
           </div>
-        )}
+        ) : rowsWithDate.map((it, i) => (
+          <Row key={`${it.source}_${it.id}_${i}`} item={it} showDate={it.showDate} />
+        ))}
       </div>
     </div>
   );
@@ -110,56 +118,75 @@ function SourceBadge({ source, stats, active, onClick }) {
     <button
       onClick={onClick}
       style={{
-        display: 'flex', alignItems: 'center', gap: 4,
-        padding: '4px 8px', borderRadius: 4,
-        background: active ? meta.color + '25' : '#1e293b',
-        border: `1px solid ${active ? meta.color : '#334155'}`,
-        color: '#e2e8f0', fontSize: 11, cursor: 'pointer', fontFamily: 'inherit',
+        display: 'flex', alignItems: 'center', gap: 3,
+        padding: '2px 6px', borderRadius: 3,
+        background: active ? meta.color + '25' : 'transparent',
+        border: `1px solid ${active ? meta.color : '#1e293b'}`,
+        color: '#e2e8f0', fontSize: 10, cursor: 'pointer', fontFamily: 'inherit',
       }}
     >
       <span>{meta.icon}</span>
       <strong style={{ fontFamily: 'var(--mn)' }}>{total}</strong>
-      <span style={{ color: '#64748b' }}>{meta.label}</span>
-      {errors > 0 && (
-        <span style={{ color: '#ef4444', fontSize: 10 }}>✕{errors}</span>
-      )}
+      {errors > 0 && <span style={{ color: '#ef4444' }}>✕{errors}</span>}
     </button>
   );
 }
 
-function Row({ item }) {
+// Компактная форма строки: фиксированная grid, 22px высота, минимум chrome.
+// Columns: [status-dot] [time] [source] [label] [summary...] [tokens/cost]
+// При наведении — background highlight + фулл-summary в title tooltip.
+function Row({ item, showDate }) {
   const meta = SOURCE_META[item.source] || { icon: '•', label: item.source, color: '#64748b' };
   const statusColor = STATUS_COLOR[item.status] || '#64748b';
   const time = (item.started_at || '').slice(11, 16);
-  const date = (item.started_at || '').slice(0, 10);
+  const date = (item.started_at || '').slice(5, 10);
 
   return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 8,
-      padding: '6px 10px', background: '#0f172a',
-      borderLeft: `3px solid ${meta.color}`,
-      borderRadius: 3,
-      fontSize: 11,
-    }}>
-      <span style={{ fontSize: 12 }}>{meta.icon}</span>
-      <span style={{ color: statusColor, fontWeight: 700, minWidth: 60, fontSize: 10 }}>
-        {item.status?.toUpperCase() || '?'}
+    <div
+      title={`${item.source} · ${item.label} · ${item.status}\n${item.summary || ''}\n${item.started_at}`}
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '6px 42px 16px 130px 1fr auto',
+        alignItems: 'center',
+        gap: 8,
+        padding: '2px 8px',
+        fontSize: 11,
+        lineHeight: '18px',
+        height: 22,
+        fontFamily: 'var(--mn)',
+        color: '#94a3b8',
+      }}
+      onMouseEnter={e => e.currentTarget.style.background = '#1e293b30'}
+      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+    >
+      <span style={{ color: statusColor, fontSize: 10 }}>●</span>
+      <span style={{ color: '#64748b', fontSize: 10 }}>
+        {showDate ? date : ''}{showDate ? ' ' : ''}{time}
       </span>
-      <strong style={{ color: '#e2e8f0', minWidth: 120, fontFamily: 'var(--mn)', fontSize: 11 }}>
+      <span style={{ fontSize: 11 }}>{meta.icon}</span>
+      <strong style={{ color: '#e2e8f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {item.label}
       </strong>
-      <span style={{ color: '#94a3b8', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      <span style={{
+        color: '#94a3b8',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        fontFamily: 'inherit',
+        fontSize: 11,
+      }}>
         {item.summary}
       </span>
-      {item.tokens_used > 0 && (
-        <span style={{ color: '#64748b', fontSize: 10, fontFamily: 'var(--mn)', flexShrink: 0 }}>
-          {item.tokens_used}t
-          {item.cost_usd > 0 && ` · $${item.cost_usd.toFixed(4)}`}
+      {item.tokens_used > 0 ? (
+        <span style={{ color: '#475569', fontSize: 10, flexShrink: 0 }}>
+          {formatTokens(item.tokens_used)}{item.cost_usd > 0 ? ` $${item.cost_usd.toFixed(3)}` : ''}
         </span>
-      )}
-      <span style={{ color: '#475569', fontFamily: 'var(--mn)', fontSize: 10, flexShrink: 0 }}>
-        {date} {time}
-      </span>
+      ) : <span />}
     </div>
   );
+}
+
+function formatTokens(n) {
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
+  return String(n);
 }
