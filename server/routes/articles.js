@@ -3,32 +3,96 @@ import { randomUUID } from 'node:crypto';
 import { db } from '../db.js';
 import { clientFromSiteRow, WordPressNotConfiguredError, WordPressApiError } from '../services/wordpress.js';
 import { logRevision, logBulkRevision, listRevisions, REVISION_KINDS } from '../services/revisions.js';
+import { searchArticles, hydrateArticle as hydrateWithTags } from '../services/article-search.js';
 
 const router = Router();
 
 function hydrateArticle(row) {
-  if (!row) return null;
-  return {
-    id: row.id,
-    siteId: row.site_id,
-    wpPostId: row.wp_post_id,
-    title: row.title,
-    url: row.url,
-    type: row.type,
-    status: row.status,
-    sessions: row.sessions,
-    clicks: row.clicks,
-    cr: row.cr,
-    notes: row.notes,
-    wpLastSync: row.wp_last_sync,
-    updated: row.updated_at,
-  };
+  // Re-export hydrate из article-search (добавляет tags/wordCount/qualityScore).
+  return hydrateWithTags(row);
+}
+
+// Разбор query-параметров из URL в filters для searchArticles.
+// Массивы: ?tags=a&tags=b → ['a', 'b']; ?tags=a,b → ['a', 'b']; ?tags=a → ['a']
+function parseListParam(value) {
+  if (value == null) return [];
+  if (Array.isArray(value)) return value;
+  return String(value).split(',').map(s => s.trim()).filter(Boolean);
 }
 
 // GET /api/sites/:siteId/articles
+// Основной endpoint списка. Поддерживает search + filters + sort + pagination.
+// Response shape:
+//   - Если НИ одного filter/search параметра → backward-compatible: просто массив
+//   - Если есть фильтры → { items, total, facets, limit, offset }
 router.get('/sites/:siteId/articles', (req, res) => {
-  const rows = db.prepare('SELECT * FROM articles WHERE site_id = ? ORDER BY updated_at DESC').all(req.params.siteId);
-  res.json(rows.map(hydrateArticle));
+  const q = req.query;
+  const hasFilters = Boolean(
+    q.q || q.type || q.status || q.tags || q.word_min || q.word_max ||
+    q.quality_min || q.quality_max || q.has_url || q.date_from || q.date_to ||
+    q.sort || q.limit || q.offset || q.paged === '1' || q.paged === 'true'
+  );
+
+  if (!hasFilters) {
+    // Backward compatibility: простой массив, чтобы старый фронт не ломался.
+    const rows = db.prepare('SELECT * FROM articles WHERE site_id = ? ORDER BY updated_at DESC').all(req.params.siteId);
+    return res.json(rows.map(hydrateArticle));
+  }
+
+  const result = searchArticles({
+    site_id:     req.params.siteId,
+    q:           q.q,
+    type:        q.type,
+    status:      q.status,
+    tags:        parseListParam(q.tags),
+    word_min:    q.word_min,
+    word_max:    q.word_max,
+    quality_min: q.quality_min,
+    quality_max: q.quality_max,
+    has_url:     q.has_url,
+    date_from:   q.date_from,
+    date_to:     q.date_to,
+    sort:        q.sort,
+    limit:       q.limit,
+    offset:      q.offset,
+  });
+
+  res.json({
+    items: result.items.map(hydrateArticle),
+    total: result.total,
+    facets: result.facets,
+    limit: Math.min(Number(q.limit) || 50, 500),
+    offset: Math.max(Number(q.offset) || 0, 0),
+  });
+});
+
+// GET /api/articles/search — cross-site поиск (без привязки к site_id).
+// Полезно для merge workflow ("найти все наши обзоры по Magnifica").
+router.get('/articles/search', (req, res) => {
+  const q = req.query;
+  const result = searchArticles({
+    q:           q.q,
+    type:        q.type,
+    status:      q.status,
+    tags:        parseListParam(q.tags),
+    word_min:    q.word_min,
+    word_max:    q.word_max,
+    quality_min: q.quality_min,
+    quality_max: q.quality_max,
+    has_url:     q.has_url,
+    date_from:   q.date_from,
+    date_to:     q.date_to,
+    sort:        q.sort,
+    limit:       q.limit,
+    offset:      q.offset,
+  });
+  res.json({
+    items: result.items.map(hydrateArticle),
+    total: result.total,
+    facets: result.facets,
+    limit: Math.min(Number(q.limit) || 50, 500),
+    offset: Math.max(Number(q.offset) || 0, 0),
+  });
 });
 
 // POST /api/sites/:siteId/articles
@@ -244,6 +308,105 @@ router.get('/articles/:id/revisions', (req, res) => {
   if (!article) return res.status(404).json({ error: 'Article not found' });
   res.json(listRevisions(req.params.id, { limit }));
 });
+
+// POST /api/articles/bulk — массовые операции над статьями.
+// Body: { article_ids: [...], action: 'archive'|'delete'|'tag_add'|'tag_remove'|'status', payload? }
+// Action 'archive':   status='archived' (soft-delete, сохраняет FTS индекс)
+// Action 'delete':    физическое удаление (осторожно, revisions каскадом теряются)
+// Action 'tag_add':   добавляет tags из payload.tags к существующим
+// Action 'tag_remove':убирает tags из payload.tags
+// Action 'status':    меняет status на payload.status
+//
+// Limits: максимум 500 items за запрос (больше → background job, здесь отказ).
+// Transaction: всё в одной транзакции — либо всё, либо rollback.
+router.post('/articles/bulk', (req, res) => {
+  const b = req.body || {};
+  const ids = Array.isArray(b.article_ids) ? b.article_ids.filter(s => typeof s === 'string') : [];
+  const action = b.action;
+  const payload = b.payload || {};
+
+  if (!ids.length) return res.status(400).json({ error: 'article_ids required' });
+  if (ids.length > 500) return res.status(400).json({ error: 'Max 500 items per bulk; split into batches' });
+
+  const ALLOWED = ['archive', 'delete', 'tag_add', 'tag_remove', 'status'];
+  if (!ALLOWED.includes(action)) return res.status(400).json({ error: `action must be one of ${ALLOWED.join(', ')}` });
+
+  // Валидация actions-specific payload
+  if (action === 'status') {
+    const VALID_STATUS = ['published', 'draft', 'planned', 'archived'];
+    if (!VALID_STATUS.includes(payload.status)) {
+      return res.status(400).json({ error: `payload.status must be one of ${VALID_STATUS.join(', ')}` });
+    }
+  }
+  if ((action === 'tag_add' || action === 'tag_remove')) {
+    const tags = Array.isArray(payload.tags) ? payload.tags.filter(t => typeof t === 'string' && t.trim()) : [];
+    if (!tags.length) return res.status(400).json({ error: 'payload.tags must be non-empty array' });
+    payload.tags = tags;
+  }
+
+  // Pre-check: какие ID реально существуют. Не существующие → in failed.
+  const placeholders = ids.map(() => '?').join(',');
+  const existing = db.prepare(`SELECT id, site_id, tags, status FROM articles WHERE id IN (${placeholders})`).all(...ids);
+  const existingMap = new Map(existing.map(r => [r.id, r]));
+  const failed = ids.filter(id => !existingMap.has(id)).map(id => ({ id, reason: 'not_found' }));
+  const toProcess = ids.filter(id => existingMap.has(id));
+  if (!toProcess.length) return res.json({ succeeded: [], failed });
+
+  const succeeded = [];
+
+  const tx = db.transaction(() => {
+    for (const id of toProcess) {
+      const row = existingMap.get(id);
+      try {
+        if (action === 'archive') {
+          db.prepare(`UPDATE articles SET status = 'archived', updated_at = datetime('now') WHERE id = ?`).run(id);
+          logRevision(id, row.site_id, REVISION_KINDS.MANUAL_EDIT,
+            'Bulk archive', { prev_status: row.status });
+        } else if (action === 'delete') {
+          db.prepare(`DELETE FROM articles WHERE id = ?`).run(id);
+        } else if (action === 'status') {
+          db.prepare(`UPDATE articles SET status = ?, updated_at = datetime('now') WHERE id = ?`).run(payload.status, id);
+          logRevision(id, row.site_id, REVISION_KINDS.MANUAL_EDIT,
+            `Bulk status change: ${row.status} → ${payload.status}`, { prev_status: row.status, new_status: payload.status });
+        } else if (action === 'tag_add') {
+          const current = safeParseTagsJson(row.tags);
+          const set = new Set(current);
+          for (const t of payload.tags) set.add(t);
+          const next = JSON.stringify([...set]);
+          db.prepare(`UPDATE articles SET tags = ?, updated_at = datetime('now') WHERE id = ?`).run(next, id);
+          logRevision(id, row.site_id, REVISION_KINDS.MANUAL_EDIT,
+            `Bulk tags +: ${payload.tags.join(', ')}`, { added: payload.tags });
+        } else if (action === 'tag_remove') {
+          const current = safeParseTagsJson(row.tags);
+          const toRemove = new Set(payload.tags);
+          const next = JSON.stringify(current.filter(t => !toRemove.has(t)));
+          db.prepare(`UPDATE articles SET tags = ?, updated_at = datetime('now') WHERE id = ?`).run(next, id);
+          logRevision(id, row.site_id, REVISION_KINDS.MANUAL_EDIT,
+            `Bulk tags −: ${payload.tags.join(', ')}`, { removed: payload.tags });
+        }
+        succeeded.push(id);
+      } catch (e) {
+        failed.push({ id, reason: e.message });
+      }
+    }
+  });
+
+  try {
+    tx();
+  } catch (e) {
+    return res.status(500).json({ error: 'Bulk transaction failed', message: e.message });
+  }
+
+  res.json({ succeeded, failed, action, total: toProcess.length });
+});
+
+function safeParseTagsJson(raw) {
+  if (!raw) return [];
+  try {
+    const p = JSON.parse(raw);
+    return Array.isArray(p) ? p.filter(t => typeof t === 'string') : [];
+  } catch { return []; }
+}
 
 function mapWpStatus(s) {
   if (s === 'publish') return 'published';

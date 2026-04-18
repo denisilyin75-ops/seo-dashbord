@@ -4,6 +4,7 @@ import { api } from '../api/client.js';
 import { Badge, Btn, Metric, Modal, XLink } from '../components/ui.jsx';
 import { TI, PC } from '../utils/constants.js';
 import ArticleRow from '../components/ArticleRow.jsx';
+import ArticlesPanel from '../components/ArticlesPanel.jsx';
 import AIPanel from '../components/AIPanel.jsx';
 import ValuationPanel from '../components/ValuationPanel.jsx';
 import LogPanel from '../components/LogPanel.jsx';
@@ -211,27 +212,15 @@ export default function SiteDetail() {
 
       <div style={{ animation: 'fadeIn .3s ease' }}>
         {tab === 'articles' && (
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <span style={{ fontSize: '11px', color: '#64748b' }}>{articles.length} статей</span>
-              <Btn onClick={() => setModal('addArticle')} v="acc" sx={{ fontSize: '10px' }}>＋ Статья <kbd style={{ marginLeft: 4 }}>N A</kbd></Btn>
-            </div>
-            {articles.length ? (
-              articles.map((a) => <ArticleRow key={a.id} article={a} onUpdate={updArt} onDelete={delArt} />)
-            ) : (
-              <EmptyState
-                icon="📄"
-                title="Нет статей"
-                description="Добавьте вручную или импортируйте из WordPress (если настроены креды)."
-                actions={
-                  <>
-                    <Btn v="acc" onClick={() => setModal('addArticle')}>＋ Первая статья</Btn>
-                    {site.wpHasCreds && <Btn onClick={() => tryToast(async () => { const r = await api.syncAllWp(id); await load(); return r; }, { success: (r) => `Импортировано: ${r.synced}` })}>↻ Import from WP</Btn>}
-                  </>
-                }
-              />
-            )}
-          </div>
+          <ArticlesPanel
+            siteId={id}
+            articles={articles}
+            onAdd={() => setModal('addArticle')}
+            onImport={() => tryToast(async () => { const r = await api.syncAllWp(id); await load(); return r; }, { success: (r) => `Импортировано: ${r.synced}` })}
+            canImportWp={Boolean(site.wpHasCreds)}
+            onUpdate={updArt}
+            onDelete={delArt}
+          />
         )}
 
         {tab === 'plan' && (

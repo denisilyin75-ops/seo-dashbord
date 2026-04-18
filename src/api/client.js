@@ -49,6 +49,21 @@ export const api = {
 
   // articles
   listArticles: (siteId) => request('GET',    `/api/sites/${siteId}/articles`),
+  // Paginated + filtered — возвращает { items, total, facets, limit, offset }.
+  // filters: { q, type, status, tags: [], word_min, word_max, quality_min, quality_max, has_url, date_from, date_to, sort, limit, offset }
+  searchArticles: (siteId, filters = {}) => {
+    const qs = new URLSearchParams();
+    qs.set('paged', '1');
+    for (const [k, v] of Object.entries(filters)) {
+      if (v == null || v === '') continue;
+      if (Array.isArray(v)) v.forEach(x => qs.append(k, x));
+      else qs.set(k, String(v));
+    }
+    const base = siteId ? `/api/sites/${siteId}/articles` : '/api/articles/search';
+    return request('GET', `${base}?${qs.toString()}`);
+  },
+  bulkArticles: (article_ids, action, payload) =>
+    request('POST', '/api/articles/bulk', { article_ids, action, payload }),
   createArticle:(siteId, data) => request('POST',   `/api/sites/${siteId}/articles`, data),
   updateArticle:(id, data) => request('PUT',    `/api/articles/${id}`, data),
   deleteArticle:(id) => request('DELETE', `/api/articles/${id}`),

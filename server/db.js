@@ -244,6 +244,58 @@ softAlter(`ALTER TABLE agent_runs ADD COLUMN site_id TEXT`);
 softAlter(`ALTER TABLE agent_runs ADD COLUMN tokens_used INTEGER DEFAULT 0`);
 softAlter(`ALTER TABLE agent_runs ADD COLUMN cost_usd REAL DEFAULT 0`);
 
+// Article Import & Actions Phase 1 — search/filter/bulk
+// content_text: plain-text проекция body (для FTS); naturals = title + notes.
+//   Когда подключим WP body sync, сюда попадёт полный текст.
+// tags: JSON array строк. Используется и для FTS, и для bulk tag add/remove.
+// word_count: автоподсчёт (триггеры ниже).
+// quality_score: placeholder; заполнит Content Quality Agent (0-100).
+softAlter(`ALTER TABLE articles ADD COLUMN content_text TEXT`);
+softAlter(`ALTER TABLE articles ADD COLUMN tags TEXT`); // JSON
+softAlter(`ALTER TABLE articles ADD COLUMN word_count INTEGER DEFAULT 0`);
+softAlter(`ALTER TABLE articles ADD COLUMN quality_score INTEGER`);
+
+// FTS5 виртуальная таблица (contentless — не хранит дубликат текста, только индекс).
+// Поиск по title + notes + content_text + tags.
+// Триггеры синхронизируют index с таблицей articles.
+try {
+  db.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS articles_fts USING fts5(
+    title, notes, content_text, tags,
+    content='articles', content_rowid='rowid',
+    tokenize='unicode61 remove_diacritics 2'
+  )`);
+} catch (e) { /* already exists */ }
+
+// Триггеры — синхронизация articles ↔ articles_fts.
+// Обёрнуто в try-catch: при повторном старте триггеры уже есть.
+function safeTrigger(sql) {
+  try { db.exec(sql); } catch (e) { /* exists */ }
+}
+safeTrigger(`CREATE TRIGGER IF NOT EXISTS articles_ai_fts AFTER INSERT ON articles BEGIN
+  INSERT INTO articles_fts(rowid, title, notes, content_text, tags)
+  VALUES (new.rowid, new.title, new.notes, new.content_text, new.tags);
+END`);
+safeTrigger(`CREATE TRIGGER IF NOT EXISTS articles_ad_fts AFTER DELETE ON articles BEGIN
+  INSERT INTO articles_fts(articles_fts, rowid, title, notes, content_text, tags)
+  VALUES ('delete', old.rowid, old.title, old.notes, old.content_text, old.tags);
+END`);
+safeTrigger(`CREATE TRIGGER IF NOT EXISTS articles_au_fts AFTER UPDATE ON articles BEGIN
+  INSERT INTO articles_fts(articles_fts, rowid, title, notes, content_text, tags)
+  VALUES ('delete', old.rowid, old.title, old.notes, old.content_text, old.tags);
+  INSERT INTO articles_fts(rowid, title, notes, content_text, tags)
+  VALUES (new.rowid, new.title, new.notes, new.content_text, new.tags);
+END`);
+
+// Одноразовый rebuild FTS для существующих записей (если FTS пуст, а articles — нет).
+// Это покрывает upgrade-кейс: фича добавлена на существующую БД.
+try {
+  const ftsCount = db.prepare('SELECT COUNT(*) AS n FROM articles_fts').get().n;
+  const articlesCount = db.prepare('SELECT COUNT(*) AS n FROM articles').get().n;
+  if (articlesCount > 0 && ftsCount === 0) {
+    db.exec(`INSERT INTO articles_fts(articles_fts) VALUES('rebuild')`);
+  }
+} catch (e) { /* ignore */ }
+
 // ------- seed: минимальный демо-набор, только если БД пустая -------
 // Seed блога — независимо от sites (может сработать позже, когда sites уже есть).
 // Создаёт базовый набор ретроспективных записей «что сделано за 2026-04-17 → 2026-04-18».
