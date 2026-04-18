@@ -74,6 +74,7 @@ export const api = {
   // ai
   aiCommand:    (command, context = {}) => request('POST', '/api/ai/command', { command, context }),
   aiSitePlan:   (data) => request('POST', '/api/ai/site-plan', data),
+  aiCredits:    () => request('GET',  '/api/ai/credits'),
 
   // deploy
   listDeploys:  () => request('GET',  '/api/deploys'),

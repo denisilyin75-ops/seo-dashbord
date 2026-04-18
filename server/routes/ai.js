@@ -1,8 +1,18 @@
 import { Router } from 'express';
 import { db } from '../db.js';
-import { executeCommand, generateSitePlan } from '../services/claude.js';
+import { executeCommand, generateSitePlan, openRouterCredits } from '../services/claude.js';
 
 const router = Router();
+
+// GET /api/ai/credits — остаток кредитов у провайдера (OpenRouter)
+router.get('/credits', async (_req, res) => {
+  try {
+    const credits = await openRouterCredits();
+    res.json(credits);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
 // POST /api/ai/command — выполнить произвольную команду
 router.post('/command', async (req, res) => {

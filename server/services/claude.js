@@ -47,6 +47,28 @@ export function aiStatus() {
   return { configured: false, provider, model };
 }
 
+/**
+ * Остаток кредитов OpenRouter.
+ * @returns {Promise<{configured:boolean, total?:number, used?:number, remaining?:number, error?:string}>}
+ */
+export async function openRouterCredits() {
+  const key = process.env.OPENROUTER_API_KEY;
+  if (!key) return { configured: false };
+  try {
+    const res = await fetch('https://openrouter.ai/api/v1/credits', {
+      headers: { 'Authorization': `Bearer ${key}` },
+    });
+    if (!res.ok) return { configured: true, error: `HTTP ${res.status}` };
+    const body = await res.json();
+    const d = body?.data || body || {};
+    const total = Number(d.total_credits ?? 0);
+    const used  = Number(d.total_usage   ?? 0);
+    return { configured: true, total, used, remaining: Math.max(0, total - used) };
+  } catch (e) {
+    return { configured: true, error: e.message };
+  }
+}
+
 // ---------- Anthropic SDK ----------
 let _anthropic = null;
 function getAnthropicClient() {

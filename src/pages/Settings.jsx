@@ -12,6 +12,8 @@ export default function Settings() {
   const [healthErr, setHealthErr] = useState(null);
   const [sites, setSites] = useState([]);
   const [aiStatus, setAiStatus] = useState(null);
+  const [credits, setCredits] = useState(null);
+  const [creditsErr, setCreditsErr] = useState(null);
 
   const checkHealth = async () => {
     setHealthErr(null);
@@ -23,8 +25,19 @@ export default function Settings() {
     }
   };
 
+  const refreshCredits = async () => {
+    setCreditsErr(null);
+    try {
+      const c = await api.aiCredits();
+      setCredits(c);
+    } catch (e) {
+      setCreditsErr(e.message);
+    }
+  };
+
   useEffect(() => {
     checkHealth();
+    refreshCredits();
     api.listSites().then(setSites).catch(() => {});
     // дёрнем dummy AI command — заглушка ответит stub:true, реальный ключ — stub:false
     api.aiCommand('ping', {}).then((r) => setAiStatus(r)).catch((e) => setAiStatus({ error: e.message }));
@@ -126,6 +139,52 @@ export default function Settings() {
         </div>
         <div style={{ marginTop: '10px' }}>
           <Btn onClick={checkHealth} sx={{ fontSize: '11px' }}>🔄 Перепроверить</Btn>
+        </div>
+      </Card>
+
+      <Card title="AI-бюджет (OpenRouter)">
+        {!credits && !creditsErr && <Skeleton w={260} h={24} />}
+        {creditsErr && (
+          <div style={{ fontSize: '12px', color: '#ef4444' }}>Ошибка: {creditsErr}</div>
+        )}
+        {credits && !credits.configured && (
+          <div style={{ fontSize: '12px', color: '#64748b' }}>
+            OPENROUTER_API_KEY не задан в .env — пропуск.
+          </div>
+        )}
+        {credits && credits.configured && credits.error && (
+          <div style={{ fontSize: '12px', color: '#fbbf24' }}>API вернул ошибку: {credits.error}</div>
+        )}
+        {credits && credits.configured && !credits.error && (() => {
+          const pct = credits.total > 0 ? (credits.remaining / credits.total) * 100 : 0;
+          const color = pct < 10 ? '#ef4444' : pct < 30 ? '#fbbf24' : '#34d399';
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', fontFamily: 'var(--mn)' }}>
+                <span style={{ fontSize: '22px', fontWeight: 800, color }}>
+                  ${credits.remaining.toFixed(2)}
+                </span>
+                <span style={{ fontSize: '11px', color: '#64748b' }}>
+                  остаток · из ${credits.total.toFixed(2)} (использовано ${credits.used.toFixed(2)})
+                </span>
+              </div>
+              <div style={{ height: '6px', background: '#0a0e17', borderRadius: '3px', overflow: 'hidden' }}>
+                <div style={{ width: `${Math.max(0, Math.min(100, pct))}%`, height: '100%', background: color, transition: 'width .3s' }} />
+              </div>
+              <div style={{ fontSize: '11px', color: '#64748b' }}>
+                {pct < 10 && '⚠️ Меньше 10% — пополните, иначе агенты и AI-команды упадут.'}
+                {pct >= 10 && pct < 30 && '🟡 Менее 30% — стоит подумать о пополнении.'}
+                {pct >= 30 && '🟢 Ресурса достаточно.'}
+              </div>
+            </div>
+          );
+        })()}
+        <div style={{ marginTop: '10px', display: 'flex', gap: '6px' }}>
+          <Btn onClick={refreshCredits} sx={{ fontSize: '11px' }}>🔄 Обновить</Btn>
+          <a href="https://openrouter.ai/credits" target="_blank" rel="noreferrer"
+             style={{ fontSize: '11px', color: '#60a5fa', alignSelf: 'center', textDecoration: 'none' }}>
+            openrouter.ai/credits ↗
+          </a>
         </div>
       </Card>
 
