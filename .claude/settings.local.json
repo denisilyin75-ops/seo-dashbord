@@ -45,7 +45,8 @@
       "Bash(ssh root@5.129.245.98 \"cat /opt/scc/docker-compose.yml | head -30\")",
       "Bash(ssh root@5.129.245.98 \"cd /opt/scc && docker compose up -d --build scc 2>&1 | tail -10\")",
       "Bash(grep -rln \"daily.\\\\|impact\\\\|Expected\\\\|+\\\\$\" src/components/DailyBrief.jsx)",
-      "Bash(node --check server/services/dailyBrief.js)"
+      "Bash(node --check server/services/dailyBrief.js)",
+      "Bash(ssh root@5.129.245.98 \"cd /opt/scc && git fetch origin main && git merge origin/main --no-edit 2>&1 | tail -3 && docker compose up -d --build scc 2>&1 | tail -3\")"
     ]
   }
 }

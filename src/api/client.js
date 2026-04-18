@@ -72,6 +72,14 @@ export const api = {
   articleRevisions: (id, limit = 50) => request('GET', `/api/articles/${id}/revisions?limit=${limit}`),
   articleMeta:  (id) => request('GET', `/api/articles/${id}/meta`),
 
+  // Daily brief — история «идея дня» для аккумулированной ленты
+  ideasHistory: (siteId, limit = 30) => {
+    const qs = new URLSearchParams();
+    if (siteId) qs.set('siteId', siteId);
+    qs.set('limit', String(limit));
+    return request('GET', `/api/daily-brief/ideas-history?${qs}`);
+  },
+
   // Content Quality Agent (Phase 1: deterministic checks)
   contentHealth: (siteId, params = {}) => {
     const qs = new URLSearchParams();

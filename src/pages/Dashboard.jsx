@@ -16,6 +16,7 @@ import EmptyState from '../components/EmptyState.jsx';
 import ScrollToTop from '../components/ScrollToTop.jsx';
 import ContentPlanProgress from '../components/ContentPlanProgress.jsx';
 import BlogPanel from '../components/BlogPanel.jsx';
+import IdeasHistoryPanel from '../components/IdeasHistoryPanel.jsx';
 import PhilosophyPanel from '../components/PhilosophyPanel.jsx';
 import { SiteCardSkeleton, RowSkeleton } from '../components/Skeleton.jsx';
 import { useTryToast } from '../components/Toast.jsx';
@@ -284,6 +285,24 @@ export default function Dashboard() {
         </summary>
         <div style={{ maxHeight: 520, overflowY: 'auto', marginTop: 10, paddingRight: 4 }}>
           <BlogPanel />
+        </div>
+      </details>
+
+      {/* История «идея дня» — аккумулированная лента (чтобы не терять пропущенные идеи) */}
+      <details
+        style={{
+          background: '#0f172a', border: '1px solid #1e293b', borderRadius: 7,
+          padding: '10px 14px', marginBottom: 12,
+        }}
+      >
+        <summary style={{
+          cursor: 'pointer', userSelect: 'none', fontSize: 12, fontWeight: 700,
+          color: '#94a3b8', outline: 'none', padding: '2px 0',
+        }}>
+          💡 История «идея дня» <span style={{ color: '#64748b', fontWeight: 500, fontSize: 11 }}>— аккумулированные предложения из Daily Brief</span>
+        </summary>
+        <div style={{ maxHeight: 520, overflowY: 'auto', marginTop: 10, paddingRight: 4 }}>
+          <IdeasHistoryPanel siteId={sel || ''} limit={50} />
         </div>
       </details>
 
