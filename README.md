@@ -14,12 +14,15 @@ npm run dev              # vite (5173) + express (3001) через concurrently
 
 ## Скрипты
 
-| Команда          | Что делает                                             |
-|------------------|--------------------------------------------------------|
-| `npm run dev`    | Запуск фронта (Vite) + бэка (Express) параллельно      |
-| `npm run build`  | Production-сборка фронта                               |
-| `npm run server` | Запуск только Express                                  |
-| `npm run seed`   | Засеять БД демо-данными (idempotent)                   |
+| Команда                  | Что делает                                             |
+|--------------------------|--------------------------------------------------------|
+| `npm run dev`            | Запуск фронта (Vite) + бэка (Express) параллельно      |
+| `npm run build`          | Production-сборка фронта                               |
+| `npm run server`         | Запуск только Express                                  |
+| `npm run seed`           | Засеять БД демо-данными (idempotent)                   |
+| `npm test`               | Node native test runner (server/services/__tests__)    |
+| `npm run install-hooks`  | Установка git post-commit hook (code-review-agent)     |
+| `npm run code-review`    | Ручной запуск code-review на HEAD commit               |
 
 ## Структура
 
@@ -63,12 +66,38 @@ npm run dev              # vite (5173) + express (3001) через concurrently
 
 ## AI провайдеры
 
-Поддерживаются два (выбор через `AI_PROVIDER` в `.env`):
+Поддерживаются три (выбор через `AI_PROVIDER` в `.env` или автовыбор):
 
+- **Local LLM** (`local`) — Ollama/vLLM/LM Studio через `LOCAL_LLM_URL`. Бесплатно,
+  приватно. Дефолтная модель: `qwen2.5:72b`. Настройка: `LOCAL_LLM_API_TYPE=ollama|openai`.
 - **OpenRouter** (`openrouter`) — `OPENROUTER_API_KEY`, OpenAI-совместимый,
-  доступ к Claude/GPT/Gemini и др. Дефолтная модель: `anthropic/claude-sonnet-4`
+  доступ к Claude/GPT/Gemini и др. Дефолтная модель: `anthropic/claude-sonnet-4.6`
 - **Anthropic напрямую** (`anthropic`) — `ANTHROPIC_API_KEY`, дефолтная
   модель: `claude-sonnet-4-20250514`
 
-Если оба ключа заданы, OpenRouter имеет приоритет. Модель можно переопределить
-через `AI_MODEL`.
+Приоритет автовыбора: local (если `LOCAL_LLM_URL` задан) → openrouter → anthropic.
+Fallback chain доступен через `callWithFallback` в `server/services/claude.js`.
+Модель можно переопределить через `AI_MODEL`.
+
+## Автоматические агенты
+
+**Code Review Agent** (`docs/agents/code-review-agent.md`):
+- post-commit: LLM review каждого коммита → `docs/review_log.md`
+- nightly 04:00 UTC: api-reference + architecture auto-sections
+- weekly Mon 06:00: security audit + code smells
+- monthly 1st 08:00: exit readiness scorecard /100
+
+**Content Quality Agent** (`docs/agents/content-quality-agent.md`):
+- 6 deterministic dimensions (SEO hygiene, link health, schema, readability, E-E-A-T, voice persona)
+- Per-post scoring /100, issues в `content_health` табличке
+- Batch mode: анализ топ-10 опубликованных статей
+
+**Article Import & Actions** (`docs/features/article-import-and-actions.md`):
+- Import URL через Mozilla Readability → `imported_articles`
+- 5 AI actions: translate/rewrite-preserve/rewrite-voice/structural-analysis/fact-extraction
+- Merge workflow: 2+ наших статей → one via Sonnet с conflict resolver
+
+Full auto-generated docs: [`docs/api-reference.md`](./docs/api-reference.md),
+[`docs/architecture.md`](./docs/architecture.md), [`docs/exit-readiness.md`](./docs/exit-readiness.md),
+[`docs/security-audit.md`](./docs/security-audit.md), [`docs/code-smells.md`](./docs/code-smells.md),
+[`docs/review_log.md`](./docs/review_log.md).
