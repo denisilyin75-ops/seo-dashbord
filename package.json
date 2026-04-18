@@ -1,7 +1,7 @@
 {
   "name": "seo-command-center",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.4.0",
   "type": "module",
   "description": "SEO/Affiliate portfolio command center — dashboard, AI commands, WordPress/GA4/GSC integrations, deploy wizard.",
   "scripts": {
