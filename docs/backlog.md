@@ -1,7 +1,7 @@
 # Backlog — единый список всех открытых задач
 
 > **Статус:** живой документ. Обновляется после каждой значимой встречи/сессии.
-> **Последнее обновление:** 2026-04-17
+> **Последнее обновление:** 2026-04-18
 >
 > **Priority levels:**
 > - P0 — срочно (горит или блокирует много чего)
@@ -11,20 +11,16 @@
 
 ---
 
-## 🔥 P0 — срочно (следующая сессия, первым)
+## ✅ Сделано в сессии 2026-04-18 (Stage C, день 1)
 
-### [ ] ⚡ Откалибровать формулу Site Valuation
-**Проблема:** текущая asset-based оценка завышает в 2-4 раза vs реальный рынок (Flippa/Empire Flippers):
-- popolkam.ru сейчас $3300, реально ~$800-1500
-- 4beg.ru сейчас $19360, реально ~$3500-5500 (без revenue подтверждённого)
+- **P0-01: Site Valuation калибровка** — `PER_ARTICLE_VALUE` снижены, age × $100 (cap $800) + bonus $200 за «возраст × наполненность», momentum cap $500. Penalty за нет-revenue **двухуровневая**: −40% для «зомби» (нет momentum), −20% для активных. Прод: portfolio $7,496 (popolkam $660, 4beg $6,836). [commits 72fd153, 26355bc]
+- **P0-03: OpenRouter credits в Settings UI** — endpoint `GET /api/ai/credits`, карточка с прогресс-баром (зелёный/жёлтый/красный) и текстовой рекомендацией. На проде показывает $4.93/$5.00. [commit e7472ac]
+- **P0-04: popolkam meta-fields в ArticleRow** — WP-плагин 1.1.0 регистрирует 6 полей с `show_in_rest=true`; backend PUT /api/articles/:id принимает `body.meta` и пушит в WP; UI — collapsible-секция «🛠 Калькулятор / партнёрка» с 5 inputs, lazy-loaded. End-to-end проверено. [commit f85d1bf]
+- **Побочно: popolkam синкнут с WP** — оказалось 0 статей в БД SCC, поэтому zombie-tier penalty сработал. После sync — 2 статьи (это реальное число опубликованных постов на popolkam).
 
-**Что делать:**
-- Снизить `PER_ARTICLE_VALUE`: review 40→15, comparison 60→25, guide 35→10, quiz 70→30, tool 80→40
-- Capp `domain_age × $100` (не ×$300), max $800 (не $3000). Bonus +$200 только если articles > 20.
-- Добавить penalty «нет revenue подтверждённого» = −50% от итога в asset-mode (пока не подключены GA4/GSC + partner API)
-- `momentum cap` с $800 до $500
+---
 
-**Файл:** `server/services/agents/site-valuation.js`
+## 🔥 P0 — следующим
 
 ### [ ] Продлить домен 4beg.ru
 **Дедлайн:** до 2026-07-04 (осталось ~2.5 мес)
@@ -39,7 +35,7 @@
 - Доступ к GA4 + Search Console (email, который там зарегистрирован)
 - Список активных партнёрских аккаунтов (если есть)
 
-### [ ] Expected Value UX везде — применить principle
+### [ ] **P0-02: Expected Value UX везде** — применить principle
 **Где:**
 - Daily Brief Quick Win — переформулировать в «сделай X → +$Y»
 - Plan items — показывать +$N к капитализации при создании обзора
@@ -48,9 +44,75 @@
 
 **Принцип:** `memory/feedback_expected_value_ux.md`
 
+### [ ] **Доразобраться с popolkam недотягом до таргета**
+После калибровки popolkam = $660 (таргет был $800-1500). Сейчас 2 статьи в БД. Возможно после публикации Phase 1 (9 статей) попадём в таргет естественно. **Решить:** оставить, или дополнительно подкрутить формулу под текущие 2 статьи.
+
 ---
 
-## 🎯 P1 — ближайшие 2 недели
+## 🆕 Stage C — следующий этап (выбрано из legacy spec + новые идеи)
+
+### Из legacy spec (downloads/files (1)/, см. `docs/legacy-spec/`)
+
+#### [ ] **Circuit Breaker + Budget Control + Notification Routing для агентов** — P1
+- Поля в `agent_configs`: `circuit_breaker_state`, `consecutive_failures`, `monthly_budget_usd`, `max_cost_per_run_usd`, `notification_channels`, `notification_condition`
+- Если 3 раза подряд fail → auto-disable + алерт; если over-budget → пауза до следующего месяца
+- **Без этого нельзя масштабировать на 10 сайтов** (тихое выжирание бюджета, зацикленные ошибки)
+- Источник: `ADMIN_AND_VALUATION.md §1.7+1.11`
+
+#### [ ] **AI model picker per-agent (Haiku/Sonnet/Opus)** — P1
+- Radio-выбор в карточке агента: Haiku для price-watch/links, Sonnet для аналитики, Opus только для критичных
+- Экономия 50-80% на простых агентах
+- Поле: `agent_configs.ai_model`
+- Источник: `ADMIN §1.3`
+
+#### [ ] **Adjustment table + market benchmarks для Site Valuation** — P1
+- Таблица «factors с ±%»: возраст, traffic diversity, partners count, email base, концентрация топ-страниц, Google dependency
+- Бенчмарки EF / MotionInvest / Flippa
+- Прямо улучшит уже сделанную P0-01
+- Источник: `ADMIN §2.2`
+
+#### [ ] **Prompt caching в server/services/claude.js** — P1
+- 50-80% экономии на повторяющихся system prompts (например, каждый Daily Brief гонит один и тот же контекст)
+- Anthropic SDK поддерживает `cache_control: {type: "ephemeral"}`
+- OpenRouter тоже поддерживает (через специальный header)
+- Источник: `AGENTS.md §6`
+
+#### [ ] **Sale Preparation Checklist (15 пунктов)** — P2
+- UI вкладка `/sites/:id/prepare-sale` + таблица `sale_checklist`
+- 15 пунктов: финансы / трафик / качество / процессы / домен. Progress 8/15
+- Превращает абстрактный «exit» в конкретный progress-bar — точно в духе supreme principle
+- Источник: `ADMIN §2.7`
+
+#### [ ] **Schedule Builder UI (без cron)** — P2
+- «Каждый ⟨день⟩ в ⟨время⟩» вместо `0 4 * * 0` в карточке агента
+- Принцип «новичок управляет» из CLAUDE.md
+- Источник: `ADMIN §1.10`
+
+#### [ ] **Cannibalization Detector** — P2 (новый агент)
+- GSC-запросы → ищет страницы конкурирующие в топ-20 → AI предлагает merge / redirect / repurpose
+- Реальная проблема при 50+ статьях; **в нашем backlog отсутствует**
+- Источник: `AGENTS.md §2.12`
+
+### Дополнительные идеи (мои 5)
+
+#### [ ] **A. Site Health summary card** — P1
+Per-site widget: uptime, SSL expiry, GA4/GSC connected, last metric sync, broken links count, freshness %, momentum. Зелёный/жёлтый/красный одной картинкой. Заменяет 10 кликов по разным экранам, сразу видно «где сейчас пожар».
+
+#### [ ] **B. Audit Log + Activity Feed UI** — P1
+Каждое действие в SCC (кто, что, когда). Принцип уже задекларирован в CLAUDE.md (#9), но не реализован. **Без него нельзя нанимать операторов** — нечем разбирать инциденты.
+
+#### [ ] **C. AI commentary в Daily Brief** — P2
+Каждая карточка не только цифра, а 1-2 строки «почему могло измениться» + suggested action. Конкретное применение Expected Value UX через AI.
+
+#### [ ] **D. Cross-site benchmark в SiteDetail** — P2
+Каждая ключевая метрика рядом с медианой портфеля («RPM $3.2 — 35% выше portfolio avg $2.4»). Помогает identify outliers без переключения сайтов.
+
+#### [ ] **E. Onboarding Wizard для нового сайта** — P2
+5 шагов с проверками (WP credentials → GA4 → first sync → first plan item). Цель из CLAUDE.md: «новый сайт за 15 минут с нуля».
+
+---
+
+## 🎯 P1 — ближайшие 2 недели (из legacy P1)
 
 ### Монетизация / Контент
 
@@ -220,3 +282,4 @@
 - **2026-04-17** — favicon SCC + logo/favicon popolkam загружены
 - **2026-04-18** — Расширены supreme principles: итеративность + планка лидеров + монетизация как топливо + быстрый подбор
 - **2026-04-18** — Content Freshness Agent спроектирован (spec в памяти), добавлен в P1
+- **2026-04-18 (Stage C, день 1)** — P0-01 / P0-03 / P0-04 закрыты. Изучена legacy spec из `Downloads/files (1)/` — отобраны 7 идей и добавлены в backlog как Stage C. Добавлены 5 собственных идей (Site Health card, Audit Log, AI commentary, Cross-site benchmark, Onboarding Wizard). Двухуровневая penalty в site-valuation. popolkam впервые синкнут в БД SCC (был 0 статей).
