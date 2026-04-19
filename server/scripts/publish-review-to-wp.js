@@ -6,7 +6,8 @@
 //     --site=popolkam \
 //     --file=content/popolkam/reviews/obzor-delonghi-magnifica-s-ecam22-110.md \
 //     [--category-ids=16,24] \
-//     [--status=draft|publish]
+//     [--status=draft|publish] \
+//     [--post-type=post|page]        (default: post; для pages как /o-avtore/ — page)
 //
 // Что делает:
 //   1. Парсит frontmatter (YAML-like simple parser)
@@ -328,8 +329,13 @@ async function main() {
     payload.meta.rank_math_focus_keyword = meta.primary_keyword;
   }
 
-  // POST to WP
-  const wpEndpoint = `${site.wp_api_url.replace(/\/$/, '')}/posts`;
+  // POST to WP — для pages используется /pages endpoint (нет categories там)
+  const postType = args['post-type'] || 'post';
+  const endpointSegment = postType === 'page' ? 'pages' : 'posts';
+  if (postType === 'page') {
+    delete payload.categories; // pages не имеют categories taxonomy
+  }
+  const wpEndpoint = `${site.wp_api_url.replace(/\/$/, '')}/${endpointSegment}`;
   const auth = Buffer.from(`${site.wp_user}:${site.wp_app_password}`).toString('base64');
 
   console.log(`[publish] POST ${wpEndpoint}...`);
