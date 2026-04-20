@@ -196,6 +196,13 @@ router.post('/worker/tasks/:id/complete', requireWorker, (req, res) => {
 });
 
 // ========== LEGACY (deploys) — keep backward compat ==========
+// GET / — список старых deploys (таблица deploys). Frontend Dashboard.loadBase
+// вызывает api.listDeploys() → /api/deploys, регрессия после Wizard V2 рефакторинга.
+router.get('/', (req, res) => {
+  const rows = db.prepare('SELECT * FROM deploys ORDER BY created_at DESC').all();
+  res.json(rows.map(hydrateLegacy));
+});
+
 router.get('/:id/status', (req, res) => {
   const row = db.prepare('SELECT * FROM deploys WHERE id = ?').get(req.params.id);
   if (!row) return res.status(404).json({ error: 'Deploy not found' });
