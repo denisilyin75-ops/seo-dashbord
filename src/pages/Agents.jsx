@@ -4,6 +4,7 @@ import { Btn, Inp, Sel } from '../components/ui.jsx';
 import { useTryToast } from '../components/Toast.jsx';
 import ActivityFeed from '../components/ActivityFeed.jsx';
 import LlmCostPanel from '../components/LlmCostPanel.jsx';
+import LlmInsightsPanel from '../components/LlmInsightsPanel.jsx';
 
 const SCHEDULE_OPTIONS = [
   { v: '', l: 'Не запускать (on-demand)' },
@@ -100,6 +101,19 @@ export default function Agents() {
         </summary>
         <div style={{ marginTop: 10 }}>
           <LlmCostPanel />
+        </div>
+      </details>
+
+      {/* LLM Insights — timeline + reconciliation + drill-down */}
+      <details open style={{
+        background: '#0f172a', border: '1px solid #1e293b', borderRadius: 7,
+        padding: '10px 14px', marginBottom: 10,
+      }}>
+        <summary style={{ cursor: 'pointer', userSelect: 'none', fontSize: 12, fontWeight: 700, color: '#94a3b8' }}>
+          📈 LLM spend insights <span style={{ color: '#64748b', fontWeight: 500 }}>— daily timeline + сверка с OpenRouter billing + drill-down</span>
+        </summary>
+        <div style={{ marginTop: 10 }}>
+          <LlmInsightsPanel />
         </div>
       </details>
 

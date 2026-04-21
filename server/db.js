@@ -247,6 +247,13 @@ softAlter(`ALTER TABLE agent_runs ADD COLUMN cost_usd REAL DEFAULT 0`);
 // NULL = no cap. Проверяется в llm-tracker перед каждым LLM call по site_id.
 // При превышении — call reject'ится, alert в Daily Brief.
 softAlter(`ALTER TABLE sites ADD COLUMN monthly_llm_budget_usd REAL`);
+// Cost Insights Phase A — reconciliation с actual OpenRouter billing.
+// generation_id = data.id из OpenRouter response. Позволяет fetch actual cost через
+// GET /api/v1/generation?id=<id>. Если actual расходится с нашим computed — видно gap.
+softAlter(`ALTER TABLE llm_calls ADD COLUMN generation_id TEXT`);
+softAlter(`ALTER TABLE llm_calls ADD COLUMN actual_cost_usd REAL`);
+softAlter(`ALTER TABLE llm_calls ADD COLUMN full_prompt TEXT`);       // для drill-down
+softAlter(`ALTER TABLE llm_calls ADD COLUMN full_response TEXT`);
 
 // Article Import & Actions Phase 1 — search/filter/bulk
 // content_text: plain-text проекция body (для FTS); naturals = title + notes.

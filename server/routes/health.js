@@ -184,6 +184,52 @@ router.get('/activity/llm-calls', async (req, res) => {
   }
 });
 
+// GET /api/activity/llm-call/:id — single call drill-down (полный prompt + response)
+router.get('/activity/llm-call/:id', async (req, res) => {
+  try {
+    const { getLlmCall } = await import('../services/llm-tracker.js');
+    const row = getLlmCall(Number(req.params.id));
+    if (!row) return res.status(404).json({ error: 'Not found' });
+    res.json(row);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/activity/llm-timeline?days=30 — daily spend series + reconciliation summary
+router.get('/activity/llm-timeline', async (req, res) => {
+  try {
+    const { spendTimeline } = await import('../services/llm-tracker.js');
+    const r = spendTimeline({ days: Number(req.query.days) || 30 });
+    res.json(r);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/activity/llm-estimate — preview перед action
+// Body: { operation, model, inputTokensEstimate?, expectedOutputRatio? }
+router.post('/activity/llm-estimate', async (req, res) => {
+  try {
+    const { estimateCost } = await import('../services/llm-tracker.js');
+    const b = req.body || {};
+    res.json(estimateCost(b));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/activity/llm-reconcile — manual trigger reconciliation (для UI button)
+router.post('/activity/llm-reconcile', async (req, res) => {
+  try {
+    const { reconcileRecent } = await import('../services/llm-reconciliation.js');
+    const r = await reconcileRecent({ limit: Number(req.body?.limit) || 50 });
+    res.json(r);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // GET /api/activity/agents-status — список всех agents + их статус на короткий взгляд
 router.get('/activity/agents-status', (req, res) => {
   try {

@@ -187,6 +187,9 @@ export async function planMerge({ site_id, article_ids, params = {}, created_by 
       tokensOut: r.tokensOut || 0,
       latencyMs: null,
       status: 'success',
+      generationId: r.generationId,
+      fullPrompt: `SYSTEM:\n${prompts.system}\n\nUSER:\n${prompts.user}`.slice(0, 50_000),
+      fullResponse: r.text,
     });
     const costUsd = tracked.cost_usd;
 

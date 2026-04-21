@@ -105,6 +105,22 @@ function exitScorecardMonthly() {
   log('registered exitScorecardMonthly (0 8 1 * * UTC)');
 }
 
+/** LLM cost reconciliation — каждые 6 часов сверяет ~50 последних calls с OpenRouter billing */
+function llmReconciliationCron() {
+  cron.schedule('0 */6 * * *', async () => {
+    try {
+      const { reconcileRecent } = await import('./services/llm-reconciliation.js');
+      const r = await reconcileRecent({ limit: 50 });
+      if (r.total > 0) {
+        log(`llmReconciliation: reconciled=${r.reconciled}, errors=${r.errors}, skipped=${r.skipped} из ${r.total}`);
+      }
+    } catch (e) {
+      log(`llmReconciliation error: ${e.message}`);
+    }
+  }, { timezone: 'UTC' });
+  log('registered llmReconciliationCron (0 */6 * * * UTC)');
+}
+
 /**
  * Content Quality nightly batch — 02:30 UTC для каждого active сайта.
  * Анализирует 10 последних published статей per-site, данные копятся в
@@ -163,5 +179,6 @@ export function startCron() {
   codeReviewNightly();
   codeReviewWeekly();
   exitScorecardMonthly();
+  llmReconciliationCron();
   agentsTicker();
 }

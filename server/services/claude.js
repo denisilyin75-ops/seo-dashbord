@@ -252,7 +252,33 @@ async function callOpenRouter({ system, userMessage, maxTokens = 2000, model }) 
     tokensIn,
     tokensOut,
     tokensUsed: data.usage?.total_tokens || (tokensIn + tokensOut) || 0,
+    generationId: data.id || null,  // для OpenRouter reconciliation via /api/v1/generation?id=X
   };
+}
+
+// Fetch actual cost для одного generation_id через OpenRouter API.
+// Возвращает { cost, native_cost, tokens_prompt, tokens_completion } или null при failure.
+// Rate limit: не чаще 1 запроса в 200ms (OpenRouter guideline).
+export async function fetchOpenRouterGenerationCost(generationId) {
+  const key = process.env.OPENROUTER_API_KEY;
+  if (!key || !generationId) return null;
+  try {
+    const res = await fetch(`https://openrouter.ai/api/v1/generation?id=${encodeURIComponent(generationId)}`, {
+      headers: { 'Authorization': `Bearer ${key}` },
+    });
+    if (!res.ok) return { error: `HTTP ${res.status}` };
+    const body = await res.json();
+    const data = body?.data || body;
+    return {
+      cost:          typeof data.total_cost === 'number' ? data.total_cost : null,
+      tokens_prompt: data.tokens_prompt || data.native_tokens_prompt || null,
+      tokens_completion: data.tokens_completion || data.native_tokens_completion || null,
+      model: data.model || null,
+      provider: data.provider_name || null,
+    };
+  } catch (e) {
+    return { error: e.message };
+  }
 }
 
 /**

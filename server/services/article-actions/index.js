@@ -220,6 +220,7 @@ export async function runAction({ action_type, source_type, source_ids, params =
     const tracked = trackLlmCall({
       source: 'article_action',
       source_id: id,
+      site_id: siteId,
       operation: action_type,
       provider: r.provider || status.provider,
       model,
@@ -227,6 +228,9 @@ export async function runAction({ action_type, source_type, source_ids, params =
       tokensOut: r.tokensOut || 0,
       latencyMs: elapsedMs,
       status: 'success',
+      generationId: r.generationId,
+      fullPrompt: `SYSTEM:\n${prompts.system}\n\nUSER:\n${prompts.user}`.slice(0, 50_000),
+      fullResponse: r.text,
     });
     const tokensOut = r.tokensUsed || 0;
     const costUsd = tracked.cost_usd;

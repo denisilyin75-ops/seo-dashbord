@@ -112,6 +112,10 @@ export const api = {
     for (const [k, v] of Object.entries(filters)) if (v != null && v !== '') qs.set(k, String(v));
     return request('GET', `/api/activity/llm-calls${qs.toString() ? '?' + qs : ''}`);
   },
+  llmCall: (id) => request('GET', `/api/activity/llm-call/${id}`),
+  llmTimeline: (days = 30) => request('GET', `/api/activity/llm-timeline?days=${days}`),
+  llmEstimate: (body) => request('POST', '/api/activity/llm-estimate', body),
+  llmReconcile: (limit = 50) => request('POST', '/api/activity/llm-reconcile', { limit }),
 
   // Merge workflow (Phase 4)
   planMerge: (body) => request('POST', '/api/merge/preview', body),

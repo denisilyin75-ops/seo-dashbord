@@ -40,16 +40,106 @@ export function trackLlmCall(opts) {
   const tokensIn = opts.tokensIn || 0;
   const tokensOut = opts.tokensOut || 0;
   const cost = computeCost({ tokensIn, tokensOut, model: opts.model });
+  // Truncate prompt/response до 50KB чтобы БД не разбухла
+  const trim = (s) => s ? String(s).slice(0, 50_000) : null;
   const info = db.prepare(`INSERT INTO llm_calls
-    (source, source_id, site_id, provider, model, operation, tokens_in, tokens_out, tokens_total, cost_usd, latency_ms, status, error)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+    (source, source_id, site_id, provider, model, operation,
+     tokens_in, tokens_out, tokens_total, cost_usd, latency_ms, status, error,
+     generation_id, full_prompt, full_response)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
       opts.source, opts.source_id || null, opts.site_id || null,
       opts.provider, opts.model, opts.operation || null,
       tokensIn, tokensOut, tokensIn + tokensOut,
       cost, opts.latencyMs || null,
       opts.status || 'success', opts.error || null,
+      opts.generationId || null, trim(opts.fullPrompt), trim(opts.fullResponse),
     );
   return { id: info.lastInsertRowid, cost_usd: cost };
+}
+
+/**
+ * Daily spend timeline за N дней: series per-day с calls/tokens/cost.
+ * Zeros-filled: если в день N не было calls, row возвращается с 0.
+ * Plus anomaly detection — помечаются дни где cost > 3× от 7d rolling median.
+ */
+export function spendTimeline({ days = 30 } = {}) {
+  const rows = db.prepare(`SELECT
+      substr(created_at, 1, 10) AS day,
+      COUNT(*) AS calls,
+      SUM(tokens_total) AS tokens,
+      SUM(cost_usd) AS cost,
+      SUM(COALESCE(actual_cost_usd, cost_usd)) AS cost_effective
+    FROM llm_calls
+    WHERE created_at > datetime('now', '-' || ? || ' days')
+    GROUP BY day
+    ORDER BY day ASC`).all(days);
+
+  // Zero-fill пропущенные дни
+  const now = new Date();
+  const filled = [];
+  const byDay = new Map(rows.map(r => [r.day, r]));
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now.getTime() - i * 86400000);
+    const key = d.toISOString().slice(0, 10);
+    const row = byDay.get(key);
+    filled.push(row || { day: key, calls: 0, tokens: 0, cost: 0, cost_effective: 0 });
+  }
+
+  // Anomaly detection: точка считается anomaly если cost > 3× rolling 7d median
+  const costs = filled.map(r => r.cost || 0);
+  for (let i = 0; i < filled.length; i++) {
+    const window = costs.slice(Math.max(0, i - 7), i).filter(c => c > 0).sort((a, b) => a - b);
+    if (window.length < 3) continue;
+    const median = window[Math.floor(window.length / 2)];
+    if (median > 0 && costs[i] > median * 3) filled[i].anomaly = true;
+  }
+
+  // Reconciliation summary
+  const recon = db.prepare(`SELECT
+      SUM(cost_usd) AS computed,
+      SUM(COALESCE(actual_cost_usd, cost_usd)) AS actual,
+      SUM(CASE WHEN actual_cost_usd IS NOT NULL THEN 1 ELSE 0 END) AS reconciled_calls,
+      COUNT(*) AS total_calls
+    FROM llm_calls
+    WHERE created_at > datetime('now', '-' || ? || ' days')`).get(days);
+
+  return { days, timeline: filled, reconciliation: recon };
+}
+
+/**
+ * Estimated cost для preview перед action. Берёт historical avg по operation+model.
+ * Fallback — компьют из входных tokens через pricing table.
+ */
+export function estimateCost({ operation, model, inputTokensEstimate, expectedOutputRatio = 1.5 }) {
+  // Пробуем historical average tokens для same operation+model (last 30d)
+  if (operation && model) {
+    const hist = db.prepare(`SELECT AVG(tokens_in) AS avg_in, AVG(tokens_out) AS avg_out
+      FROM llm_calls WHERE operation = ? AND model = ? AND status = 'success'
+      AND created_at > datetime('now', '-30 days')`).get(operation, model);
+    if (hist.avg_in && hist.avg_out) {
+      return {
+        source: 'historical',
+        estimated_cost: computeCost({ tokensIn: hist.avg_in, tokensOut: hist.avg_out, model }),
+        tokens_in_avg: Math.round(hist.avg_in),
+        tokens_out_avg: Math.round(hist.avg_out),
+      };
+    }
+  }
+  // Fallback — pricing-table × input estimate × expected output ratio
+  if (inputTokensEstimate && model) {
+    return {
+      source: 'estimate',
+      estimated_cost: computeCost({ tokensIn: inputTokensEstimate, tokensOut: Math.round(inputTokensEstimate * expectedOutputRatio), model }),
+      tokens_in_avg: inputTokensEstimate,
+      tokens_out_avg: Math.round(inputTokensEstimate * expectedOutputRatio),
+    };
+  }
+  return { source: 'unknown', estimated_cost: null };
+}
+
+/** Один call по id — для drill-down модала */
+export function getLlmCall(id) {
+  return db.prepare('SELECT * FROM llm_calls WHERE id = ?').get(id);
 }
 
 // --- Analytics queries ---
