@@ -226,20 +226,30 @@ async function callOpenRouter({ system, userMessage, maxTokens = 2000, model }) 
   if (system) messages.push({ role: 'system', content: system });
   messages.push({ role: 'user', content: userMessage });
 
-  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${key}`,
-      'Content-Type': 'application/json',
-      'X-Title': 'SEO Command Center',
-      ...(process.env.OPENROUTER_REFERER ? { 'HTTP-Referer': process.env.OPENROUTER_REFERER } : {}),
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      max_tokens: maxTokens,
-    }),
-  });
+  // 5-минутный timeout. Default undici timeout ~30s — недостаточно для Sonnet с 8K max_tokens.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 5 * 60 * 1000);
+
+  let res;
+  try {
+    res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        'X-Title': 'SEO Command Center',
+        ...(process.env.OPENROUTER_REFERER ? { 'HTTP-Referer': process.env.OPENROUTER_REFERER } : {}),
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        max_tokens: maxTokens,
+      }),
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
   if (!res.ok) {
     const body = await res.text();
     throw new Error(`OpenRouter ${res.status}: ${body.slice(0, 400)}`);
