@@ -5,6 +5,7 @@ import { TI } from '../utils/constants.js';
 import { fmt } from '../utils/format.js';
 import { api } from '../api/client.js';
 import RevisionsModal, { freshnessLevel } from './RevisionsModal.jsx';
+import ImageFinderModal from './ImageFinderModal.jsx';
 
 const META_FIELDS = [
   { k: 'popolkam_machine_price', label: 'Цена (₽)',          placeholder: 'напр. 35000', kind: 'number' },
@@ -21,6 +22,7 @@ export default function ArticleRow({ article, onUpdate, onDelete }) {
   const [editing, setEditing] = useState(false);
   const [dr, setDr] = useState(article);
   const [showHistory, setShowHistory] = useState(false);
+  const [showImageFinder, setShowImageFinder] = useState(false);
   const [meta, setMeta] = useState({});
   const [metaLoading, setMetaLoading] = useState(false);
   const [metaErr, setMetaErr] = useState(null);
@@ -104,10 +106,30 @@ export default function ArticleRow({ article, onUpdate, onDelete }) {
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: fresh.color, display: 'inline-block' }} />
               {fresh.label}
             </button>
+            {article.wpPostId && (
+              <Btn onClick={() => setShowImageFinder(true)} v="ghost" sx={{ fontSize: '12px' }} title="Найти featured image">🖼</Btn>
+            )}
             <Btn onClick={openEdit} v="ghost" sx={{ fontSize: '12px' }}>✏️</Btn>
             <Btn onClick={() => onDelete(article.id)} v="ghost" sx={{ fontSize: '12px', color: '#ef4444' }}>🗑</Btn>
           </div>
           {showHistory && <RevisionsModal article={article} onClose={() => setShowHistory(false)} />}
+          {showImageFinder && (
+            <ImageFinderModal
+              open={showImageFinder}
+              onClose={() => setShowImageFinder(false)}
+              siteId={article.siteId}
+              postId={article.wpPostId}
+              defaultQuery={article.title}
+              suggestedPrompts={[
+                `Editorial photo of ${article.title}, soft natural light, minimalist composition, no text no logos, high quality`,
+                `Concept illustration for "${article.title}", warm tones, editorial style, no text`,
+                `Lifestyle shot inspired by "${article.title}", depth of field, modern kitchen background`,
+              ]}
+              onAssigned={(r) => {
+                alert(`✓ Featured image установлен.\nMedia #${r.media_id}`);
+              }}
+            />
+          )}
           <div style={{ display: 'flex', gap: '4px', marginTop: '6px' }}>
             <Inp value={cmd} onChange={setCmd} onKeyDown={(e) => e.key === 'Enter' && runAI()} placeholder="AI: обнови, добавь модель, перепиши..." sx={{ flex: 1 }} />
             <Btn onClick={runAI} disabled={ld} v="acc">{ld ? '⏳' : '▶ AI'}</Btn>

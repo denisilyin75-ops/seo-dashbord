@@ -25,6 +25,7 @@ import importedRouter from './routes/imported.js';
 import actionsRouter from './routes/actions.js';
 import mergeRouter from './routes/merge.js';
 import healthRouter from './routes/health.js';
+import imagesRouter from './routes/images.js';
 import { syncAgentsToDb } from './services/agents/registry.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -84,6 +85,7 @@ app.use('/api', importedRouter);        // /api/imported + /api/imported/:id
 app.use('/api', actionsRouter);         // /api/actions + /api/actions/:id
 app.use('/api', mergeRouter);           // /api/merge/preview + /api/merge/previews
 app.use('/api', healthRouter);          // /api/health/exit-readiness + /api/health/portfolio-quality
+app.use('/api', imagesRouter);          // /api/images/search + /api/images/assign + /api/images/flux-generate
 
 // 404 для API
 app.use('/api', (req, res) => res.status(404).json({ error: 'Not found', path: req.path }));

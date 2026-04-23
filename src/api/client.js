@@ -117,6 +117,13 @@ export const api = {
   llmEstimate: (body) => request('POST', '/api/activity/llm-estimate', body),
   llmReconcile: (limit = 50) => request('POST', '/api/activity/llm-reconcile', { limit }),
 
+  // Image Finder
+  searchImages: (body) => request('POST', '/api/images/search', body),
+  searchUnsplash: (query, count = 9, orientation = 'landscape') =>
+    request('POST', '/api/images/unsplash-only', { query, count, orientation }),
+  generateFluxImage: (body) => request('POST', '/api/images/flux-generate', body),
+  assignImage: (body) => request('POST', '/api/images/assign', body),
+
   // Merge workflow (Phase 4)
   planMerge: (body) => request('POST', '/api/merge/preview', body),
   getMergePreview: (id) => request('GET', `/api/merge/preview/${id}`),
