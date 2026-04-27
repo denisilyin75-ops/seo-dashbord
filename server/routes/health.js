@@ -230,6 +230,38 @@ router.post('/activity/llm-reconcile', async (req, res) => {
   }
 });
 
+// GET /api/health/sites — per-site availability dashboard
+router.get('/health/sites', async (req, res) => {
+  try {
+    const { getSitesHealth } = await import('../services/site-health-monitor.js');
+    res.json({ sites: getSitesHealth() });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/health/sites/:id/history?hours=24
+router.get('/health/sites/:id/history', async (req, res) => {
+  try {
+    const { getSiteHistory } = await import('../services/site-health-monitor.js');
+    const items = getSiteHistory(req.params.id, { hours: Number(req.query.hours) || 24 });
+    res.json({ items });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/health/sites/check-now — manual trigger для всех сайтов
+router.post('/health/sites/check-now', async (req, res) => {
+  try {
+    const { checkAllSites } = await import('../services/site-health-monitor.js');
+    const results = await checkAllSites();
+    res.json({ results });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // GET /api/activity/llm-waste?days=30 — waste analysis findings
 router.get('/activity/llm-waste', async (req, res) => {
   try {

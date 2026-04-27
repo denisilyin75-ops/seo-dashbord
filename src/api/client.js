@@ -117,6 +117,9 @@ export const api = {
   llmEstimate: (body) => request('POST', '/api/activity/llm-estimate', body),
   llmReconcile: (limit = 50) => request('POST', '/api/activity/llm-reconcile', { limit }),
   llmWaste: (days = 30) => request('GET', `/api/activity/llm-waste?days=${days}`),
+  sitesUptime: () => request('GET', '/api/health/sites'),
+  sitesUptimeCheck: () => request('POST', '/api/health/sites/check-now'),
+  siteHistoryHealth: (id, hours = 24) => request('GET', `/api/health/sites/${id}/history?hours=${hours}`),
 
   // Image Finder
   searchImages: (body) => request('POST', '/api/images/search', body),

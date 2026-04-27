@@ -247,6 +247,23 @@ softAlter(`ALTER TABLE agent_runs ADD COLUMN cost_usd REAL DEFAULT 0`);
 // NULL = no cap. Проверяется в llm-tracker перед каждым LLM call по site_id.
 // При превышении — call reject'ится, alert в Daily Brief.
 softAlter(`ALTER TABLE sites ADD COLUMN monthly_llm_budget_usd REAL`);
+// Site Health Monitor — per-site uptime checks (Phase 1, every 10 min cron).
+// Хранит historical hits + last_check + computed availability_pct (24h/7d/30d).
+db.exec(`
+  CREATE TABLE IF NOT EXISTS site_health_checks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    site_id TEXT NOT NULL,
+    url TEXT NOT NULL,
+    http_status INTEGER,
+    latency_ms INTEGER,
+    ssl_days_left INTEGER,
+    ok INTEGER DEFAULT 0,
+    error TEXT,
+    checked_at TEXT DEFAULT (datetime('now'))
+  );
+  CREATE INDEX IF NOT EXISTS idx_health_site_time ON site_health_checks(site_id, checked_at DESC);
+`);
+
 // Cost Insights Phase A — reconciliation с actual OpenRouter billing.
 // generation_id = data.id из OpenRouter response. Позволяет fetch actual cost через
 // GET /api/v1/generation?id=<id>. Если actual расходится с нашим computed — видно gap.

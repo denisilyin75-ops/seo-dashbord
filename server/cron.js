@@ -105,6 +105,23 @@ function exitScorecardMonthly() {
   log('registered exitScorecardMonthly (0 8 1 * * UTC)');
 }
 
+/** Site Health monitoring — каждые 10 минут, ping all active sites */
+function siteHealthMonitorCron() {
+  cron.schedule('*/10 * * * *', async () => {
+    try {
+      const { checkAllSites } = await import('./services/site-health-monitor.js');
+      const r = await checkAllSites();
+      const down = r.filter(s => !s.ok);
+      if (down.length) {
+        log(`siteHealthMonitor: ${r.length} sites checked, ${down.length} DOWN: ${down.map(s => s.name).join(', ')}`);
+      }
+    } catch (e) {
+      log(`siteHealthMonitor error: ${e.message}`);
+    }
+  }, { timezone: 'UTC' });
+  log('registered siteHealthMonitorCron (every 10 min)');
+}
+
 /** LLM waste detection — Sun 06:30 UTC, ищет паттерны экономии */
 function llmWasteWeekly() {
   cron.schedule('30 6 * * 0', async () => {
@@ -195,5 +212,6 @@ export function startCron() {
   exitScorecardMonthly();
   llmReconciliationCron();
   llmWasteWeekly();
+  siteHealthMonitorCron();
   agentsTicker();
 }

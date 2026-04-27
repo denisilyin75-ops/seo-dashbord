@@ -20,6 +20,7 @@ import BlogPanel from '../components/BlogPanel.jsx';
 import IdeasHistoryPanel from '../components/IdeasHistoryPanel.jsx';
 import PhilosophyPanel from '../components/PhilosophyPanel.jsx';
 import HealthWidget from '../components/HealthWidget.jsx';
+import SitesUptimeWidget from '../components/SitesUptimeWidget.jsx';
 import { SiteCardSkeleton, RowSkeleton } from '../components/Skeleton.jsx';
 import { useTryToast } from '../components/Toast.jsx';
 import { useConfirm } from '../components/ConfirmDialog.jsx';
@@ -270,6 +271,8 @@ export default function Dashboard() {
 
       {/* Health widgets: Exit Readiness + Portfolio Content Quality */}
       <HealthWidget />
+
+      <SitesUptimeWidget />
 
       {/* Философия портфеля — 5 принципов-якорей */}
       <PhilosophyPanel />
