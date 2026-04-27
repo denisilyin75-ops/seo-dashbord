@@ -116,6 +116,7 @@ export const api = {
   llmTimeline: (days = 30) => request('GET', `/api/activity/llm-timeline?days=${days}`),
   llmEstimate: (body) => request('POST', '/api/activity/llm-estimate', body),
   llmReconcile: (limit = 50) => request('POST', '/api/activity/llm-reconcile', { limit }),
+  llmWaste: (days = 30) => request('GET', `/api/activity/llm-waste?days=${days}`),
 
   // Image Finder
   searchImages: (body) => request('POST', '/api/images/search', body),

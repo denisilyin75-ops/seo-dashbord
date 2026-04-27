@@ -170,12 +170,101 @@ export default function LlmInsightsPanel() {
         </div>
       </div>
 
+      {/* Waste detection findings */}
+      <WastePanel days={days} />
+
       {/* Recent calls list for drill-down */}
       <RecentCallsList onSelect={setSelectedCallId} />
 
       {/* Modal — single call detail */}
       {selectedCallId && callDetail && (
         <CallDetailModal call={callDetail} onClose={() => setSelectedCallId(null)} />
+      )}
+    </div>
+  );
+}
+
+function WastePanel({ days }) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const run = () => {
+    setLoading(true);
+    api.llmWaste(days)
+      .then(setData)
+      .catch(() => setData(null))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { setData(null); }, [days]);
+
+  if (!data && !loading) {
+    return (
+      <div style={{ marginTop: 10, padding: 8, background: '#0f172a', border: '1px solid #1e293b', borderRadius: 4, fontSize: 11 }}>
+        <span style={{ color: '#64748b' }}>💡 Waste detection — patterns экономии</span>
+        <button
+          onClick={run}
+          style={{ marginLeft: 10, padding: '3px 8px', background: '#3b82f625', border: '1px solid #3b82f6', borderRadius: 3, color: '#e2e8f0', cursor: 'pointer', fontSize: 10 }}
+        >Run analysis</button>
+      </div>
+    );
+  }
+  if (loading) return <div style={{ marginTop: 10, padding: 8, color: '#64748b', fontSize: 11 }}>Анализирую…</div>;
+
+  const { findings, summary } = data || { findings: [], summary: {} };
+
+  return (
+    <div style={{ marginTop: 10, background: '#0f172a', border: '1px solid #1e293b', borderRadius: 4, padding: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, fontSize: 11 }}>
+        <strong style={{ color: '#e2e8f0' }}>💡 Waste analysis ({days}d)</strong>
+        <span style={{ color: '#64748b' }}>{summary.total_findings} pattern{summary.total_findings === 1 ? '' : 's'}</span>
+        {summary.projection_monthly > 0 && (
+          <span style={{ color: '#22c55e', fontWeight: 600 }}>
+            potential ${summary.projection_monthly}/mo
+          </span>
+        )}
+        <button onClick={run} style={{ marginLeft: 'auto', padding: '2px 6px', background: 'transparent', border: '1px solid #334155', color: '#64748b', borderRadius: 3, cursor: 'pointer', fontSize: 10 }}>
+          ↻ Re-run
+        </button>
+      </div>
+      {!findings.length ? (
+        <div style={{ fontSize: 11, color: '#22c55e', padding: 6 }}>✓ Нет patterns waste — оптимально.</div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {findings.map((f, i) => (
+            <Finding key={i} f={f} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Finding({ f }) {
+  const [expanded, setExpanded] = useState(false);
+  const sevColor = { critical: '#ef4444', high: '#f97316', medium: '#fbbf24', low: '#94a3b8', info: '#60a5fa' }[f.severity] || '#64748b';
+  return (
+    <div style={{ padding: 8, background: '#0a0e17', borderLeft: `3px solid ${sevColor}`, borderRadius: 3 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: '#e2e8f0' }}>{f.title}</div>
+          {f.detail?.savings_usd > 0 && (
+            <div style={{ fontSize: 10, color: '#22c55e', marginTop: 2 }}>
+              💰 экономия ${f.detail.savings_usd.toFixed(4)} ({f.detail.savings_pct}%)
+            </div>
+          )}
+          <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 4, lineHeight: 1.4 }}>
+            {f.recommendation}
+          </div>
+        </div>
+        <button onClick={() => setExpanded(!expanded)} style={{ background: 'transparent', border: 'none', color: '#60a5fa', cursor: 'pointer', fontSize: 10 }}>
+          {expanded ? '▲' : '▼'}
+        </button>
+      </div>
+      {expanded && (
+        <pre style={{ marginTop: 6, padding: 6, background: '#0f172a', borderRadius: 3, fontSize: 9, color: '#94a3b8', overflow: 'auto', maxHeight: 250, fontFamily: 'var(--mn)' }}>
+{JSON.stringify(f.detail, null, 2)}
+        </pre>
       )}
     </div>
   );

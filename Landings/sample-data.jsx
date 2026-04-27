@@ -1,0 +1,77 @@
+// Sample data — mixed Russian + international clients.
+const PROJECTS = [
+  {
+    id: 'p1', name: 'Северсталь Недвижимость', initials: 'СН', color: '#1e3a8a',
+    description: 'Лендинги для жилых комплексов и коммерческой недвижимости. 4 региона, 6 активных кампаний.',
+    status: 'active', landings: 12, domains: 3, forms: 7,
+    visits: 48210, delta: 12.4, updated: 'изменён 2 часа назад',
+    spark: [120, 145, 132, 180, 195, 210, 225, 248, 260, 255, 290, 310, 295, 340],
+    archived: false, alert: null,
+  },
+  {
+    id: 'p2', name: 'Acme Performance', initials: 'AP', color: '#0f172a',
+    description: 'Performance-маркетинг агентство: Black Friday, НГ-кампании, тестовые гипотезы.',
+    status: 'active', landings: 24, domains: 8, forms: 12,
+    visits: 124030, delta: 34.2, updated: 'изменён 14 минут назад',
+    spark: [80, 95, 110, 130, 158, 180, 175, 210, 245, 270, 290, 330, 360, 410],
+    archived: false, alert: null,
+  },
+  {
+    id: 'p3', name: 'Клиника «Белый Медведь»', initials: 'БМ', color: '#047857',
+    description: 'Сеть стоматологий, 11 филиалов. Лендинги под услуги и акции.',
+    status: 'active', landings: 9, domains: 2, forms: 5,
+    visits: 18420, delta: -4.1, updated: 'изменён вчера',
+    spark: [220, 210, 205, 195, 200, 185, 190, 175, 180, 170, 165, 160, 170, 158],
+    archived: false, alert: 'SSL истекает 7 мая',
+  },
+  {
+    id: 'p4', name: 'Northwind Retail', initials: 'NR', color: '#b45309',
+    description: 'Крупный e-commerce клиент. Промо-лендинги к распродажам и коллаборациям.',
+    status: 'active', landings: 18, domains: 5, forms: 9,
+    visits: 86540, delta: 8.7, updated: 'изменён 3 часа назад',
+    spark: [180, 190, 200, 195, 215, 230, 220, 240, 255, 248, 265, 280, 275, 295],
+    archived: false, alert: null,
+  },
+  {
+    id: 'p5', name: 'Студия Парус', initials: 'СП', color: '#1e3a8a',
+    description: 'Частные заказы — свадебные агентства, event-компании. Тёплый трафик.',
+    status: 'paused', landings: 6, domains: 2, forms: 4,
+    visits: 4120, delta: -18.2, updated: 'изменён 5 дней назад',
+    spark: [90, 88, 85, 80, 78, 70, 65, 60, 55, 50, 48, 45, 42, 38],
+    archived: false, alert: 'Яндекс.Метрика не отвечает',
+  },
+  {
+    id: 'p6', name: 'ООО «Техпром»', initials: 'ТП', color: '#6b21a8',
+    description: 'B2B-лендинги под промышленное оборудование. Длинный цикл сделки.',
+    status: 'active', landings: 7, domains: 2, forms: 3,
+    visits: 3210, delta: 2.1, updated: 'изменён 6 часов назад',
+    spark: [28, 30, 32, 29, 34, 36, 33, 38, 40, 37, 42, 44, 41, 45],
+    archived: false, alert: null,
+  },
+  {
+    id: 'p7', name: 'Legacy Clients', initials: 'LC', color: '#57534e',
+    description: 'Архив. Старые проекты 2021–2023, оставлены для справки и редких обновлений.',
+    status: 'archive', landings: 31, domains: 12, forms: 18,
+    visits: 280, delta: -92.1, updated: 'изменён 3 месяца назад',
+    spark: [400, 380, 300, 250, 180, 120, 80, 50, 35, 25, 18, 12, 9, 6],
+    archived: true, alert: null,
+  },
+  {
+    id: 'p8', name: 'Horizon Fintech', initials: 'HF', color: '#0f172a',
+    description: 'B2C финтех. Регулярные A/B-тесты на конверсию регистрации и онбординг.',
+    status: 'active', landings: 14, domains: 4, forms: 8,
+    visits: 68410, delta: 18.9, updated: 'изменён 45 минут назад',
+    spark: [140, 150, 155, 170, 175, 190, 210, 225, 240, 255, 270, 290, 310, 335],
+    archived: false, alert: null,
+  },
+  {
+    id: 'p9', name: 'Ферма «Лето»', initials: 'ФЛ', color: '#047857',
+    description: 'Локальный бренд фермерских продуктов. Сезонные кампании, доставка по МО.',
+    status: 'active', landings: 4, domains: 1, forms: 2,
+    visits: 8920, delta: 5.4, updated: 'изменён 1 час назад',
+    spark: [60, 65, 70, 68, 75, 78, 74, 82, 85, 88, 92, 95, 90, 98],
+    archived: false, alert: null,
+  },
+];
+
+Object.assign(window, { PROJECTS });

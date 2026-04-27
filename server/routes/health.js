@@ -230,6 +230,17 @@ router.post('/activity/llm-reconcile', async (req, res) => {
   }
 });
 
+// GET /api/activity/llm-waste?days=30 — waste analysis findings
+router.get('/activity/llm-waste', async (req, res) => {
+  try {
+    const { runWasteAnalysis } = await import('../services/llm-waste-detector.js');
+    const r = runWasteAnalysis({ days: Number(req.query.days) || 30 });
+    res.json(r);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // GET /api/activity/agents-status — список всех agents + их статус на короткий взгляд
 router.get('/activity/agents-status', (req, res) => {
   try {

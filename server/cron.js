@@ -105,6 +105,20 @@ function exitScorecardMonthly() {
   log('registered exitScorecardMonthly (0 8 1 * * UTC)');
 }
 
+/** LLM waste detection — Sun 06:30 UTC, ищет паттерны экономии */
+function llmWasteWeekly() {
+  cron.schedule('30 6 * * 0', async () => {
+    try {
+      const { runWasteAnalysis } = await import('./services/llm-waste-detector.js');
+      const r = runWasteAnalysis({ days: 30 });
+      log(`llmWasteWeekly: ${r.summary.total_findings} findings, projected savings $${r.summary.projection_monthly}/mo`);
+    } catch (e) {
+      log(`llmWasteWeekly error: ${e.message}`);
+    }
+  }, { timezone: 'UTC' });
+  log('registered llmWasteWeekly (30 6 * * 0 UTC)');
+}
+
 /** LLM cost reconciliation — каждые 6 часов сверяет ~50 последних calls с OpenRouter billing */
 function llmReconciliationCron() {
   cron.schedule('0 */6 * * *', async () => {
@@ -180,5 +194,6 @@ export function startCron() {
   codeReviewWeekly();
   exitScorecardMonthly();
   llmReconciliationCron();
+  llmWasteWeekly();
   agentsTicker();
 }

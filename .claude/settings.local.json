@@ -52,7 +52,14 @@
       "Bash(node --check server/services/code-review/diff-analyzer.js)",
       "Bash(node server/scripts/install-hooks.js)",
       "Bash(ssh root@5.129.245.98 \"cd /opt/scc && git fetch origin main && git merge origin/main --no-edit 2>&1 | tail -3 && npm install --silent 2>&1 | tail -3 && node server/scripts/install-hooks.js 2>&1 | tail -2 && node server/scripts/code-review.js --trigger=manual --sha=HEAD 2>&1 | tail -5\")",
-      "Bash(ssh root@5.129.245.98 \"docker exec scc node -e 'import\\(\\\\\"better-sqlite3\\\\\"\\).then\\(m=>{const db=new m.default\\(\\\\\"/app/data/seo.sqlite\\\\\"\\); const runs=db.prepare\\(\\\\\"SELECT source,status,started_at FROM \\(SELECT \\\\\\\\x27agent\\\\\\\\x27 AS source, status, started_at FROM agent_runs WHERE started_at > datetime\\(\\\\\\\\x27now\\\\\\\\x27,\\\\\\\\x27-12 hours\\\\\\\\x27\\) UNION ALL SELECT \\\\\\\\x27code_review\\\\\\\\x27, status, started_at FROM code_review_runs WHERE started_at > datetime\\(\\\\\\\\x27now\\\\\\\\x27,\\\\\\\\x27-12 hours\\\\\\\\x27\\) UNION ALL SELECT \\\\\\\\x27quality\\\\\\\\x27, status, started_at FROM quality_runs WHERE started_at > datetime\\(\\\\\\\\x27now\\\\\\\\x27,\\\\\\\\x27-12 hours\\\\\\\\x27\\)\\) ORDER BY started_at DESC LIMIT 15\\\\\"\\).all\\(\\); console.table\\(runs\\);}\\)' 2>&1 | tail -25\")"
+      "Bash(ssh root@5.129.245.98 \"docker exec scc node -e 'import\\(\\\\\"better-sqlite3\\\\\"\\).then\\(m=>{const db=new m.default\\(\\\\\"/app/data/seo.sqlite\\\\\"\\); const runs=db.prepare\\(\\\\\"SELECT source,status,started_at FROM \\(SELECT \\\\\\\\x27agent\\\\\\\\x27 AS source, status, started_at FROM agent_runs WHERE started_at > datetime\\(\\\\\\\\x27now\\\\\\\\x27,\\\\\\\\x27-12 hours\\\\\\\\x27\\) UNION ALL SELECT \\\\\\\\x27code_review\\\\\\\\x27, status, started_at FROM code_review_runs WHERE started_at > datetime\\(\\\\\\\\x27now\\\\\\\\x27,\\\\\\\\x27-12 hours\\\\\\\\x27\\) UNION ALL SELECT \\\\\\\\x27quality\\\\\\\\x27, status, started_at FROM quality_runs WHERE started_at > datetime\\(\\\\\\\\x27now\\\\\\\\x27,\\\\\\\\x27-12 hours\\\\\\\\x27\\)\\) ORDER BY started_at DESC LIMIT 15\\\\\"\\).all\\(\\); console.table\\(runs\\);}\\)' 2>&1 | tail -25\")",
+      "Bash(ssh root@5.129.245.98:*)",
+      "Bash(scp:*)",
+      "Bash(lftp:*)",
+      "Bash(node --check:*)",
+      "Bash(docker compose:*)",
+      "Bash(docker logs:*)",
+      "Bash(docker exec:*)"
     ]
   }
 }
