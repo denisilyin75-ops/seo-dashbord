@@ -42,6 +42,16 @@
 - [ ] **Страница `/o-avtore/`** — `content/aykakchisto/pages/o-avtore.md`
   - + Schema.org Person (Дарья Метёлкина) по `docs/templates/schema-person.md`
 
+### 4beg.ru — псевдоним-редактор Phase 0 (перед первой статьёй из P0 плана)
+
+> **Контекст:** в content_plan залиты 20 P0 идей (см. `docs/strategies/running-shoes.md`). Перед публикацией первой статьи под Артёмом Спиридоновым нужна минимальная E-E-A-T инфра. См. полный canon в `docs/personas/4beg-artem-spiridonov.md §4`.
+
+- [ ] **Email `artem@4beg.ru`** — через хостинг 4beg (Timeweb / Yandex 360)
+- [ ] **Страница `/o-avtore/`** — pseudonym disclosure (готовая формулировка в `docs/personas/4beg-artem-spiridonov.md §5`)
+- [ ] **Schema.org Person** — в footer / about page с `alternateName`, `email`, `sameAs` по `docs/templates/schema-person.md`
+- [ ] **Footer disclaimer** — «Артём Спиридонов — литературный псевдоним редакции 4beg.ru»
+- [ ] **Avatar** — спортивная фотография для author page (можно AI-сгенерированная с явным disclaimer)
+
 ### Инфра — срочно
 
 - [ ] **Продлить домен 4beg.ru** до 2026-07-04 (осталось ~2.5 мес)
