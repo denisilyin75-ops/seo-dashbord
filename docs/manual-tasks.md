@@ -42,6 +42,48 @@
 - [ ] **Страница `/o-avtore/`** — `content/aykakchisto/pages/o-avtore.md`
   - + Schema.org Person (Дарья Метёлкина) по `docs/templates/schema-person.md`
 
+### popolkam.ru — восстановление REHub-look через staging pipeline
+
+> **Контекст:** popolkam сейчас выглядит как голая стандартная тема — REHub theme + child установлены, но Theme Options + widgets + Customizer не настроены, поэтому header «разъехался» и архивы голые. См. полный анализ в `deploy/popolkam-staging/README.md`.
+>
+> **Как работает:** spin-staging.sh поднимает на VPS отдельный staging-WP с REHub → ты делаешь 1 клик в staging-admin (Import Demo Magazine) → скрипт экспортирует Theme Options + widgets + customizer → ты применяешь их к боевому popolkam (3-5 кликов).
+
+#### Шаг 1 — DNS (1 клик в твоём DNS-провайдере)
+
+- [ ] **Добавить A-запись** `popolkam-staging` → IP того же VPS, что cmd.bonaka.app
+
+#### Шаг 2 — staging admin (1 клик после моего ping'a)
+
+- [ ] **Зайти в staging:** https://popolkam-staging.bonaka.app/wp-admin
+  - login: `admin` / pass: `stg_admin_a8f3c2b1`
+- [ ] **Appearance → Import Demo Data** → выбрать "Magazine" → Import (ждать ~5 мин)
+- [ ] **Сообщить мне «готово»** — я запускаю export-rehub.sh, кладу артефакты на твой Dropbox/SCC
+
+#### Шаг 3 — popolkam.ru (3-5 кликов)
+
+- [ ] **Plugins → Add New → найти и установить + активировать:**
+  - Customizer Export/Import
+  - Widget Importer & Exporter
+- [ ] **Загрузить customizer.dat:** Appearance → Customize → нижний раздел «Export/Import» → Import → выбрать файл
+- [ ] **Загрузить widgets.wie:** Tools → Widget Importer & Exporter → Import Widgets → выбрать файл
+- [ ] **Загрузить theme-options.json:** REHub → Theme Options → Import / Export → вставить содержимое JSON
+
+#### Шаг 4 — после применения (опционально, 2-3 клика)
+
+- [ ] **Customizer → Site Identity:** проверить что логотип не сбросился (если сбросился — загрузить заново)
+- [ ] **Customizer → Colors:** убедиться что primary остался `#f97316` (наш брендовый)
+- [ ] **Settings → Reading → Front page displays:** убедиться что выбрана наша главная (page-id=24), не demo
+
+#### Шаг 5 — снос staging (1 команда)
+
+После того как popolkam ОК — staging больше не нужен:
+```
+ssh root@cmd.bonaka.app 'cd /opt/popolkam-staging && docker compose down -v'
+```
+- [ ] **Удалить A-запись** `popolkam-staging` из DNS
+
+---
+
 ### 4beg.ru — псевдоним-редактор Phase 0 (перед первой статьёй из P0 плана)
 
 > **Контекст:** в content_plan залиты 20 P0 идей (см. `docs/strategies/running-shoes.md`). Перед публикацией первой статьи под Артёмом Спиридоновым нужна минимальная E-E-A-T инфра. См. полный canon в `docs/personas/4beg-artem-spiridonov.md §4`.

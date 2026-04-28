@@ -1,0 +1,14 @@
+# REHub theme (платный артефакт, не коммитим)
+rehub-theme.zip
+rehub-blankchild.zip
+*.zip
+
+# Экспортированные артефакты demo-импорта (генерируются скриптом)
+exports/
+*.dat
+*.wie
+*.json.bak
+
+# Database dumps (могут содержать ключи)
+*.sql
+*.sql.gz

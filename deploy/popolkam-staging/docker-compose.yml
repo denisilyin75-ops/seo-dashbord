@@ -1,0 +1,78 @@
+services:
+  db:
+    image: mariadb:11
+    container_name: popolkam-staging-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: stg_root_8e3a91f2c5d7
+      MYSQL_DATABASE: popolkam_staging
+      MYSQL_USER: wp_staging
+      MYSQL_PASSWORD: stg_wp_4a82f6b1d9e5
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - internal
+
+  wordpress:
+    image: wordpress:6.9-php8.3-apache
+    container_name: popolkam-staging-wp
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_NAME: popolkam_staging
+      WORDPRESS_DB_USER: wp_staging
+      WORDPRESS_DB_PASSWORD: stg_wp_4a82f6b1d9e5
+      WORDPRESS_TABLE_PREFIX: wp_
+      # увеличенные лимиты для импорта demo (~50 МБ)
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_MEMORY_LIMIT', '512M');
+        define('WP_MAX_MEMORY_LIMIT', '512M');
+    volumes:
+      - wp-data:/var/www/html
+      # zip-ы темы доступны изнутри контейнера для wp-cli
+      - ./rehub-theme.zip:/tmp/rehub-theme.zip:ro
+      - ./rehub-blankchild.zip:/tmp/rehub-blankchild.zip:ro
+      - ./exports:/exports
+    networks:
+      - internal
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.popolkam-staging.rule=Host(`popolkam-staging.bonaka.app`)"
+      - "traefik.http.routers.popolkam-staging.entrypoints=websecure"
+      - "traefik.http.routers.popolkam-staging.tls=true"
+      - "traefik.http.routers.popolkam-staging.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.popolkam-staging.service=popolkam-staging"
+      - "traefik.http.routers.popolkam-staging-http.rule=Host(`popolkam-staging.bonaka.app`)"
+      - "traefik.http.routers.popolkam-staging-http.entrypoints=web"
+      - "traefik.http.routers.popolkam-staging-http.middlewares=popolkam-staging-redirect"
+      - "traefik.http.middlewares.popolkam-staging-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.popolkam-staging-redirect.redirectscheme.permanent=true"
+      - "traefik.http.services.popolkam-staging.loadbalancer.server.port=80"
+
+  wpcli:
+    image: wordpress:cli-php8.3
+    container_name: popolkam-staging-wpcli
+    depends_on:
+      - wordpress
+    user: "33:33"  # www-data
+    volumes:
+      - wp-data:/var/www/html
+      - ./rehub-theme.zip:/tmp/rehub-theme.zip:ro
+      - ./rehub-blankchild.zip:/tmp/rehub-blankchild.zip:ro
+      - ./exports:/exports
+    networks:
+      - internal
+    entrypoint: ["sleep", "infinity"]  # держим живым для exec команд
+
+volumes:
+  db-data:
+  wp-data:
+
+networks:
+  internal:
+  web:
+    external: true
