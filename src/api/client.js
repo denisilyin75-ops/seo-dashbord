@@ -81,6 +81,11 @@ export const api = {
   },
   getImported: (id) => request('GET', `/api/imported/${id}`),
   archiveImported: (id) => request('DELETE', `/api/imported/${id}`),
+  // Re-fetch monitor — детект изменений в импортированных статьях
+  importedChangesUnseen: (limit = 20) => request('GET', `/api/imported/changes/unseen?limit=${limit}`),
+  markImportedChangeSeen: (id) => request('POST', `/api/imported/changes/${id}/seen`),
+  refetchImportedNow: (id) => request('POST', `/api/imported/${id}/refetch`),
+  refetchImportedRunDue: (limit = 50) => request('POST', '/api/imported/refetch/run', { limit }),
 
   // Article Actions (Phase 3)
   runAction: (body) => request('POST', '/api/actions', body),

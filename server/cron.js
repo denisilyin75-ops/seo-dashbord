@@ -105,6 +105,24 @@ function exitScorecardMonthly() {
   log('registered exitScorecardMonthly (0 8 1 * * UTC)');
 }
 
+/** Re-fetch monitor — daily 04:30 UTC, проверяет imported_articles с заданным
+ *  refetch_interval_days, детектит изменения content_hash, копит в imported_article_changes.
+ *  UI badge «N конкурентов обновили статью» растёт оттуда. */
+function refetchMonitorCron() {
+  cron.schedule('30 4 * * *', async () => {
+    try {
+      const { processDueRefetches } = await import('./services/article-import/refetch-monitor.js');
+      const r = await processDueRefetches({ limit: 50 });
+      if (r.processed > 0) {
+        log(`refetchMonitor: processed=${r.processed}, changed=${r.changed}, unchanged=${r.unchanged}, errors=${r.errors}`);
+      }
+    } catch (e) {
+      log(`refetchMonitor error: ${e.message}`);
+    }
+  }, { timezone: 'UTC' });
+  log('registered refetchMonitorCron (30 4 * * * UTC)');
+}
+
 /** Site Health monitoring — каждые 10 минут, ping all active sites */
 function siteHealthMonitorCron() {
   cron.schedule('*/10 * * * *', async () => {
@@ -213,5 +231,6 @@ export function startCron() {
   llmReconciliationCron();
   llmWasteWeekly();
   siteHealthMonitorCron();
+  refetchMonitorCron();
   agentsTicker();
 }

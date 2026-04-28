@@ -247,6 +247,26 @@ softAlter(`ALTER TABLE agent_runs ADD COLUMN cost_usd REAL DEFAULT 0`);
 // NULL = no cap. Проверяется в llm-tracker перед каждым LLM call по site_id.
 // При превышении — call reject'ится, alert в Daily Brief.
 softAlter(`ALTER TABLE sites ADD COLUMN monthly_llm_budget_usd REAL`);
+// Imported article changes — re-fetch monitoring tracks contention diff.
+// При detected change → запись + notification в Daily Brief.
+db.exec(`
+  CREATE TABLE IF NOT EXISTS imported_article_changes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    imported_article_id TEXT NOT NULL,
+    change_type TEXT NOT NULL,            -- content | title | meta | structure
+    old_hash TEXT,
+    new_hash TEXT,
+    old_title TEXT,
+    new_title TEXT,
+    old_word_count INTEGER,
+    new_word_count INTEGER,
+    detected_at TEXT DEFAULT (datetime('now')),
+    seen_at TEXT
+  );
+  CREATE INDEX IF NOT EXISTS idx_iac_article ON imported_article_changes(imported_article_id, detected_at DESC);
+  CREATE INDEX IF NOT EXISTS idx_iac_unseen ON imported_article_changes(seen_at) WHERE seen_at IS NULL;
+`);
+
 // Site Health Monitor — per-site uptime checks (Phase 1, every 10 min cron).
 // Хранит historical hits + last_check + computed availability_pct (24h/7d/30d).
 db.exec(`

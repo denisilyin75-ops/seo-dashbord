@@ -21,6 +21,7 @@ import IdeasHistoryPanel from '../components/IdeasHistoryPanel.jsx';
 import PhilosophyPanel from '../components/PhilosophyPanel.jsx';
 import HealthWidget from '../components/HealthWidget.jsx';
 import SitesUptimeWidget from '../components/SitesUptimeWidget.jsx';
+import CompetitorChangesWidget from '../components/CompetitorChangesWidget.jsx';
 import { SiteCardSkeleton, RowSkeleton } from '../components/Skeleton.jsx';
 import { useTryToast } from '../components/Toast.jsx';
 import { useConfirm } from '../components/ConfirmDialog.jsx';
@@ -273,6 +274,8 @@ export default function Dashboard() {
       <HealthWidget />
 
       <SitesUptimeWidget />
+
+      <CompetitorChangesWidget />
 
       {/* Философия портфеля — 5 принципов-якорей */}
       <PhilosophyPanel />
