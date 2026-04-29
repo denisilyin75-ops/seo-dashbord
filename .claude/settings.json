@@ -1,7 +1,17 @@
 {
   "permissions": {
     "allow": [
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(ssh root@cmd.bonaka.app:*)",
+      "Bash(ssh root@5.129.245.98:*)",
+      "Bash(scp:*)",
+      "Bash(lftp:*)",
+      "Bash(dig:*)",
+      "Bash(nslookup:*)",
+      "Bash(docker compose:*)",
+      "Bash(docker exec:*)",
+      "Bash(docker logs:*)",
+      "Bash(docker cp:*)"
     ]
   }
 }
