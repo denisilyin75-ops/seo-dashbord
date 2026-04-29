@@ -59,6 +59,14 @@ services:
     depends_on:
       - wordpress
     user: "33:33"  # www-data
+    environment:
+      # ВАЖНО: те же что у wordpress, иначе wp-config.php getenv_docker
+      # резолвит DB_HOST в default 'mysql' и wp-cli не подключится
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_NAME: popolkam_staging
+      WORDPRESS_DB_USER: wp_staging
+      WORDPRESS_DB_PASSWORD: stg_wp_4a82f6b1d9e5
+      WORDPRESS_TABLE_PREFIX: wp_
     volumes:
       - wp-data:/var/www/html
       - ./rehub-theme.zip:/tmp/rehub-theme.zip:ro

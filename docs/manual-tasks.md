@@ -59,14 +59,29 @@
 - [ ] **Appearance → Import Demo Data** → выбрать "Magazine" → Import (ждать ~5 мин)
 - [ ] **Сообщить мне «готово»** — я запускаю export-rehub.sh, кладу артефакты на твой Dropbox/SCC
 
-#### Шаг 3 — popolkam.ru (3-5 кликов)
+#### Шаг 3 — popolkam.ru (3 артефакта × ~2 клика = 6 кликов)
 
-- [ ] **Plugins → Add New → найти и установить + активировать:**
-  - Customizer Export/Import
-  - Widget Importer & Exporter
-- [ ] **Загрузить customizer.dat:** Appearance → Customize → нижний раздел «Export/Import» → Import → выбрать файл
-- [ ] **Загрузить widgets.wie:** Tools → Widget Importer & Exporter → Import Widgets → выбрать файл
-- [ ] **Загрузить theme-options.json:** REHub → Theme Options → Import / Export → вставить содержимое JSON
+Все 3 файла лежат локально в `deploy/popolkam-staging/exports/`:
+- `rehub-options.json` (12 КБ) — **главный**: REHub Theme Options + design selector + wizard. Уже отребрендирован: цвет magenta → наш `#f97316`, URL staging → popolkam.ru
+- `customizer.dat` (3 КБ) — Customizer mods (theme_mods)
+- `widgets.wie` (1.2 КБ) — sidebars (минимальные generic-блоки, REHub демо почти не использует виджеты)
+
+**Шаг 3.1: Загрузка REHub Options (главное, делать первым)**
+
+- [ ] **Plugins → Add New → Upload Plugin** → загрузить `wp-plugins/rehub-options-importer.zip` → Активировать
+- [ ] **Tools → REHub Options Importer** → выбрать файл `rehub-options.json` → «Импортировать»
+- [ ] **Зайти в REHub → Theme Options** — убедиться что цвет `#f97316`, archive_layout=communitylist, остальное на месте
+- [ ] *(опционально)* После проверки: Plugins → деактивировать и удалить REHub Options Importer
+
+**Шаг 3.2: Customizer mods**
+
+- [ ] **Plugins → Add New** → найти «Customizer Export/Import» → Установить + Активировать
+- [ ] **Appearance → Customize** → секция «Export/Import» внизу → Import → выбрать `customizer.dat` → Apply
+
+**Шаг 3.3: Widgets (опционально — почти ничего не даст, в demo widgets были голые)**
+
+- [ ] **Plugins → Add New** → найти «Widget Importer & Exporter» → Установить + Активировать
+- [ ] **Tools → Widget Importer & Exporter** → Import Widgets → выбрать `widgets.wie`
 
 #### Шаг 4 — после применения (опционально, 2-3 клика)
 

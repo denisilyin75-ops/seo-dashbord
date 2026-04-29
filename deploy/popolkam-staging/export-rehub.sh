@@ -32,26 +32,41 @@ if [[ "$ACTIVE_THEME" != "rehub-theme" && "$ACTIVE_THEME" != "rehub-blankchild" 
 fi
 
 echo "===> 3. Экспорт Customizer (customizer.dat)"
-# Customizer Export/Import плагин: команда `customizer-export-import export`
-# Записывает .dat файл в /tmp внутри контейнера
-WPCLI customizer-export-import export 2>&1 | tail -3 || true
-# fallback: если CLI команда не сработала, дампим theme_mods вручную
-WPCLI option get theme_mods_$(WPCLI option get template) --format=json > exports/customizer-fallback.json 2>/dev/null || true
-# попытка скопировать .dat файл
-docker cp popolkam-staging-wp:/var/www/html/wp-content/uploads/customizer-import.dat exports/customizer.dat 2>/dev/null \
-  || echo "    Нет customizer.dat — будет использован customizer-fallback.json"
+# Customizer Export/Import плагин не предоставляет wp-cli команды.
+# Генерируем .dat файл напрямую — это PHP-serialized array вида:
+# { template, mods, options, wp_css }, как делает плагин при export.
+docker exec popolkam-staging-wpcli sh -c '
+cat > /tmp/build-customizer-dat.php <<PHP
+<?php
+require_once "/var/www/html/wp-load.php";
+\$template = get_template();          // активный parent template (rehub-theme)
+\$stylesheet = get_stylesheet();      // активный stylesheet (rehub-blankchild)
+\$mods = get_option("theme_mods_" . \$stylesheet, array());
+// также соберём theme_mods для parent на случай если REHub что-то держит там
+\$parent_mods = get_option("theme_mods_" . \$template, array());
+// options that Customizer Export/Import плагин обычно тоже захватывает
+\$options = array();
+\$opt_names = array("blogname", "blogdescription", "show_on_front", "page_on_front", "page_for_posts");
+foreach (\$opt_names as \$o) { \$options[\$o] = get_option(\$o); }
+\$wp_css = wp_get_custom_css();
+\$data = array(
+  "template"   => \$template,
+  "stylesheet" => \$stylesheet,
+  "mods"       => array_merge(\$parent_mods, \$mods),
+  "options"    => \$options,
+  "wp_css"     => \$wp_css,
+);
+file_put_contents("/exports/customizer.dat", serialize(\$data));
+echo "    customizer.dat: " . count(\$data["mods"]) . " mods, " . count(\$data["options"]) . " options, " . strlen(\$wp_css) . " bytes css\n";
+PHP
+wp --allow-root eval-file /tmp/build-customizer-dat.php
+'
 
 echo "===> 4. Экспорт виджетов (widgets.wie)"
-# widget-importer-exporter создаёт .wie файл
-# Включает все sidebars + widget instances в JSON-внутри-WIE формате
-WPCLI option get sidebars_widgets --format=json > exports/sidebars_widgets.json
-# Все widget option keys
-WPCLI option list --search='widget_*' --field=option_name | while read opt; do
-  WPCLI option get "$opt" --format=json > "exports/${opt}.json" 2>/dev/null || true
-done
-# Сборка в .wie формат (это просто JSON массив, который Widget Importer/Exporter понимает)
+# widgets.wie format = JSON, который Widget Importer/Exporter понимает.
+# Структура: { sidebar_id: { widget_id: instance_data, ... }, ... }
 docker exec popolkam-staging-wpcli sh -c '
-  cd /tmp && cat > /tmp/build-wie.php <<PHP
+cat > /tmp/build-wie.php <<PHP
 <?php
 require_once "/var/www/html/wp-load.php";
 \$out = array();
@@ -68,25 +83,47 @@ foreach (\$widgets as \$sidebar => \$widget_ids) {
     \$out[\$sidebar][\$widget_id] = \$instances[\$m[2]];
   }
 }
-echo json_encode(\$out, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+\$json = json_encode(\$out, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+file_put_contents("/exports/widgets.wie", \$json);
+\$total = 0; foreach(\$out as \$s) \$total += count(\$s);
+echo "    widgets.wie: " . count(\$out) . " sidebars, " . \$total . " widgets\n";
 PHP
-  wp --allow-root eval-file /tmp/build-wie.php > /exports/widgets.wie
+wp --allow-root eval-file /tmp/build-wie.php
 '
 
-echo "===> 5. Экспорт REHub Theme Options (Redux)"
-# REHub использует Redux Framework. Опции хранятся в wp_options как
-# `rehub_framework` или `redux_options` или `rehub_theme_options` — варианты
-# по версии. Дампим все возможные ключи.
-for KEY in rehub_framework redux_options rehub_theme_options redux_demo redux_options-rehub_framework; do
-  VAL=$(WPCLI option get "$KEY" --format=json 2>/dev/null || echo "")
-  if [[ -n "$VAL" && "$VAL" != "false" && "$VAL" != "null" ]]; then
-    echo "$VAL" > "exports/theme-options-${KEY}.json"
-    echo "    ✓ $KEY → exports/theme-options-${KEY}.json"
-  fi
-done
+echo "===> 5. Экспорт REHub Theme Options (rehub_option = главный)"
+# В REHub 19.x главный объект Theme Options — `rehub_option` (~9 КБ JSON).
+# Также важны `rehub_design_selector` (выбранный skin) и `rehub_wizard_option`.
+docker exec popolkam-staging-wpcli sh -c '
+cat > /tmp/build-rehub-options.php <<PHP
+<?php
+require_once "/var/www/html/wp-load.php";
 
-# Best-effort: дамп всех ключей содержащих rehub
-WPCLI option list --search='*rehub*' --format=json > exports/all-rehub-options.json 2>/dev/null || true
+\$bundle = array();
+\$keys = array("rehub_option", "rehub_design_selector", "rehub_wizard_option");
+foreach (\$keys as \$k) {
+  \$v = get_option(\$k);
+  if (\$v !== false && \$v !== "") \$bundle[\$k] = \$v;
+}
+
+// Auto-rebrand: meninto/recart magenta → popolkam orange (#f97316)
+\$json = json_encode(\$bundle, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+\$replacements = array(
+  "#7000f4" => "#f97316",                               // recart magenta
+  "#0073aa" => "#f97316",                               // generic blue
+  "popolkam-staging.bonaka.app" => "popolkam.ru",       // staging URL → prod
+);
+foreach (\$replacements as \$from => \$to) {
+  \$json = str_ireplace(\$from, \$to, \$json);
+}
+file_put_contents("/exports/rehub-options.json", \$json);
+echo "    rehub-options.json: " . strlen(\$json) . " bytes (rebranded)\n";
+PHP
+wp --allow-root eval-file /tmp/build-rehub-options.php
+'
+
+# Best-effort бэкап: все ключи с "rehub" — для ручного разбора если что
+WPCLI option list --search='*rehub*' --format=json > exports/all-rehub-options-raw.json 2>/dev/null || true
 
 echo
 echo "===> 6. Список созданных файлов"
