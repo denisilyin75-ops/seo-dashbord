@@ -100,6 +100,20 @@ Pipeline per статья (~2-4 часа):
 - [ ] **Кнопка «Запустить агента site_valuation сейчас»** в PortfolioWidget — после новой публикации сразу видеть новую цифру
 - [ ] **Sync-all кнопка** на SiteDetail — сейчас через curl, в UI нет
 
+### 🆕 SEO/AEO Strategist Agent (P1, big new feature)
+
+**Spec:** `docs/agents/seo-aeo-strategist-agent.md` — полный design doc.
+
+Идея от Reddit r/ClaudeAI поста: перепозиционировать Claude из «content generator» в «analytical strategist» — скармливать GSC + GA4 + Ahrefs данные → Claude находит gaps → диктует rigid template → мы публикуем.
+
+**5 фаз rollout** (см. spec §5):
+- Phase 0: GSC + GA4 Service Accounts (блокер) + Ahrefs decision
+- Phase 1: read-only audit + gap-analyzer + UI Findings tab
+- Phase 2: write-actions (CTR optimizer applies via WP REST), weekly cron
+- Phase 3: content generation с rigid template + persona voice check
+- Phase 4: AEO infra (robots.txt, llms.txt, schema markup auto)
+- Phase 5 (опц.): Core Web Vitals automation
+
 ### Stage C идеи (если останется время в 25%)
 
 - Prompt caching в claude.js (−50-80% AI costs)
