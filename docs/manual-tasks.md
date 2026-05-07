@@ -42,6 +42,22 @@
 - [ ] **Страница `/o-avtore/`** — `content/aykakchisto/pages/o-avtore.md`
   - + Schema.org Person (Дарья Метёлкина) по `docs/templates/schema-person.md`
 
+### popolkam.ru — Rank Math initial setup wizard (1 раз, ~5 мин)
+
+> **Контекст:** Rank Math плагин активен, но не выводит og:image / twitter:image meta tags во фронтенде. У нас уже залиты 3 OG-image SVG (homepage / о-авторе / методология) с post_meta — но они не появятся пока wizard не пройдён.
+
+- [ ] **wp-admin → Rank Math → Setup Wizard** (или dashboard → Activate)
+- [ ] Step 1: Site type → «Personal blog» (или «Other»)
+- [ ] Step 2: Compatibility → принять
+- [ ] Step 3: Search Console → пропустить (потом подключим Service Account)
+- [ ] Step 4: Sitemap → enable
+- [ ] Step 5: Optimization → enable Auto Update + Open Graph + Twitter Card
+- [ ] Done — meta tags автоматически появятся на всех страницах
+
+После — проверить: `curl -s https://popolkam.ru/ | grep og:image` должен показать SVG URL.
+
+---
+
 ### popolkam.ru — восстановление REHub-look через staging pipeline
 
 > **Контекст:** popolkam сейчас выглядит как голая стандартная тема — REHub theme + child установлены, но Theme Options + widgets + Customizer не настроены, поэтому header «разъехался» и архивы голые. См. полный анализ в `deploy/popolkam-staging/README.md`.
