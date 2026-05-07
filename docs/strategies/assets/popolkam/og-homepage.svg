@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="Popolkam.ru — обзоры бытовой техники для дома">
+  <defs>
+    <linearGradient id="ogHbg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#ef4444"/>
+    </linearGradient>
+    <linearGradient id="ogHcard" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fff"/>
+      <stop offset="100%" stop-color="#fef9f5"/>
+    </linearGradient>
+    <linearGradient id="ogHsteam" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#ogHbg)"/>
+
+  <g fill="#fff" opacity="0.07">
+    <ellipse cx="120" cy="100" rx="22" ry="32" transform="rotate(-22 120 100)"/>
+    <line x1="120" y1="68" x2="120" y2="132" stroke="#fff" stroke-width="4" stroke-opacity="0.07" transform="rotate(-22 120 100)"/>
+    <ellipse cx="1080" cy="540" rx="20" ry="28" transform="rotate(28 1080 540)"/>
+    <line x1="1080" y1="510" x2="1080" y2="568" stroke="#fff" stroke-width="4" stroke-opacity="0.07" transform="rotate(28 1080 540)"/>
+    <ellipse cx="980" cy="80" rx="18" ry="26" transform="rotate(15 980 80)"/>
+    <ellipse cx="80" cy="510" rx="18" ry="26" transform="rotate(-12 80 510)"/>
+  </g>
+
+  <g transform="translate(60 80)" filter="drop-shadow(0 12px 28px rgba(0,0,0,0.18))">
+    <rect width="1080" height="470" rx="24" fill="url(#ogHcard)"/>
+
+    <g transform="translate(60 70)">
+      <rect width="56" height="56" rx="14" fill="url(#ogHbg)"/>
+      <rect x="14" y="16" width="28" height="4" rx="2" fill="#fff"/>
+      <rect x="16" y="26" width="24" height="4" rx="2" fill="#fff" fill-opacity="0.9"/>
+      <rect x="18" y="36" width="20" height="4" rx="2" fill="#fff" fill-opacity="0.8"/>
+      <text x="78" y="36" font-family="DM Sans,system-ui,sans-serif" font-size="26" font-weight="800" fill="#0f172a">popolkam<tspan fill="#f97316">.ru</tspan></text>
+    </g>
+
+    <text x="60" y="240" font-family="DM Sans,system-ui,sans-serif" font-size="68" font-weight="800" fill="#0f172a">Какую кофемашину</text>
+    <text x="60" y="312" font-family="DM Sans,system-ui,sans-serif" font-size="68" font-weight="800" fill="#0f172a">купить —</text>
+    <text x="60" y="384" font-family="DM Sans,system-ui,sans-serif" font-size="68" font-weight="800" fill="#f97316">без воды и обмана</text>
+
+    <g transform="translate(60 412)">
+      <text font-family="DM Sans,system-ui,sans-serif" font-size="20" font-weight="600" fill="#475569">Замеры в ваттах и децибелах · 5-летний прогноз поломок</text>
+    </g>
+
+    <g transform="translate(800 220)">
+      <ellipse cx="60" cy="140" rx="68" ry="9" fill="#000" fill-opacity="0.12"/>
+      <path d="M -5,135 Q -5,142 5,144 L 115,144 Q 125,142 125,135 L 122,128 L -2,128 Z" fill="#fff" stroke="#e5e7eb" stroke-width="1"/>
+      <ellipse cx="60" cy="128" rx="62" ry="8" fill="#e5e7eb"/>
+      <path d="M 22,30 Q 22,18 30,16 L 90,16 Q 98,18 98,30 L 96,108 Q 94,118 86,124 Q 60,130 34,124 Q 26,118 24,108 Z" fill="#fff" stroke="#e5e7eb" stroke-width="1"/>
+      <ellipse cx="60" cy="20" rx="38" ry="8" fill="#92400e"/>
+      <ellipse cx="60" cy="19" rx="32" ry="5" fill="#fbbf24" fill-opacity="0.55"/>
+      <path d="M 96,42 Q 122,42 124,62 Q 124,80 100,82 L 100,76 Q 116,75 117,62 Q 116,49 96,49 Z" fill="#fff" stroke="#e5e7eb" stroke-width="1"/>
+      <g stroke="url(#ogHsteam)" stroke-width="3" stroke-linecap="round" fill="none">
+        <path d="M 40,5 Q 32,-20 42,-50 Q 50,-78 40,-105"/>
+        <path d="M 60,5 Q 52,-20 62,-50 Q 70,-80 60,-110"/>
+        <path d="M 80,5 Q 72,-20 82,-50 Q 90,-78 80,-105"/>
+      </g>
+    </g>
+  </g>
+
+  <g transform="translate(60 580)">
+    <rect width="240" height="34" rx="17" fill="#fff"/>
+    <text x="120" y="22" font-family="DM Sans,system-ui,sans-serif" font-size="13" font-weight="800" fill="#f97316" text-anchor="middle" letter-spacing="0.5">Обзоры · сравнения · рейтинги</text>
+  </g>
+  <g transform="translate(960 580)">
+    <rect width="180" height="34" rx="17" fill="#0f172a"/>
+    <text x="90" y="22" font-family="DM Sans,system-ui,sans-serif" font-size="13" font-weight="800" fill="#fff" text-anchor="middle" letter-spacing="0.5">popolkam.ru</text>
+  </g>
+</svg>

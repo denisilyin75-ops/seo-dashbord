@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="Popolkam — как мы тестируем технику">
+  <defs>
+    <linearGradient id="ogMbg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#ef4444"/>
+    </linearGradient>
+    <linearGradient id="ogMcard" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fff"/>
+      <stop offset="100%" stop-color="#fef9f5"/>
+    </linearGradient>
+    <pattern id="ogMgrid" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#fff" stroke-width="0.6" opacity="0.18"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#ogMbg)"/>
+  <rect width="1200" height="630" fill="url(#ogMgrid)"/>
+
+  <g transform="translate(60 80)" filter="drop-shadow(0 12px 28px rgba(0,0,0,0.18))">
+    <rect width="1080" height="470" rx="24" fill="url(#ogMcard)"/>
+
+    <g transform="translate(60 70)">
+      <rect width="56" height="56" rx="14" fill="url(#ogMbg)"/>
+      <rect x="14" y="16" width="28" height="4" rx="2" fill="#fff"/>
+      <rect x="16" y="26" width="24" height="4" rx="2" fill="#fff" fill-opacity="0.9"/>
+      <rect x="18" y="36" width="20" height="4" rx="2" fill="#fff" fill-opacity="0.8"/>
+      <text x="78" y="36" font-family="DM Sans,system-ui,sans-serif" font-size="22" font-weight="800" fill="#0f172a">popolkam<tspan fill="#f97316">.ru</tspan></text>
+    </g>
+
+    <g transform="translate(60 200)" font-family="DM Sans,system-ui,sans-serif">
+      <text font-size="20" font-weight="700" fill="#c2410c" letter-spacing="2">МЕТОДОЛОГИЯ</text>
+      <text y="80" font-size="72" font-weight="800" fill="#0f172a">Как мы тестируем</text>
+      <text y="138" font-size="22" font-weight="600" fill="#475569">Каждое слово в обзорах — через стенд</text>
+    </g>
+
+    <g transform="translate(60 380)">
+      <g transform="translate(0 0)">
+        <rect width="120" height="48" rx="8" fill="#0f172a"/>
+        <text x="60" y="20" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="11" font-weight="700" fill="#86efac" text-anchor="middle">9 БАР</text>
+        <text x="60" y="36" font-family="DM Sans,sans-serif" font-size="9" font-weight="600" fill="#cbd5e1" text-anchor="middle">давление помпы</text>
+      </g>
+      <g transform="translate(140 0)">
+        <rect width="120" height="48" rx="8" fill="#0f172a"/>
+        <text x="60" y="20" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="11" font-weight="700" fill="#fbbf24" text-anchor="middle">91°C</text>
+        <text x="60" y="36" font-family="DM Sans,sans-serif" font-size="9" font-weight="600" fill="#cbd5e1" text-anchor="middle">температура</text>
+      </g>
+      <g transform="translate(280 0)">
+        <rect width="120" height="48" rx="8" fill="#0f172a"/>
+        <text x="60" y="20" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="11" font-weight="700" fill="#86efac" text-anchor="middle">56 dB(A)</text>
+        <text x="60" y="36" font-family="DM Sans,sans-serif" font-size="9" font-weight="600" fill="#cbd5e1" text-anchor="middle">шум помпы</text>
+      </g>
+      <g transform="translate(420 0)">
+        <rect width="120" height="48" rx="8" fill="#0f172a"/>
+        <text x="60" y="20" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="11" font-weight="700" fill="#fbbf24" text-anchor="middle">1450 W</text>
+        <text x="60" y="36" font-family="DM Sans,sans-serif" font-size="9" font-weight="600" fill="#cbd5e1" text-anchor="middle">потребление</text>
+      </g>
+    </g>
+
+    <g transform="translate(700 130)" filter="drop-shadow(0 6px 14px rgba(0,0,0,0.12))">
+      <rect width="120" height="170" rx="14" fill="#fff" stroke="#e5e7eb" stroke-width="1.5"/>
+      <ellipse cx="60" cy="22" rx="34" ry="6" fill="#0a0e17"/>
+      <g fill="#1e293b">
+        <circle cx="46" cy="22" r="1.5"/>
+        <circle cx="52" cy="22" r="1.5"/>
+        <circle cx="58" cy="22" r="1.5"/>
+        <circle cx="64" cy="22" r="1.5"/>
+        <circle cx="70" cy="22" r="1.5"/>
+      </g>
+      <rect x="14" y="42" width="92" height="68" rx="6" fill="#0f172a"/>
+      <rect x="14" y="42" width="92" height="68" rx="6" fill="#fbbf24" opacity="0.12"/>
+      <text x="60" y="80" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="26" font-weight="700" fill="#fbbf24" text-anchor="middle">56.4</text>
+      <text x="60" y="100" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="11" font-weight="700" fill="#fbbf24" text-anchor="middle" opacity="0.85">dB(A)</text>
+      <rect x="22" y="124" width="76" height="14" rx="3" fill="#fee2e2"/>
+      <rect x="22" y="124" width="58" height="14" rx="3" fill="#fb923c"/>
+      <text x="60" y="135" font-family="DM Sans,sans-serif" font-size="9" font-weight="700" fill="#fff" text-anchor="middle">PEAK 71%</text>
+      <rect x="22" y="146" width="76" height="14" rx="3" fill="#0f172a"/>
+      <text x="60" y="157" font-family="DM Sans,sans-serif" font-size="9" font-weight="700" fill="#94a3b8" text-anchor="middle">SOUND METER</text>
+    </g>
+
+    <g transform="translate(870 90)" filter="drop-shadow(0 6px 14px rgba(0,0,0,0.12))">
+      <ellipse cx="60" cy="216" rx="68" ry="8" fill="#000" fill-opacity="0.10"/>
+      <path d="M -5,210 Q -5,218 5,220 L 115,220 Q 125,218 125,210 L 122,202 L -2,202 Z" fill="#fff" stroke="#e5e7eb" stroke-width="1"/>
+      <path d="M 22,108 Q 22,96 30,94 L 90,94 Q 98,96 98,108 L 96,184 Q 94,196 86,200 Q 60,206 34,200 Q 26,196 24,184 Z" fill="#fff" stroke="#e5e7eb" stroke-width="1"/>
+      <ellipse cx="60" cy="98" rx="38" ry="8" fill="#92400e"/>
+      <ellipse cx="60" cy="97" rx="32" ry="5" fill="#fbbf24" fill-opacity="0.55"/>
+      <path d="M 96,118 Q 122,118 124,138 Q 124,156 100,158 L 100,152 Q 116,151 117,138 Q 116,125 96,125 Z" fill="#fff" stroke="#e5e7eb" stroke-width="1"/>
+      <g stroke="#f97316" stroke-width="3" stroke-linecap="round" fill="none">
+        <path d="M 40,84 Q 32,60 42,30"/>
+        <path d="M 60,84 Q 52,60 62,30"/>
+        <path d="M 80,84 Q 72,60 82,30"/>
+      </g>
+    </g>
+  </g>
+
+  <g transform="translate(60 580)">
+    <rect width="280" height="34" rx="17" fill="#fff"/>
+    <text x="140" y="22" font-family="DM Sans,system-ui,sans-serif" font-size="13" font-weight="800" fill="#f97316" text-anchor="middle" letter-spacing="0.5">8 этапов · 5 категорий оценок</text>
+  </g>
+  <g transform="translate(960 580)">
+    <rect width="180" height="34" rx="17" fill="#0f172a"/>
+    <text x="90" y="22" font-family="DM Sans,system-ui,sans-serif" font-size="13" font-weight="800" fill="#fff" text-anchor="middle" letter-spacing="0.5">popolkam.ru</text>
+  </g>
+</svg>
