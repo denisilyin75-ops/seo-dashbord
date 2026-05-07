@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 420" width="600" height="420" role="img" aria-label="Engineer's coffee workspace — espresso cup, notebook with measurements, scattered beans">
+  <defs>
+    <linearGradient id="popHeroBg" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#fff7ed" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#fff7ed" stop-opacity="0.6"/>
+    </linearGradient>
+    <radialGradient id="popHeroSpot" cx="50%" cy="48%" r="42%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="popCremа" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="55%" stop-color="#92400e"/>
+      <stop offset="100%" stop-color="#451a03"/>
+    </linearGradient>
+    <linearGradient id="popCupBody" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fff"/>
+      <stop offset="100%" stop-color="#e5e7eb"/>
+    </linearGradient>
+    <linearGradient id="popSteam" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f97316" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#f97316" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#f97316" stop-opacity="0.9"/>
+    </linearGradient>
+    <filter id="popHeroShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+      <feOffset dx="0" dy="6" result="offsetblur"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.18"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="600" height="420" fill="#fafaf9"/>
+  <rect width="600" height="420" fill="url(#popHeroSpot)"/>
+
+  <path d="M 0,330 L 600,310 L 600,420 L 0,420 Z" fill="#0f172a"/>
+  <path d="M 0,330 L 600,310 L 600,332 L 0,352 Z" fill="#1e293b"/>
+
+  <g filter="url(#popHeroShadow)">
+    <rect x="80" y="200" width="180" height="140" rx="3" fill="#fff" transform="rotate(-6 170 270)"/>
+    <rect x="80" y="200" width="14" height="140" fill="#f97316" transform="rotate(-6 170 270)"/>
+    <g transform="rotate(-6 170 270)" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="14" font-weight="600" fill="#0f172a">
+      <line x1="106" y1="232" x2="240" y2="232" stroke="#cbd5e1" stroke-width="1"/>
+      <text x="106" y="228">9 бар</text>
+      <line x1="106" y1="262" x2="240" y2="262" stroke="#cbd5e1" stroke-width="1"/>
+      <text x="106" y="258">91°C</text>
+      <line x1="106" y1="292" x2="240" y2="292" stroke="#cbd5e1" stroke-width="1"/>
+      <text x="106" y="288">56 дБ</text>
+      <line x1="106" y1="322" x2="240" y2="322" stroke="#cbd5e1" stroke-width="1"/>
+      <text x="106" y="318">8 г / 30 мл</text>
+    </g>
+  </g>
+
+  <g transform="translate(330 195)">
+    <ellipse cx="60" cy="138" rx="68" ry="10" fill="#000" fill-opacity="0.18"/>
+    <path d="M -5,135 Q -5,142 5,144 L 115,144 Q 125,142 125,135 L 122,128 L -2,128 Z" fill="#fff"/>
+    <ellipse cx="60" cy="128" rx="62" ry="8" fill="#e5e7eb"/>
+    <g>
+      <path d="M 22,30 Q 22,18 30,16 L 90,16 Q 98,18 98,30 L 96,108 Q 94,118 86,124 Q 60,130 34,124 Q 26,118 24,108 Z" fill="url(#popCupBody)"/>
+      <path d="M 22,30 Q 22,18 30,16 L 90,16 Q 98,18 98,30 L 97,32 L 23,32 Z" fill="#f3f4f6"/>
+      <ellipse cx="60" cy="20" rx="38" ry="8" fill="url(#popCremа)"/>
+      <ellipse cx="60" cy="19" rx="32" ry="5" fill="#fbbf24" fill-opacity="0.55"/>
+      <ellipse cx="55" cy="18" rx="22" ry="3.5" fill="#fff" fill-opacity="0.35"/>
+      <path d="M 96,42 Q 122,42 124,62 Q 124,80 100,82 L 100,76 Q 116,75 117,62 Q 116,49 96,49 Z" fill="url(#popCupBody)"/>
+    </g>
+  </g>
+
+  <g stroke="url(#popSteam)" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.85">
+    <path d="M 360,165 Q 350,140 360,115 Q 370,90 360,65"/>
+    <path d="M 392,170 Q 384,148 392,128 Q 402,108 392,88"/>
+    <path d="M 422,168 Q 414,148 424,130 Q 432,112 424,95"/>
+  </g>
+
+  <g>
+    <ellipse cx="225" cy="346" rx="14" ry="9" fill="#3a2415" transform="rotate(-15 225 346)"/>
+    <path d="M 218,346 Q 225,340 232,346 Q 225,352 218,346 Z" fill="#1c1917" transform="rotate(-15 225 346)"/>
+    <ellipse cx="195" cy="370" rx="12" ry="7.5" fill="#3a2415" transform="rotate(28 195 370)"/>
+    <path d="M 189,370 Q 195,365 201,370 Q 195,375 189,370 Z" fill="#1c1917" transform="rotate(28 195 370)"/>
+    <ellipse cx="265" cy="372" rx="11" ry="7" fill="#451a03" transform="rotate(8 265 372)"/>
+    <path d="M 260,372 Q 265,368 270,372 Q 265,376 260,372 Z" fill="#1c1917" transform="rotate(8 265 372)"/>
+    <ellipse cx="475" cy="365" rx="13" ry="8" fill="#3a2415" transform="rotate(-22 475 365)"/>
+    <path d="M 469,365 Q 475,360 481,365 Q 475,370 469,365 Z" fill="#1c1917" transform="rotate(-22 475 365)"/>
+  </g>
+
+  <g transform="translate(490 60)" font-family="DM Sans,system-ui,sans-serif">
+    <circle cx="0" cy="0" r="42" fill="#f97316"/>
+    <circle cx="0" cy="0" r="38" fill="none" stroke="#fff" stroke-width="2"/>
+    <text x="0" y="-2" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">5 ЛЕТ</text>
+    <text x="0" y="14" font-size="9" font-weight="600" fill="#fff" text-anchor="middle" opacity="0.9">прогноз</text>
+  </g>
+</svg>
