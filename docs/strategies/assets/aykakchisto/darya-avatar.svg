@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" role="img" aria-label="Дарья Метёлкина — главный редактор Aykakchisto.ru">
+  <defs>
+    <linearGradient id="ayAvatarBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a5f"/>
+      <stop offset="100%" stop-color="#0f1e36"/>
+    </linearGradient>
+    <radialGradient id="ayAvatarVignette" cx="50%" cy="40%" r="65%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.18"/>
+    </radialGradient>
+    <clipPath id="ayAvatarClip">
+      <circle cx="120" cy="120" r="110"/>
+    </clipPath>
+  </defs>
+
+  <circle cx="120" cy="120" r="110" fill="url(#ayAvatarBg)"/>
+  <circle cx="120" cy="120" r="110" fill="url(#ayAvatarVignette)"/>
+
+  <g opacity="0.18">
+    <ellipse cx="42" cy="50" rx="6" ry="9" fill="#e8a04c"/>
+    <path d="M 42,42 Q 38,46 42,50 Q 46,46 42,42 Z" fill="#fff" fill-opacity="0.4"/>
+    <ellipse cx="200" cy="200" rx="5" ry="8" fill="#e8a04c"/>
+    <path d="M 200,193 Q 196,196 200,200 Q 204,196 200,193 Z" fill="#fff" fill-opacity="0.4"/>
+    <ellipse cx="50" cy="200" rx="4" ry="6" fill="#e8a04c"/>
+  </g>
+
+  <g clip-path="url(#ayAvatarClip)">
+    <path d="M 50,250 L 50,210 Q 50,168 95,160 L 145,160 Q 190,168 190,210 L 190,250 Z" fill="#fff"/>
+    <path d="M 50,250 L 50,210 Q 50,180 80,170 L 100,160 L 140,160 L 160,170 Q 190,180 190,210 L 190,250 Z" fill="#f4f6f8"/>
+
+    <path d="M 100,168 L 120,180 L 140,168 L 140,200 L 100,200 Z" fill="#0f1e36"/>
+    <path d="M 100,168 L 120,180 L 140,168 L 140,176 L 120,188 L 100,176 Z" fill="#1e3a5f"/>
+
+    <circle cx="120" cy="180" r="2.5" fill="#e8a04c"/>
+
+    <rect x="108" y="140" width="24" height="22" fill="#0f1e36"/>
+
+    <ellipse cx="120" cy="116" rx="40" ry="44" fill="#0f1e36"/>
+
+    <path d="M 78,98 Q 76,68 102,58 Q 130,52 152,68 Q 168,82 165,108 L 165,160 Q 158,170 145,168 L 145,140 Q 145,124 135,118 Q 158,118 162,98 Q 158,76 130,72 Q 96,72 80,92 Q 78,108 75,160 Q 70,168 78,160 Q 78,108 78,98 Z" fill="#020617"/>
+    <path d="M 75,118 Q 70,140 68,168 Q 70,180 80,178 L 80,160 Q 80,140 75,118 Z" fill="#020617"/>
+    <path d="M 165,118 Q 170,140 172,168 Q 170,180 160,178 L 160,160 Q 160,140 165,118 Z" fill="#020617"/>
+
+    <circle cx="100" cy="116" r="11" fill="none" stroke="#fff" stroke-width="2.5"/>
+    <circle cx="140" cy="116" r="11" fill="none" stroke="#fff" stroke-width="2.5"/>
+    <line x1="111" y1="116" x2="129" y2="116" stroke="#fff" stroke-width="2.5"/>
+    <circle cx="100" cy="116" r="2.5" fill="#fff"/>
+    <circle cx="140" cy="116" r="2.5" fill="#fff"/>
+
+    <path d="M 110,138 Q 120,144 130,138" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M 116,142 Q 120,146 124,142" stroke="#e8a04c" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.8"/>
+
+    <circle cx="155" cy="124" r="3" fill="#e8a04c"/>
+    <circle cx="85" cy="124" r="3" fill="#e8a04c"/>
+  </g>
+
+  <g transform="translate(180 50)">
+    <circle cx="0" cy="0" r="10" fill="#e8a04c"/>
+    <circle cx="14" cy="-10" r="8" fill="#fff" stroke="#e8a04c" stroke-width="2"/>
+    <circle cx="14" cy="10" r="8" fill="#fff" stroke="#e8a04c" stroke-width="2"/>
+    <line x1="0" y1="0" x2="14" y2="-10" stroke="#e8a04c" stroke-width="2"/>
+    <line x1="0" y1="0" x2="14" y2="10" stroke="#e8a04c" stroke-width="2"/>
+    <text x="0" y="3" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="8" font-weight="700" fill="#0f1e36" text-anchor="middle">O</text>
+    <text x="14" y="-7" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="7" font-weight="700" fill="#1e3a5f" text-anchor="middle">H</text>
+    <text x="14" y="13" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="7" font-weight="700" fill="#1e3a5f" text-anchor="middle">H</text>
+  </g>
+
+  <circle cx="120" cy="120" r="110" fill="none" stroke="#e8a04c" stroke-opacity="0.45" stroke-width="2"/>
+</svg>
