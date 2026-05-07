@@ -1,0 +1,175 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" width="1200" height="500" role="img" aria-label="Лабораторный стенд Popolkam: ваттметр, эспрессо-чашка, dB-meter, секундомер, термометр">
+  <defs>
+    <radialGradient id="methSpot" cx="50%" cy="44%" r="55%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="methCremа" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="60%" stop-color="#92400e"/>
+      <stop offset="100%" stop-color="#451a03"/>
+    </linearGradient>
+    <linearGradient id="methCupBody" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fff"/>
+      <stop offset="100%" stop-color="#e5e7eb"/>
+    </linearGradient>
+    <linearGradient id="methSteam" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#f97316" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#f97316" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="methDevice" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="methThermoMercury" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#dc2626"/>
+      <stop offset="100%" stop-color="#f97316"/>
+    </linearGradient>
+    <pattern id="methGrid" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#cbd5e1" stroke-width="0.5" opacity="0.5"/>
+    </pattern>
+    <filter id="methShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="5"/>
+      <feOffset dx="0" dy="6" result="b"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.18"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="500" fill="#fafaf9"/>
+  <rect width="1200" height="500" fill="url(#methSpot)"/>
+
+  <g transform="rotate(-2 600 250)">
+    <rect x="240" y="100" width="720" height="320" fill="#fff" filter="url(#methShadow)"/>
+    <rect x="240" y="100" width="720" height="320" fill="url(#methGrid)"/>
+    <polyline points="280,360 340,310 400,330 460,260 520,290 580,200 640,250 700,180 760,220 820,160 880,190 940,140" fill="none" stroke="#f97316" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <g fill="#f97316">
+      <circle cx="280" cy="360" r="3"/>
+      <circle cx="400" cy="330" r="3"/>
+      <circle cx="520" cy="290" r="3"/>
+      <circle cx="640" cy="250" r="3"/>
+      <circle cx="760" cy="220" r="3"/>
+      <circle cx="880" cy="190" r="3"/>
+    </g>
+  </g>
+
+  <path d="M 0,400 L 1200,380 L 1200,500 L 0,500 Z" fill="#0f172a"/>
+  <path d="M 0,400 L 1200,380 L 1200,402 L 0,422 Z" fill="#1e293b"/>
+
+  <g transform="translate(80 320)" filter="url(#methShadow)">
+    <rect width="170" height="110" rx="10" fill="url(#methDevice)"/>
+    <rect x="14" y="14" width="142" height="50" rx="4" fill="#0a0e17"/>
+    <rect x="14" y="14" width="142" height="50" rx="4" fill="#86efac" opacity="0.18"/>
+    <text x="148" y="50" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="28" font-weight="700" fill="#86efac" text-anchor="end">1450</text>
+    <text x="148" y="62" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="9" font-weight="600" fill="#22c55e" text-anchor="end" opacity="0.75">WATT</text>
+    <circle cx="32" cy="86" r="6" fill="#f97316"/>
+    <circle cx="56" cy="86" r="6" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+    <rect x="78" y="80" width="68" height="14" rx="2" fill="#0a0e17"/>
+    <text x="112" y="91" font-family="DM Sans,sans-serif" font-size="9" font-weight="700" fill="#cbd5e1" text-anchor="middle">POWER METER</text>
+    <path d="M 14,90 Q -20,120 -40,160 Q -60,200 -20,210" fill="none" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/>
+    <rect x="-50" y="200" width="20" height="24" rx="2" fill="#0f172a"/>
+    <rect x="-46" y="208" width="3" height="12" fill="#fbbf24"/>
+    <rect x="-39" y="208" width="3" height="12" fill="#fbbf24"/>
+  </g>
+
+  <g transform="translate(440 230)">
+    <ellipse cx="60" cy="138" rx="68" ry="9" fill="#000" fill-opacity="0.18"/>
+    <path d="M -5,135 Q -5,142 5,144 L 115,144 Q 125,142 125,135 L 122,128 L -2,128 Z" fill="#fff"/>
+    <ellipse cx="60" cy="128" rx="62" ry="8" fill="#e5e7eb"/>
+    <path d="M 22,30 Q 22,18 30,16 L 90,16 Q 98,18 98,30 L 96,108 Q 94,118 86,124 Q 60,130 34,124 Q 26,118 24,108 Z" fill="url(#methCupBody)"/>
+    <path d="M 22,30 Q 22,18 30,16 L 90,16 Q 98,18 98,30 L 97,32 L 23,32 Z" fill="#f3f4f6"/>
+    <ellipse cx="60" cy="20" rx="38" ry="8" fill="url(#methCremа)"/>
+    <ellipse cx="60" cy="19" rx="32" ry="5" fill="#fbbf24" fill-opacity="0.55"/>
+    <path d="M 96,42 Q 122,42 124,62 Q 124,80 100,82 L 100,76 Q 116,75 117,62 Q 116,49 96,49 Z" fill="url(#methCupBody)"/>
+    <g stroke="url(#methSteam)" stroke-width="3" stroke-linecap="round" fill="none">
+      <path d="M 40,5 Q 32,-20 42,-50 Q 50,-78 40,-105"/>
+      <path d="M 60,5 Q 52,-20 62,-50 Q 70,-80 60,-110"/>
+      <path d="M 80,5 Q 72,-20 82,-50 Q 90,-78 80,-105"/>
+    </g>
+  </g>
+
+  <g transform="translate(700 270)" filter="url(#methShadow)">
+    <rect width="120" height="170" rx="14" fill="#fff"/>
+    <rect x="0" y="0" width="120" height="170" rx="14" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+    <ellipse cx="60" cy="22" rx="34" ry="6" fill="#0a0e17"/>
+    <g fill="#1e293b">
+      <circle cx="46" cy="22" r="1.5"/>
+      <circle cx="52" cy="22" r="1.5"/>
+      <circle cx="58" cy="22" r="1.5"/>
+      <circle cx="64" cy="22" r="1.5"/>
+      <circle cx="70" cy="22" r="1.5"/>
+    </g>
+    <rect x="14" y="42" width="92" height="68" rx="6" fill="url(#methDevice)"/>
+    <rect x="14" y="42" width="92" height="68" rx="6" fill="#fbbf24" opacity="0.12"/>
+    <text x="60" y="80" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="26" font-weight="700" fill="#fbbf24" text-anchor="middle">56.4</text>
+    <text x="60" y="100" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="11" font-weight="700" fill="#fbbf24" text-anchor="middle" opacity="0.85">dB(A)</text>
+    <rect x="22" y="124" width="76" height="14" rx="3" fill="#fee2e2"/>
+    <rect x="22" y="124" width="58" height="14" rx="3" fill="#fb923c"/>
+    <text x="60" y="135" font-family="DM Sans,sans-serif" font-size="9" font-weight="700" fill="#fff" text-anchor="middle">PEAK 71%</text>
+    <rect x="22" y="146" width="76" height="14" rx="3" fill="#0f172a"/>
+    <text x="60" y="157" font-family="DM Sans,sans-serif" font-size="9" font-weight="700" fill="#94a3b8" text-anchor="middle">SOUND METER</text>
+  </g>
+
+  <g transform="translate(900 290)" filter="url(#methShadow)">
+    <rect x="60" y="-12" width="20" height="14" rx="2" fill="#0f172a"/>
+    <rect x="64" y="-22" width="12" height="12" rx="2" fill="#0f172a"/>
+    <circle cx="70" cy="80" r="76" fill="#fff"/>
+    <circle cx="70" cy="80" r="76" fill="none" stroke="#0f172a" stroke-width="3"/>
+    <circle cx="70" cy="80" r="68" fill="none" stroke="#cbd5e1" stroke-width="1"/>
+    <g stroke="#0f172a" stroke-width="2" stroke-linecap="round">
+      <line x1="70" y1="14" x2="70" y2="22"/>
+      <line x1="136" y1="80" x2="128" y2="80"/>
+      <line x1="70" y1="146" x2="70" y2="138"/>
+      <line x1="4" y1="80" x2="12" y2="80"/>
+    </g>
+    <g stroke="#94a3b8" stroke-width="1">
+      <line x1="105" y1="33" x2="100" y2="38"/>
+      <line x1="105" y1="127" x2="100" y2="122"/>
+      <line x1="35" y1="127" x2="40" y2="122"/>
+      <line x1="35" y1="33" x2="40" y2="38"/>
+    </g>
+    <text x="70" y="55" font-family="DM Sans,sans-serif" font-size="11" font-weight="700" fill="#475569" text-anchor="middle">EXTRACTION</text>
+    <line x1="70" y1="80" x2="70" y2="22" stroke="#f97316" stroke-width="3" stroke-linecap="round"/>
+    <line x1="70" y1="80" x2="115" y2="105" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="70" cy="80" r="6" fill="#f97316"/>
+    <circle cx="70" cy="80" r="3" fill="#0f172a"/>
+    <text x="70" y="125" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="14" font-weight="700" fill="#0f172a" text-anchor="middle">00:25.4</text>
+  </g>
+
+  <g transform="translate(1080 50)" filter="url(#methShadow)">
+    <rect x="14" y="14" width="22" height="220" rx="11" fill="#fff" stroke="#cbd5e1" stroke-width="1"/>
+    <rect x="20" y="40" width="10" height="180" fill="#fff"/>
+    <rect x="20" y="80" width="10" height="140" fill="url(#methThermoMercury)"/>
+    <circle cx="25" cy="240" r="22" fill="#dc2626"/>
+    <circle cx="25" cy="240" r="22" fill="none" stroke="#0f172a" stroke-width="2"/>
+    <circle cx="22" cy="236" r="6" fill="#fff" opacity="0.4"/>
+    <g font-family="ui-monospace,Menlo,Consolas,monospace" font-size="9" fill="#475569" font-weight="600">
+      <line x1="36" y1="40" x2="42" y2="40" stroke="#475569" stroke-width="1"/>
+      <text x="46" y="44">100</text>
+      <line x1="36" y1="80" x2="42" y2="80" stroke="#f97316" stroke-width="1.5"/>
+      <text x="46" y="84" fill="#f97316" font-weight="700">91°C</text>
+      <line x1="36" y1="120" x2="42" y2="120" stroke="#475569" stroke-width="1"/>
+      <text x="46" y="124">75</text>
+      <line x1="36" y1="160" x2="42" y2="160" stroke="#475569" stroke-width="1"/>
+      <text x="46" y="164">50</text>
+      <line x1="36" y1="200" x2="42" y2="200" stroke="#475569" stroke-width="1"/>
+      <text x="46" y="204">25</text>
+    </g>
+  </g>
+
+  <g>
+    <ellipse cx="350" cy="430" rx="14" ry="8" fill="#3a2415" transform="rotate(-15 350 430)"/>
+    <path d="M 343,430 Q 350,425 357,430 Q 350,435 343,430 Z" fill="#1c1917" transform="rotate(-15 350 430)"/>
+    <ellipse cx="630" cy="445" rx="13" ry="7.5" fill="#451a03" transform="rotate(8 630 445)"/>
+    <path d="M 624,445 Q 630,440 636,445 Q 630,450 624,445 Z" fill="#1c1917" transform="rotate(8 630 445)"/>
+    <ellipse cx="850" cy="455" rx="12" ry="7" fill="#3a2415" transform="rotate(-22 850 455)"/>
+    <path d="M 844,455 Q 850,450 856,455 Q 850,460 844,455 Z" fill="#1c1917" transform="rotate(-22 850 455)"/>
+  </g>
+
+  <g transform="translate(40 60)" font-family="DM Sans,system-ui,sans-serif">
+    <rect width="190" height="36" rx="18" fill="#0f172a"/>
+    <text x="20" y="23" font-size="13" font-weight="700" fill="#fff" letter-spacing="1.2">МЕТОДОЛОГИЯ</text>
+    <circle cx="170" cy="18" r="10" fill="#f97316"/>
+    <text x="170" y="22" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">5</text>
+  </g>
+</svg>
