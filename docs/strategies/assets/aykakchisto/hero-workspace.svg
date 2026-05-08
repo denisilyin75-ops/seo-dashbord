@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 420" width="600" height="420" role="img" aria-label="Лабораторный стенд Aykakchisto: спрей-бутылка, блокнот с pH-замерами, тестовая полоска, микрофибра">
+  <defs>
+    <linearGradient id="ayHbg" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#dbeafe" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#dbeafe" stop-opacity="0.4"/>
+    </linearGradient>
+    <radialGradient id="ayHspot" cx="50%" cy="46%" r="50%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ayHbottle" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fff"/>
+      <stop offset="100%" stop-color="#e0f2fe"/>
+    </linearGradient>
+    <linearGradient id="ayHpHstrip" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#dc2626"/>
+      <stop offset="20%" stop-color="#f97316"/>
+      <stop offset="40%" stop-color="#fbbf24"/>
+      <stop offset="60%" stop-color="#84cc16"/>
+      <stop offset="80%" stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="ayHfiber" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+    <linearGradient id="ayHspray" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#7dd3fc" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0.6"/>
+    </linearGradient>
+    <filter id="ayHshadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="5"/>
+      <feOffset dx="0" dy="6" result="b"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.18"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="600" height="420" fill="#f4f6f8"/>
+  <rect width="600" height="420" fill="url(#ayHspot)"/>
+  <rect width="600" height="420" fill="url(#ayHbg)"/>
+
+  <g stroke="#1e3a5f" stroke-width="1" fill="none" opacity="0.16">
+    <circle cx="100" cy="80" r="12"/>
+    <line x1="112" y1="80" x2="128" y2="68"/>
+    <line x1="112" y1="80" x2="128" y2="92"/>
+    <circle cx="140" cy="60" r="8"/>
+    <circle cx="140" cy="100" r="8"/>
+    <text x="96" y="84" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="9" fill="#1e3a5f">C</text>
+    <text x="136" y="64" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="7" fill="#1e3a5f">H₂</text>
+    <text x="136" y="104" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="7" fill="#1e3a5f">O</text>
+  </g>
+
+  <path d="M 0,330 L 600,310 L 600,420 L 0,420 Z" fill="#1e3a5f"/>
+  <path d="M 0,330 L 600,310 L 600,332 L 0,352 Z" fill="#2a4a6f"/>
+
+  <g filter="url(#ayHshadow)">
+    <rect x="80" y="200" width="180" height="140" rx="3" fill="#fff" transform="rotate(-6 170 270)"/>
+    <rect x="80" y="200" width="14" height="140" fill="#e8a04c" transform="rotate(-6 170 270)"/>
+    <g transform="rotate(-6 170 270)" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="13" font-weight="600" fill="#1e3a5f">
+      <line x1="106" y1="232" x2="240" y2="232" stroke="#cbd5e1" stroke-width="1"/>
+      <text x="106" y="228">pH 7.2 ± 0.1</text>
+      <line x1="106" y1="262" x2="240" y2="262" stroke="#cbd5e1" stroke-width="1"/>
+      <text x="106" y="258">22°C</text>
+      <line x1="106" y1="292" x2="240" y2="292" stroke="#cbd5e1" stroke-width="1"/>
+      <text x="106" y="288">после 3-х циклов</text>
+      <line x1="106" y1="322" x2="240" y2="322" stroke="#cbd5e1" stroke-width="1"/>
+      <text x="106" y="318">ТЭ &lt; 5 мг/л</text>
+    </g>
+  </g>
+
+  <g transform="translate(330 175)" filter="url(#ayHshadow)">
+    <ellipse cx="42" cy="160" rx="50" ry="8" fill="#000" fill-opacity="0.16"/>
+    <rect x="20" y="50" width="44" height="110" rx="8" fill="url(#ayHbottle)" stroke="#1e3a5f" stroke-width="1.5"/>
+    <rect x="14" y="58" width="56" height="22" rx="3" fill="#0ea5e9"/>
+    <text x="42" y="72" font-family="DM Sans,sans-serif" font-size="10" font-weight="800" fill="#fff" text-anchor="middle" letter-spacing="0.5">CLEAN</text>
+    <rect x="18" y="84" width="48" height="3" fill="#fff" opacity="0.9"/>
+    <rect x="18" y="92" width="48" height="64" rx="2" fill="#7dd3fc" opacity="0.55"/>
+    <ellipse cx="42" cy="100" rx="14" ry="3" fill="#fff" opacity="0.6"/>
+    <rect x="34" y="40" width="16" height="14" fill="#1e3a5f"/>
+    <path d="M 38,40 L 38,18 L 70,18 L 70,30 L 50,30 L 50,40 Z" fill="#1e3a5f"/>
+    <rect x="64" y="18" width="14" height="14" rx="3" fill="#e8a04c"/>
+    <g stroke="url(#ayHspray)" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.85">
+      <path d="M 80,22 Q 100,18 120,16"/>
+      <path d="M 80,26 Q 100,28 122,30"/>
+      <path d="M 80,30 Q 100,38 118,46"/>
+    </g>
+    <circle cx="106" cy="20" r="2" fill="#7dd3fc"/>
+    <circle cx="116" cy="34" r="1.5" fill="#7dd3fc"/>
+    <circle cx="120" cy="44" r="2" fill="#0ea5e9"/>
+  </g>
+
+  <g transform="translate(440 240)" filter="url(#ayHshadow)">
+    <ellipse cx="0" cy="86" rx="40" ry="6" fill="#000" fill-opacity="0.18"/>
+    <rect x="-8" y="-14" width="16" height="100" rx="4" fill="url(#ayHpHstrip)" stroke="#0f1e36" stroke-width="1"/>
+    <rect x="-8" y="-14" width="16" height="14" fill="#fff" stroke="#0f1e36" stroke-width="1"/>
+    <text x="0" y="-2" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="6" font-weight="800" fill="#0f1e36" text-anchor="middle">pH</text>
+    <text x="22" y="6" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="9" font-weight="600" fill="#dc2626">1</text>
+    <text x="22" y="32" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="9" font-weight="600" fill="#fbbf24">5</text>
+    <text x="22" y="56" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="9" font-weight="700" fill="#84cc16">7</text>
+    <text x="22" y="84" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="9" font-weight="600" fill="#7c3aed">14</text>
+    <line x1="-12" y1="38" x2="-2" y2="38" stroke="#1e3a5f" stroke-width="2"/>
+    <text x="-16" y="42" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="8" font-weight="800" fill="#1e3a5f" text-anchor="end">7.2</text>
+  </g>
+
+  <g transform="translate(80 340)">
+    <path d="M 0,0 L 200,0 Q 220,8 218,30 L -2,30 Q 0,8 0,0 Z" fill="url(#ayHfiber)" stroke="#ca8a04" stroke-width="1"/>
+    <g stroke="#fff" stroke-width="0.8" opacity="0.55">
+      <line x1="10" y1="6" x2="10" y2="28"/>
+      <line x1="30" y1="2" x2="32" y2="28"/>
+      <line x1="50" y1="2" x2="52" y2="28"/>
+      <line x1="70" y1="2" x2="72" y2="28"/>
+      <line x1="90" y1="2" x2="92" y2="28"/>
+      <line x1="110" y1="2" x2="112" y2="28"/>
+      <line x1="130" y1="2" x2="132" y2="28"/>
+      <line x1="150" y1="2" x2="152" y2="28"/>
+      <line x1="170" y1="2" x2="172" y2="28"/>
+      <line x1="190" y1="2" x2="192" y2="28"/>
+      <line x1="0" y1="14" x2="218" y2="14"/>
+    </g>
+    <text x="110" y="22" font-family="DM Sans,sans-serif" font-size="9" font-weight="800" fill="#0f1e36" text-anchor="middle" letter-spacing="0.5">МИКРОФИБРА</text>
+  </g>
+
+  <g transform="translate(110 250)" filter="url(#ayHshadow)">
+    <ellipse cx="0" cy="60" rx="14" ry="3" fill="#000" fill-opacity="0.2"/>
+    <rect x="-10" y="-30" width="20" height="80" rx="2" fill="#fff" stroke="#1e3a5f" stroke-width="1.2" fill-opacity="0.9"/>
+    <rect x="-9" y="0" width="18" height="48" fill="#7dd3fc" opacity="0.7"/>
+    <rect x="-9" y="0" width="18" height="14" fill="#0ea5e9" opacity="0.5"/>
+    <ellipse cx="0" cy="-30" rx="10" ry="2" fill="#1e3a5f"/>
+    <rect x="-12" y="-34" width="24" height="6" rx="2" fill="#1e3a5f"/>
+  </g>
+
+  <g transform="translate(40 60)" font-family="DM Sans,system-ui,sans-serif">
+    <rect width="170" height="34" rx="17" fill="#1e3a5f"/>
+    <text x="20" y="22" font-size="13" font-weight="800" fill="#fff" letter-spacing="0.8">БЕЗ НЕРВОВ</text>
+    <circle cx="148" cy="17" r="10" fill="#e8a04c"/>
+    <path d="M 143,17 L 147,21 L 153,14" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+
+  <g transform="translate(490 60)" font-family="DM Sans,system-ui,sans-serif">
+    <circle cx="0" cy="0" r="42" fill="#e8a04c"/>
+    <circle cx="0" cy="0" r="38" fill="none" stroke="#fff" stroke-width="2"/>
+    <text x="0" y="-2" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">5 ШАГОВ</text>
+    <text x="0" y="14" font-size="9" font-weight="600" fill="#fff" text-anchor="middle" opacity="0.9">протокол</text>
+  </g>
+</svg>

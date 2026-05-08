@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" width="1200" height="500" role="img" aria-label="Об авторе Aykakchisto: абстрактный портрет Дарьи Метёлкиной на фоне молекулярных формул">
+  <defs>
+    <radialGradient id="ayAUspot" cx="50%" cy="46%" r="55%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ayAUbg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#dbeafe"/>
+      <stop offset="100%" stop-color="#fef3c7"/>
+    </linearGradient>
+    <pattern id="ayAUgrid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e3a5f" stroke-width="0.3" opacity="0.18"/>
+    </pattern>
+    <filter id="ayAUshadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+      <feOffset dx="0" dy="8" result="b"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.18"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="500" fill="url(#ayAUbg)"/>
+  <rect width="1200" height="500" fill="url(#ayAUgrid)"/>
+  <rect width="1200" height="500" fill="url(#ayAUspot)"/>
+
+  <g stroke="#1e3a5f" stroke-width="1.2" fill="none" opacity="0.4" stroke-linecap="round">
+    <circle cx="720" cy="180" r="14"/>
+    <text x="715" y="184" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="11" fill="#1e3a5f">C</text>
+    <line x1="734" y1="180" x2="752" y2="170"/>
+    <line x1="734" y1="180" x2="752" y2="190"/>
+    <line x1="734" y1="180" x2="744" y2="200"/>
+    <line x1="706" y1="180" x2="690" y2="170"/>
+    <circle cx="752" cy="170" r="9"/>
+    <text x="748" y="174" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="9" fill="#1e3a5f">O</text>
+    <circle cx="752" cy="190" r="9"/>
+    <text x="748" y="194" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="9" fill="#1e3a5f">H</text>
+    <circle cx="744" cy="200" r="9"/>
+    <text x="740" y="204" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="9" fill="#1e3a5f">N</text>
+    <circle cx="690" cy="170" r="9"/>
+    <text x="686" y="174" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="9" fill="#1e3a5f">H</text>
+
+    <circle cx="850" cy="280" r="14"/>
+    <text x="845" y="284" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="11" fill="#1e3a5f">N</text>
+    <line x1="864" y1="280" x2="884" y2="270"/>
+    <line x1="864" y1="280" x2="884" y2="290"/>
+    <circle cx="884" cy="270" r="9"/>
+    <text x="880" y="274" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="9" fill="#1e3a5f">H</text>
+    <circle cx="884" cy="290" r="9"/>
+    <text x="880" y="294" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="9" fill="#1e3a5f">H</text>
+
+    <line x1="780" y1="220" x2="900" y2="280" stroke-dasharray="4,3"/>
+    <text x="800" y="240" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="10" fill="#1e3a5f" opacity="0.7">surfactant</text>
+
+    <circle cx="980" cy="350" r="9"/>
+    <text x="976" y="354" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="9" fill="#1e3a5f">O</text>
+    <line x1="989" y1="350" x2="1010" y2="340"/>
+    <line x1="989" y1="350" x2="1010" y2="360"/>
+    <text x="1015" y="348" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="9" fill="#1e3a5f">H</text>
+    <text x="1015" y="365" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="9" fill="#1e3a5f">H</text>
+  </g>
+
+  <g stroke="#1e3a5f" stroke-width="0.8" fill="none" opacity="0.16" stroke-dasharray="3,4">
+    <line x1="60" y1="80" x2="1140" y2="80"/>
+    <line x1="60" y1="180" x2="1140" y2="180"/>
+    <line x1="60" y1="280" x2="1140" y2="280"/>
+    <line x1="60" y1="380" x2="1140" y2="380"/>
+  </g>
+
+  <g transform="translate(40 40)" font-family="DM Sans,system-ui,sans-serif">
+    <rect width="180" height="36" rx="18" fill="#1e3a5f"/>
+    <text x="20" y="23" font-size="13" font-weight="700" fill="#fff" letter-spacing="1.2">ОБ АВТОРЕ</text>
+    <circle cx="160" cy="18" r="10" fill="#e8a04c"/>
+    <text x="160" y="22" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">Д</text>
+  </g>
+
+  <g transform="translate(280 100)" filter="url(#ayAUshadow)">
+    <ellipse cx="120" cy="350" rx="120" ry="14" fill="#000" fill-opacity="0.12"/>
+
+    <path d="M 30,350 L 30,260 Q 30,200 90,190 L 150,190 Q 210,200 210,260 L 210,350 Z" fill="#fff"/>
+    <path d="M 30,350 L 30,210 Q 30,200 50,200 L 95,200 L 95,220 Q 110,210 120,210 Q 130,210 145,220 L 145,200 L 190,200 Q 210,200 210,210 L 210,350 Z" fill="#f4f6f8"/>
+
+    <path d="M 95,190 L 95,220 Q 120,232 145,220 L 145,190 Z" fill="#1e3a5f"/>
+    <path d="M 95,190 L 95,200 Q 120,212 145,200 L 145,190 Z" fill="#2a4a6f"/>
+
+    <circle cx="120" cy="210" r="3" fill="#e8a04c"/>
+
+    <rect x="108" y="170" width="24" height="22" fill="#1e3a5f"/>
+
+    <ellipse cx="120" cy="138" rx="40" ry="44" fill="#1e3a5f"/>
+
+    <path d="M 76,116 Q 74,82 100,72 Q 130,68 152,82 Q 168,98 165,124 L 165,180 Q 158,192 145,188 L 145,156 Q 145,134 135,124 Q 158,124 162,98 Q 158,80 130,76 Q 96,76 80,98 Q 76,116 75,180 Q 70,192 78,180 Z" fill="#0a1729"/>
+    <path d="M 75,124 Q 70,150 68,180 Q 70,192 80,190 L 80,170 Q 80,148 75,124 Z" fill="#0a1729"/>
+    <path d="M 165,124 Q 170,150 172,180 Q 170,192 160,190 L 160,170 Q 160,148 165,124 Z" fill="#0a1729"/>
+
+    <circle cx="100" cy="138" r="11" fill="none" stroke="#fff" stroke-width="2.5"/>
+    <circle cx="140" cy="138" r="11" fill="none" stroke="#fff" stroke-width="2.5"/>
+    <line x1="111" y1="138" x2="129" y2="138" stroke="#fff" stroke-width="2.5"/>
+    <circle cx="100" cy="138" r="2.5" fill="#fff"/>
+    <circle cx="140" cy="138" r="2.5" fill="#fff"/>
+
+    <path d="M 110,160 Q 120,166 130,160" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M 116,164 Q 120,168 124,164" stroke="#e8a04c" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.85"/>
+
+    <circle cx="155" cy="146" r="3" fill="#e8a04c"/>
+    <circle cx="85" cy="146" r="3" fill="#e8a04c"/>
+
+    <path d="M 30,300 Q 38,290 56,294 L 56,326 Q 40,328 30,322 Z" fill="#e8a04c"/>
+    <text x="42" y="316" font-family="DM Sans,sans-serif" font-size="10" font-weight="800" fill="#fff" text-anchor="middle">МГУ</text>
+  </g>
+
+  <g font-family="DM Sans,system-ui,sans-serif" font-weight="700">
+    <g transform="translate(540 130)">
+      <line x1="0" y1="20" x2="-50" y2="50" stroke="#e8a04c" stroke-width="1.5"/>
+      <circle cx="0" cy="20" r="5" fill="#e8a04c"/>
+      <rect width="200" height="40" rx="6" fill="#fff" stroke="#fde68a" stroke-width="2"/>
+      <text x="14" y="18" font-size="10" fill="#92400e" font-weight="800" letter-spacing="0.5">16 ЛЕТ ЛАБОРАТОРИИ</text>
+      <text x="14" y="34" font-size="11" fill="#1e3a5f" font-weight="600">тестируем химию · 8 категорий</text>
+    </g>
+    <g transform="translate(540 240)">
+      <line x1="0" y1="20" x2="-50" y2="20" stroke="#e8a04c" stroke-width="1.5"/>
+      <circle cx="0" cy="20" r="5" fill="#e8a04c"/>
+      <rect width="200" height="40" rx="6" fill="#fff" stroke="#fde68a" stroke-width="2"/>
+      <text x="14" y="18" font-size="10" fill="#92400e" font-weight="800" letter-spacing="0.5">ХИМФАК МГУ</text>
+      <text x="14" y="34" font-size="11" fill="#1e3a5f" font-weight="600">органическая химия · ПАВы</text>
+    </g>
+    <g transform="translate(540 350)">
+      <line x1="0" y1="-15" x2="-50" y2="-30" stroke="#e8a04c" stroke-width="1.5"/>
+      <circle cx="0" cy="-15" r="5" fill="#e8a04c"/>
+      <rect width="200" height="40" rx="6" fill="#fff" stroke="#fde68a" stroke-width="2"/>
+      <text x="14" y="-2" font-size="10" fill="#92400e" font-weight="800" letter-spacing="0.5">40 ЛЕТ</text>
+      <text x="14" y="14" font-size="11" fill="#1e3a5f" font-weight="600">мама двоих · уборка как ритуал</text>
+    </g>
+  </g>
+
+  <g transform="translate(40 440)" font-family="DM Sans,system-ui,sans-serif">
+    <text x="0" y="20" font-size="13" font-weight="800" fill="#1e3a5f">Дарья Метёлкина</text>
+    <text x="0" y="38" font-size="11" font-weight="500" fill="#475569">главный редактор · литературный псевдоним редакции</text>
+  </g>
+
+  <g transform="translate(990 410)" font-family="DM Sans,system-ui,sans-serif">
+    <rect width="170" height="50" rx="8" fill="#1e3a5f"/>
+    <text x="14" y="22" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.8">КАЖДОЕ СРЕДСТВО —</text>
+    <text x="14" y="38" font-size="13" font-weight="800" fill="#e8a04c">через 3 цикла</text>
+  </g>
+</svg>
