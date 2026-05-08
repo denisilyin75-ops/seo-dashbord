@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" role="img" aria-label="Артём Спиридонов — главный редактор 4beg.ru">
+  <defs>
+    <linearGradient id="brAvatarBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <radialGradient id="brAvatarVignette" cx="50%" cy="40%" r="65%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.2"/>
+    </radialGradient>
+    <linearGradient id="brAvatarLime" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#84cc16"/>
+      <stop offset="100%" stop-color="#65a30d"/>
+    </linearGradient>
+    <clipPath id="brAvatarClip">
+      <circle cx="120" cy="120" r="110"/>
+    </clipPath>
+  </defs>
+
+  <circle cx="120" cy="120" r="110" fill="url(#brAvatarBg)"/>
+  <circle cx="120" cy="120" r="110" fill="url(#brAvatarVignette)"/>
+
+  <g stroke="#84cc16" stroke-width="1.5" fill="none" opacity="0.22" stroke-dasharray="3,4">
+    <path d="M 14,200 L 226,200"/>
+    <path d="M 14,212 L 226,212"/>
+    <path d="M 14,224 L 226,224"/>
+  </g>
+
+  <g clip-path="url(#brAvatarClip)">
+    <path d="M 50,250 L 50,210 Q 50,168 95,160 L 145,160 Q 190,168 190,210 L 190,250 Z" fill="#1e293b"/>
+    <path d="M 95,160 L 95,178 Q 120,186 145,178 L 145,160 Z" fill="#0f172a"/>
+
+    <path d="M 100,162 L 105,178 L 120,168 L 135,178 L 140,162 L 138,176 L 122,170 L 102,176 Z" fill="url(#brAvatarLime)"/>
+    <text x="120" y="174" font-family="DM Sans,sans-serif" font-size="6" font-weight="800" fill="#0f172a" text-anchor="middle">4BEG</text>
+
+    <rect x="108" y="140" width="24" height="20" fill="#0a0e17"/>
+
+    <ellipse cx="120" cy="116" rx="40" ry="44" fill="#0a0e17"/>
+
+    <path d="M 80,90 Q 80,78 92,72 Q 120,68 148,72 Q 160,78 160,90 L 160,108 Q 160,98 148,94 Q 120,92 92,94 Q 80,98 80,108 Z" fill="#020617"/>
+    <rect x="78" y="84" width="84" height="10" rx="4" fill="url(#brAvatarLime)"/>
+    <line x1="80" y1="89" x2="160" y2="89" stroke="#0f172a" stroke-width="1" opacity="0.5"/>
+
+    <circle cx="100" cy="120" r="11" fill="none" stroke="#fff" stroke-width="2.5"/>
+    <circle cx="140" cy="120" r="11" fill="none" stroke="#fff" stroke-width="2.5"/>
+    <line x1="111" y1="120" x2="129" y2="120" stroke="#fff" stroke-width="2.5"/>
+    <circle cx="100" cy="120" r="2.5" fill="#fff"/>
+    <circle cx="140" cy="120" r="2.5" fill="#fff"/>
+
+    <path d="M 110,142 Q 120,148 130,142" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none"/>
+
+    <path d="M 100,148 Q 120,158 140,148 L 140,156 Q 120,164 100,156 Z" fill="#020617"/>
+
+    <circle cx="78" cy="124" r="4" fill="#84cc16"/>
+    <circle cx="78" cy="124" r="2" fill="#0a0e17"/>
+  </g>
+
+  <g transform="translate(178 52)">
+    <path d="M 0,12 Q 4,2 14,4 L 32,8 Q 38,10 38,16 L 36,22 Q 28,26 18,24 L 4,20 Q -2,18 0,12 Z" fill="url(#brAvatarLime)"/>
+    <path d="M 32,8 Q 42,8 46,16 L 40,18 Q 34,16 32,12 Z" fill="url(#brAvatarLime)" opacity="0.85"/>
+    <path d="M 6,16 L 12,18 M 16,18 L 22,20 M 26,18 L 32,20" stroke="#0f172a" stroke-width="0.8" opacity="0.7"/>
+  </g>
+
+  <circle cx="120" cy="120" r="110" fill="none" stroke="#84cc16" stroke-opacity="0.45" stroke-width="2"/>
+</svg>

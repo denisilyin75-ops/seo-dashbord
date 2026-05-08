@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 90" width="360" height="90" role="img" aria-label="4beg.ru — обзоры беговых кроссовок">
+  <defs>
+    <linearGradient id="lockBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="lockLime" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#84cc16"/>
+      <stop offset="100%" stop-color="#65a30d"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="80" height="80" rx="14" x="5" y="5" fill="url(#lockBg)"/>
+
+  <g stroke="#84cc16" stroke-width="1" fill="none" opacity="0.18" stroke-dasharray="2,2">
+    <path d="M 5,68 L 85,68"/>
+    <path d="M 5,73 L 85,73"/>
+    <path d="M 5,78 L 85,78"/>
+  </g>
+
+  <g transform="translate(13 17)">
+    <path d="M 30,2 L 38,2 L 38,40 L 47,40 L 47,49 L 38,49 L 38,58 L 28,58 L 28,49 L 2,49 L 2,40 Z M 28,18 L 12,40 L 28,40 Z" fill="#fff"/>
+  </g>
+
+  <g transform="translate(58 64) rotate(-12)">
+    <path d="M 0,0 Q 3,-4 7,-4 Q 8,-6 10,-5 L 14,-3 Q 16,-1 15,2 L 11,4 Q 8,5 4,4 L -1,2 Z" fill="url(#lockLime)"/>
+  </g>
+  <circle cx="78" cy="18" r="2.5" fill="#84cc16"/>
+
+  <g transform="translate(108 60)" font-family="DM Sans,system-ui,sans-serif" font-weight="800">
+    <text font-size="42" fill="#0f172a" letter-spacing="-1.5">4<tspan fill="#84cc16">beg</tspan></text>
+    <text x="0" y="20" font-size="11" font-weight="500" fill="#64748b" letter-spacing="2.5">RUNNING SHOES REVIEW</text>
+  </g>
+</svg>

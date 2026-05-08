@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="4beg.ru — обзоры беговых кроссовок">
+  <defs>
+    <linearGradient id="bgLogoBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="bgLogoLime" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#84cc16"/>
+      <stop offset="100%" stop-color="#65a30d"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="200" height="200" rx="32" fill="url(#bgLogoBg)"/>
+
+  <g stroke="#84cc16" stroke-width="2" fill="none" opacity="0.18" stroke-dasharray="3,4">
+    <path d="M 0,160 L 200,160"/>
+    <path d="M 0,170 L 200,170"/>
+    <path d="M 0,180 L 200,180"/>
+  </g>
+
+  <g transform="translate(20 30)">
+    <path d="M 78,4 L 96,4 L 96,96 L 116,96 L 116,116 L 96,116 L 96,140 L 76,140 L 76,116 L 6,116 L 6,98 Z M 76,40 L 30,98 L 76,98 Z" fill="#fff"/>
+  </g>
+
+  <g transform="translate(120 130) rotate(-12)">
+    <path d="M 0,0 Q 6,-8 14,-8 Q 16,-12 20,-10 L 28,-6 Q 32,-2 30,4 L 22,8 Q 16,10 8,8 L -2,4 Z" fill="url(#bgLogoLime)"/>
+    <path d="M 28,-6 Q 36,-8 44,-2 L 40,2 Q 32,2 28,-2 Z" fill="url(#bgLogoLime)" opacity="0.85"/>
+  </g>
+
+  <g stroke="#84cc16" stroke-width="3" fill="none" stroke-linecap="round">
+    <path d="M 86,148 L 110,148"/>
+    <path d="M 56,148 L 76,148" opacity="0.6"/>
+    <path d="M 30,148 L 44,148" opacity="0.35"/>
+  </g>
+
+  <circle cx="172" cy="38" r="5" fill="#84cc16"/>
+</svg>
