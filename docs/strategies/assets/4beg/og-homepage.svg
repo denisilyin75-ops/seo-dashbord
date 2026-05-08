@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="4beg.ru — обзоры беговых кроссовок без воды и обмана">
+  <defs>
+    <linearGradient id="ogBbg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="ogBcard" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fff"/>
+      <stop offset="100%" stop-color="#fafafa"/>
+    </linearGradient>
+    <linearGradient id="ogBlime" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#84cc16"/>
+      <stop offset="100%" stop-color="#65a30d"/>
+    </linearGradient>
+    <linearGradient id="ogBshoe" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fff"/>
+      <stop offset="100%" stop-color="#cbd5e1"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#ogBbg)"/>
+
+  <g stroke="#84cc16" stroke-width="2" stroke-dasharray="20,8" stroke-linecap="round" fill="none" opacity="0.45">
+    <path d="M 0,540 L 1200,540"/>
+  </g>
+  <g stroke="#fff" stroke-width="1" stroke-dasharray="20,8" stroke-linecap="round" fill="none" opacity="0.18">
+    <path d="M 0,560 L 1200,560"/>
+    <path d="M 0,580 L 1200,580"/>
+  </g>
+
+  <g transform="translate(60 80)" filter="drop-shadow(0 12px 28px rgba(0,0,0,0.4))">
+    <rect width="1080" height="430" rx="24" fill="url(#ogBcard)"/>
+
+    <g transform="translate(60 70)">
+      <rect width="56" height="56" rx="14" fill="url(#ogBbg)"/>
+      <g transform="translate(8 12) scale(0.7)">
+        <path d="M 30,2 L 38,2 L 38,40 L 47,40 L 47,49 L 38,49 L 38,58 L 28,58 L 28,49 L 2,49 L 2,40 Z M 28,18 L 12,40 L 28,40 Z" fill="#fff"/>
+      </g>
+      <circle cx="48" cy="14" r="3" fill="#84cc16"/>
+      <text x="78" y="36" font-family="DM Sans,system-ui,sans-serif" font-size="26" font-weight="800" fill="#0f172a">4<tspan fill="#84cc16">beg</tspan>.ru</text>
+    </g>
+
+    <text x="60" y="240" font-family="DM Sans,system-ui,sans-serif" font-size="64" font-weight="800" fill="#0f172a">Какие кроссовки</text>
+    <text x="60" y="308" font-family="DM Sans,system-ui,sans-serif" font-size="64" font-weight="800" fill="#0f172a">для бега —</text>
+    <text x="60" y="376" font-family="DM Sans,system-ui,sans-serif" font-size="64" font-weight="800" fill="#65a30d">с замерами</text>
+
+    <g transform="translate(60 405)">
+      <text font-family="DM Sans,system-ui,sans-serif" font-size="18" font-weight="600" fill="#475569">Вес в граммах · drop в мм · 100 км теста · честный пейс</text>
+    </g>
+
+    <g transform="translate(700 230)" filter="drop-shadow(0 8px 16px rgba(0,0,0,0.18))">
+      <ellipse cx="120" cy="135" rx="120" ry="10" fill="#000" fill-opacity="0.18"/>
+      <path d="M 4,90 Q 18,60 50,55 L 200,55 Q 232,60 240,90 Q 244,116 220,124 L 30,124 Q 0,116 4,90 Z" fill="url(#ogBshoe)" stroke="#0f172a" stroke-width="2"/>
+      <path d="M 4,100 Q 18,82 50,78 L 200,78 Q 232,82 240,100 L 4,100 Z" fill="url(#ogBlime)"/>
+      <path d="M 4,110 Q 18,124 50,124 L 200,124 Q 232,124 240,110 L 4,110 Z" fill="#0f172a"/>
+      <g stroke="#84cc16" stroke-width="1" opacity="0.7">
+        <path d="M 18,118 L 28,118"/>
+        <path d="M 50,118 L 64,118"/>
+        <path d="M 90,118 L 104,118"/>
+        <path d="M 130,118 L 144,118"/>
+        <path d="M 170,118 L 184,118"/>
+        <path d="M 210,118 L 224,118"/>
+      </g>
+      <g stroke="#0f172a" stroke-width="2" stroke-dasharray="4,3" fill="none">
+        <path d="M 70,46 L 70,55"/>
+        <path d="M 100,44 L 100,55"/>
+        <path d="M 130,44 L 130,55"/>
+        <path d="M 160,46 L 160,55"/>
+      </g>
+    </g>
+  </g>
+
+  <g transform="translate(60 540)">
+    <rect width="280" height="34" rx="17" fill="url(#ogBlime)"/>
+    <text x="140" y="22" font-family="DM Sans,sans-serif" font-size="13" font-weight="800" fill="#0f172a" text-anchor="middle" letter-spacing="0.5">Asics · Nike · Saucony · Hoka · NB</text>
+  </g>
+  <g transform="translate(960 540)">
+    <rect width="180" height="34" rx="17" fill="#fff"/>
+    <text x="90" y="22" font-family="DM Sans,sans-serif" font-size="13" font-weight="800" fill="#0f172a" text-anchor="middle" letter-spacing="0.5">4beg.ru</text>
+  </g>
+</svg>

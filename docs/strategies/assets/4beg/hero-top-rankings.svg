@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" width="1200" height="500" role="img" aria-label="Топ-рейтинг беговых кроссовок 4beg.ru: 3 модели на подиуме + финиш-линия">
+  <defs>
+    <linearGradient id="brTbg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <radialGradient id="brTspot" cx="50%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#84cc16" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#84cc16" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="brTlime" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#84cc16"/>
+      <stop offset="100%" stop-color="#65a30d"/>
+    </linearGradient>
+    <linearGradient id="brTpodium" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="brTshoe" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fff"/>
+      <stop offset="100%" stop-color="#cbd5e1"/>
+    </linearGradient>
+    <linearGradient id="brTshoe2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#cbd5e1"/>
+      <stop offset="100%" stop-color="#94a3b8"/>
+    </linearGradient>
+    <linearGradient id="brTshoe3" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#92400e"/>
+    </linearGradient>
+    <pattern id="brTcheckered" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <rect width="10" height="10" fill="#fff"/>
+      <rect x="10" y="10" width="10" height="10" fill="#fff"/>
+      <rect x="10" width="10" height="10" fill="#0f172a"/>
+      <rect y="10" width="10" height="10" fill="#0f172a"/>
+    </pattern>
+    <filter id="brTshadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+      <feOffset dx="0" dy="8" result="b"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.3"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="500" fill="url(#brTbg)"/>
+  <rect width="1200" height="500" fill="url(#brTspot)"/>
+
+  <g opacity="0.16">
+    <rect x="40" y="40" width="80" height="80" fill="url(#brTcheckered)"/>
+    <rect x="1080" y="380" width="80" height="80" fill="url(#brTcheckered)"/>
+  </g>
+
+  <g stroke="#84cc16" stroke-width="2" stroke-dasharray="20,8" stroke-linecap="round" fill="none" opacity="0.4">
+    <path d="M 0,420 L 1200,420"/>
+  </g>
+  <g stroke="#fff" stroke-width="1" stroke-dasharray="20,8" stroke-linecap="round" fill="none" opacity="0.18">
+    <path d="M 0,440 L 1200,440"/>
+    <path d="M 0,460 L 1200,460"/>
+  </g>
+
+  <g transform="translate(450 240)" filter="url(#brTshadow)">
+    <rect x="0" y="0" width="200" height="180" rx="6" fill="url(#brTpodium)" stroke="#84cc16" stroke-width="2"/>
+    <rect x="0" y="0" width="200" height="20" fill="#84cc16"/>
+    <text x="100" y="14" font-family="DM Sans,sans-serif" font-size="11" font-weight="800" fill="#0f172a" text-anchor="middle" letter-spacing="2">№ 1</text>
+
+    <g transform="translate(40 -110)">
+      <ellipse cx="60" cy="100" rx="58" ry="6" fill="#000" fill-opacity="0.5"/>
+      <path d="M 4,72 Q 14,52 38,48 L 100,48 Q 116,50 116,68 L 116,82 Q 116,96 100,96 L 16,96 Q 0,94 4,72 Z" fill="url(#brTshoe)" stroke="#0f172a" stroke-width="1.5"/>
+      <path d="M 4,82 Q 14,68 32,66 L 96,66 Q 110,68 116,82 L 4,82 Z" fill="url(#brTlime)"/>
+      <path d="M 4,86 Q 14,98 38,98 L 100,98 Q 110,96 116,86 L 4,86 Z" fill="#0f172a"/>
+      <g stroke="#84cc16" stroke-width="0.8" opacity="0.7">
+        <path d="M 12,92 L 18,92"/>
+        <path d="M 30,92 L 40,92"/>
+        <path d="M 56,92 L 66,92"/>
+        <path d="M 82,92 L 92,92"/>
+        <path d="M 100,92 L 108,92"/>
+      </g>
+      <g stroke="#0f172a" stroke-width="2" stroke-dasharray="4,3" fill="none">
+        <path d="M 36,52 L 36,72"/>
+        <path d="M 56,50 L 56,72"/>
+        <path d="M 76,50 L 76,72"/>
+        <path d="M 96,52 L 96,72"/>
+      </g>
+    </g>
+
+    <text x="100" y="155" font-family="DM Sans,sans-serif" font-size="14" font-weight="800" fill="#fff" text-anchor="middle">№ 1</text>
+    <text x="100" y="170" font-family="DM Sans,sans-serif" font-size="9" font-weight="600" fill="#84cc16" text-anchor="middle" letter-spacing="0.5">ВЫБОР РЕДАКЦИИ</text>
+  </g>
+
+  <g transform="translate(220 290)" filter="url(#brTshadow)">
+    <rect x="0" y="0" width="180" height="130" rx="6" fill="url(#brTpodium)" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="0" y="0" width="180" height="18" fill="#cbd5e1"/>
+    <text x="90" y="13" font-family="DM Sans,sans-serif" font-size="10" font-weight="800" fill="#0f172a" text-anchor="middle" letter-spacing="2">№ 2</text>
+
+    <g transform="translate(20 -90)">
+      <ellipse cx="60" cy="92" rx="56" ry="5" fill="#000" fill-opacity="0.4"/>
+      <path d="M 4,68 Q 14,50 38,46 L 100,46 Q 114,48 114,64 L 114,76 Q 114,88 100,88 L 16,88 Q 0,88 4,68 Z" fill="url(#brTshoe2)" stroke="#0f172a" stroke-width="1.5"/>
+      <path d="M 4,76 Q 14,62 32,60 L 96,60 Q 108,62 114,76 L 4,76 Z" fill="#94a3b8"/>
+      <path d="M 4,80 Q 14,90 38,90 L 100,90 Q 110,90 114,80 L 4,80 Z" fill="#0f172a"/>
+    </g>
+
+    <text x="90" y="105" font-family="DM Sans,sans-serif" font-size="13" font-weight="800" fill="#cbd5e1" text-anchor="middle">№ 2</text>
+    <text x="90" y="120" font-family="DM Sans,sans-serif" font-size="9" font-weight="600" fill="#94a3b8" text-anchor="middle" letter-spacing="0.5">ЦЕНА · КАЧЕСТВО</text>
+  </g>
+
+  <g transform="translate(700 320)" filter="url(#brTshadow)">
+    <rect x="0" y="0" width="180" height="100" rx="6" fill="url(#brTpodium)" stroke="#92400e" stroke-width="1.5"/>
+    <rect x="0" y="0" width="180" height="16" fill="#92400e"/>
+    <text x="90" y="12" font-family="DM Sans,sans-serif" font-size="10" font-weight="800" fill="#fff" text-anchor="middle" letter-spacing="2">№ 3</text>
+
+    <g transform="translate(20 -76)">
+      <ellipse cx="60" cy="78" rx="54" ry="5" fill="#000" fill-opacity="0.4"/>
+      <path d="M 4,58 Q 14,42 38,40 L 100,40 Q 112,42 112,56 L 112,68 Q 112,76 100,76 L 16,76 Q 0,76 4,58 Z" fill="url(#brTshoe3)" stroke="#0f172a" stroke-width="1.5"/>
+      <path d="M 4,68 Q 14,80 38,78 L 100,78 Q 110,76 112,68 L 4,68 Z" fill="#0f172a"/>
+    </g>
+
+    <text x="90" y="80" font-family="DM Sans,sans-serif" font-size="13" font-weight="800" fill="#fbbf24" text-anchor="middle">№ 3</text>
+    <text x="90" y="92" font-family="DM Sans,sans-serif" font-size="9" font-weight="600" fill="#fde68a" text-anchor="middle" letter-spacing="0.5">ДЛЯ ТРЕЙЛА</text>
+  </g>
+
+  <g transform="translate(40 60)" font-family="DM Sans,system-ui,sans-serif">
+    <rect width="200" height="36" rx="18" fill="url(#brTlime)"/>
+    <text x="20" y="23" font-size="13" font-weight="800" fill="#0f172a" letter-spacing="0.8">ТОП-10 РЕЙТИНГ</text>
+    <circle cx="180" cy="18" r="10" fill="#0f172a"/>
+    <text x="180" y="22" font-size="11" font-weight="800" fill="#84cc16" text-anchor="middle">★</text>
+  </g>
+
+  <g transform="translate(900 60)">
+    <rect width="240" height="50" rx="8" fill="#1e293b"/>
+    <text x="14" y="20" font-family="DM Sans,sans-serif" font-size="11" font-weight="800" fill="#84cc16" letter-spacing="0.5">100 КМ ТЕСТА · 5 КАТЕГОРИЙ</text>
+    <text x="14" y="40" font-family="DM Sans,sans-serif" font-size="13" font-weight="800" fill="#fff">3 победителя 2026</text>
+  </g>
+
+  <g transform="translate(980 230)" filter="url(#brTshadow)">
+    <circle cx="0" cy="0" r="48" fill="#fbbf24"/>
+    <circle cx="0" cy="0" r="40" fill="#f59e0b"/>
+    <circle cx="0" cy="0" r="34" fill="none" stroke="#92400e" stroke-width="2"/>
+    <text x="0" y="-2" font-family="DM Sans,sans-serif" font-size="14" font-weight="800" fill="#92400e" text-anchor="middle">2026</text>
+    <text x="0" y="14" font-family="DM Sans,sans-serif" font-size="9" font-weight="700" fill="#92400e" text-anchor="middle">CHOICE</text>
+    <path d="M -30,40 L -36,80 L -16,68 L 0,80 L 16,68 L 36,80 L 30,40" fill="#84cc16"/>
+  </g>
+</svg>
