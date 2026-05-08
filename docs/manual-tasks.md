@@ -42,19 +42,14 @@
 - [ ] **Страница `/o-avtore/`** — `content/aykakchisto/pages/o-avtore.md`
   - + Schema.org Person (Дарья Метёлкина) по `docs/templates/schema-person.md`
 
-### popolkam.ru — Rank Math initial setup wizard (1 раз, ~5 мин)
+### ~~popolkam.ru — Rank Math initial setup wizard~~ ✅ закрыто 2026-05-08
 
-> **Контекст:** Rank Math плагин активен, но не выводит og:image / twitter:image meta tags во фронтенде. У нас уже залиты 3 OG-image SVG (homepage / о-авторе / методология) с post_meta — но они не появятся пока wizard не пройдён.
+Rank Math не работал с REHub theme (конфликт хуков head-buffer). Решено
+через `wp-plugins/popolkam-og-meta` mu-plugin — он сам выводит og:image
+с привязкой page-id → SVG. Wizard больше не нужен.
 
-- [ ] **wp-admin → Rank Math → Setup Wizard** (или dashboard → Activate)
-- [ ] Step 1: Site type → «Personal blog» (или «Other»)
-- [ ] Step 2: Compatibility → принять
-- [ ] Step 3: Search Console → пропустить (потом подключим Service Account)
-- [ ] Step 4: Sitemap → enable
-- [ ] Step 5: Optimization → enable Auto Update + Open Graph + Twitter Card
-- [ ] Done — meta tags автоматически появятся на всех страницах
-
-После — проверить: `curl -s https://popolkam.ru/ | grep og:image` должен показать SVG URL.
+Verified: og:image / twitter:image корректно рендерятся на всех 4
+ключевых страницах с правильным per-page SVG.
 
 ---
 
